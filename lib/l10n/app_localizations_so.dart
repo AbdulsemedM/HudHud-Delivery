@@ -629,6 +629,12 @@ class AppLocalizationsSo extends AppLocalizations {
   String get homeTabDelivery => 'Gaarsiin';
 
   @override
+  String get homeTabPharmacy => 'Farmashiye';
+
+  @override
+  String get homeTabSpareParts => 'Qalab beddel';
+
+  @override
   String get cartDifferentVendorTitle => 'Ma bilowdaa gaadhi cusub?';
 
   @override
@@ -3265,6 +3271,12 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get easyVoiceHintsSubtitle => 'Sida caadiga ah waa damin. Badhanka \'Dhageyso\' had iyo jeer wuu shaqeeyaa.';
+
+  @override
+  String get easyDescribeHint => 'Maxaa ku jira baakadda? Waxaad sidoo kale ku dari kartaa sawir ama cod.';
+
+  @override
+  String get easyDescribeRequired => 'Sharrax baakadda, sawir qaad, ama cod duub.';
 
   @override
   String get navMyDeliveries => 'Gaarsiimahayga';

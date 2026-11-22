@@ -1408,6 +1408,8 @@
   "easyModeSubtitle": "أزرار أكبر وصور ومساعدة صوتية",
   "easyVoiceHints": "قراءة الخطوات بصوت عالٍ",
   "easyVoiceHintsSubtitle": "مُعطَّل افتراضيًا. زر \"استماع\" يعمل دائمًا.",
+  "easyDescribeHint": "ما الذي بداخل الطرد؟ يمكنك أيضًا إضافة صورة أو ملاحظة صوتية.",
+  "easyDescribeRequired": "صِف الطرد أو التقط صورة أو سجّل ملاحظة صوتية.",
   "navMyDeliveries": "توصيلاتي",
   "navMe": "حسابي",
   "courierNowTitle": "الآن",
@@ -1904,6 +1906,8 @@
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
   "homeTabDelivery": "التوصيل",
+  "homeTabPharmacy": "صيدلية",
+  "homeTabSpareParts": "قطع غيار",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },

@@ -610,6 +610,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get homeTabDelivery => 'ማድረስ';
 
   @override
+  String get homeTabPharmacy => 'ፋርማሲ';
+
+  @override
+  String get homeTabSpareParts => 'መለዋወጫ እቃዎች';
+
+  @override
   String get cartDifferentVendorTitle => 'አዲስ ጋሪ ይጀምሩ?';
 
   @override
@@ -3170,6 +3176,12 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get easyVoiceHintsSubtitle => 'በነባሪ ጠፍቷል። የ«አዳምጥ» ቁልፍ ሁልጊዜ ይሠራል።';
+
+  @override
+  String get easyDescribeHint => 'በጥቅሉ ውስጥ ምን አለ? ፎቶ ወይም የድምፅ ማስታወሻ ማከል ይችላሉ።';
+
+  @override
+  String get easyDescribeRequired => 'ጥቅሉን ይግለጹ፣ ፎቶ ያንሱ ወይም የድምፅ ማስታወሻ ይቅረጹ።';
 
   @override
   String get navMyDeliveries => 'የእኔ ማድረሻዎች';

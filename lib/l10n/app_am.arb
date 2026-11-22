@@ -1415,6 +1415,8 @@
   "easyModeSubtitle": "ትልልቅ ቁልፎች፣ ስዕሎች እና የድምፅ እገዛ",
   "easyVoiceHints": "ደረጃዎችን በድምፅ አንብብ",
   "easyVoiceHintsSubtitle": "በነባሪ ጠፍቷል። የ«አዳምጥ» ቁልፍ ሁልጊዜ ይሠራል።",
+  "easyDescribeHint": "በጥቅሉ ውስጥ ምን አለ? ፎቶ ወይም የድምፅ ማስታወሻ ማከል ይችላሉ።",
+  "easyDescribeRequired": "ጥቅሉን ይግለጹ፣ ፎቶ ያንሱ ወይም የድምፅ ማስታወሻ ይቅረጹ።",
   "navMyDeliveries": "የእኔ ማድረሻዎች",
   "navMe": "እኔ",
   "courierNowTitle": "አሁን",
@@ -1911,6 +1913,8 @@
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
   "homeTabDelivery": "ማድረስ",
+  "homeTabPharmacy": "ፋርማሲ",
+  "homeTabSpareParts": "መለዋወጫ እቃዎች",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },

@@ -1408,6 +1408,8 @@
   "easyModeSubtitle": "Qabduu gurguddaa, suuraalee fi gargaarsa sagaleen",
   "easyVoiceHints": "Tarkaanfiiwwan sagaleen dubbisi",
   "easyVoiceHintsSubtitle": "Durduubaan ni cufama. Qabduun 'Dhaggeeffadhu' yeroo hunda ni hojjeta.",
+  "easyDescribeHint": "Paakeejii keessa maaltu jira? Suuraa yookaan sagalee dabaluu dandeessa.",
+  "easyDescribeRequired": "Paakeejii ibsi, suuraa kaasi, yookaan sagalee waraabi.",
   "navMyDeliveries": "Geejjiba koo",
   "navMe": "Ana",
   "courierNowTitle": "Amma",
@@ -1904,6 +1906,8 @@
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
   "homeTabDelivery": "Geejjiba",
+  "homeTabPharmacy": "Faarmaasii",
+  "homeTabSpareParts": "Meeshaalee bakka buusaa",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },

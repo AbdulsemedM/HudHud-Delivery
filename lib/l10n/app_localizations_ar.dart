@@ -621,6 +621,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeTabDelivery => 'التوصيل';
 
   @override
+  String get homeTabPharmacy => 'صيدلية';
+
+  @override
+  String get homeTabSpareParts => 'قطع غيار';
+
+  @override
   String get cartDifferentVendorTitle => 'بدء سلة جديدة؟';
 
   @override
@@ -3209,6 +3215,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get easyVoiceHintsSubtitle => 'مُعطَّل افتراضيًا. زر "استماع" يعمل دائمًا.';
+
+  @override
+  String get easyDescribeHint => 'ما الذي بداخل الطرد؟ يمكنك أيضًا إضافة صورة أو ملاحظة صوتية.';
+
+  @override
+  String get easyDescribeRequired => 'صِف الطرد أو التقط صورة أو سجّل ملاحظة صوتية.';
 
   @override
   String get navMyDeliveries => 'توصيلاتي';

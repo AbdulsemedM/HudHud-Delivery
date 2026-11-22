@@ -63,8 +63,22 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   final _recipientPhoneController = TextEditingController();
   String? _senderPhone;
 
-  String? _itemType;
-  String _sizeId = 'small';
+  /// What the customer wrote, said, or photographed.
+  ///
+  /// Replaces the six-tile type picker and the three-size row. Neither earned
+  /// its tap: "Other" was the honest answer for most parcels, and the size fed
+  /// only `packageWeight`, which no pricing path in the platform reads.
+  final TextEditingController _descriptionController = TextEditingController();
+
+  /// Still sent, because the API validates `package_type` against a fixed set
+  /// and will 422 without one. 'Other' is now the only value Easy mode sends,
+  /// and the real description travels in packageDescription where a driver
+  /// can actually read it.
+  static const String _packageType = PackageItemCatalog.other;
+
+  /// Informational only — see the note on _descriptionController. Kept so the
+  /// field the API expects is still populated with something sane.
+  static const double _assumedWeightKg = 1;
   String? _packageImagePath;
   String? _voiceNotePath;
 
@@ -122,6 +136,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     _nearbyPoller.dispose();
     _recipientNameController.dispose();
     _recipientPhoneController.dispose();
+    _descriptionController.dispose();
     _audioRecorder.dispose();
     VoiceHintService.instance.stop();
     super.dispose();
@@ -142,7 +157,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
       1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
       2 => l10n.easyWhoReceives,
-      3 => '${l10n.easyWhatIsIt}. ${l10n.easyPackageSize}',
+      3 => '${l10n.easyWhatIsIt}. ${l10n.easyDescribeHint}',
       4 => l10n.easyConfirmTitle,
       _ => '',
     };
@@ -270,8 +285,17 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       return;
     }
     if (_step == 3) {
-      if (_itemType == null) {
-        _snack(l10n.pleaseSelectItemType);
+      // Any ONE of the three will do, deliberately. This is the low-literacy
+      // path: insisting on typed text would lock out the exact customer the
+      // mode exists for, and a photo or a spoken note tells the driver what
+      // is in the bag just as well. Requiring none at all would send parcels
+      // with nothing but an address.
+      final described = _descriptionController.text.trim().isNotEmpty
+          || _packageImagePath != null
+          || _voiceNotePath != null;
+
+      if (!described) {
+        _snack(l10n.easyDescribeRequired);
         return;
       }
       setState(() => _step = 4);
@@ -307,10 +331,22 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
 
     final recipientPhone =
         normalizePhoneToBackend(_recipientPhoneController.text);
-    final weight = PackageItemCatalog.weightForSize(_sizeId);
+    const weight = _assumedWeightKg;
+
+    // The typed description now leads. Previously this field carried ONLY
+    // "Voice note: /data/user/0/.../rec.m4a" — a path on the customer's own
+    // handset, which told the driver nothing and was the only thing in the
+    // description at all.
     final descParts = <String>[];
+    final typed = _descriptionController.text.trim();
+    if (typed.isNotEmpty) {
+      descParts.add(typed);
+    }
     if (_voiceNotePath != null) {
-      descParts.add('Voice note: $_voiceNotePath');
+      descParts.add('[voice note attached]');
+    }
+    if (_packageImagePath != null) {
+      descParts.add('[photo attached]');
     }
     final description = descParts.join('\n');
 
@@ -324,7 +360,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           pickupPosition: _pickupPosition,
           deliveryPosition: _dropoffPosition,
           selectedVehicle: 'motorcycle',
-          itemType: _itemType!,
+          itemType: _packageType,
           quantity: '1',
           packageWeight: weight,
           packageDescription: description,
@@ -423,11 +459,24 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     }
   }
 
+  /// What to call the parcel on the review screen and in the spoken summary.
+  ///
+  /// The customer may have typed nothing — a photo or a voice note is a valid
+  /// answer in this mode — so fall back to naming what they DID attach rather
+  /// than reading out an empty string.
+  String _packageLabel(AppLocalizations l10n) {
+    final typed = _descriptionController.text.trim();
+    if (typed.isNotEmpty) return typed;
+    if (_voiceNotePath != null) return l10n.voiceNoteAttached;
+    if (_packageImagePath != null) return l10n.takePackagePhoto;
+    return l10n.itemTypeOther;
+  }
+
   String _summary(AppLocalizations l10n) {
     return l10n.easyConfirmSummary(
       _pickupAddress,
       _dropoffAddress,
-      _itemType == null ? '' : PackageItemCatalog.labelFor(_itemType!, l10n),
+      _packageLabel(l10n),
       _recipientNameController.text.trim(),
     );
   }
@@ -462,7 +511,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
                   0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
                   1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
                   2 => l10n.easyWhoReceives,
-                  3 => '${l10n.easyWhatIsIt}. ${l10n.easyPackageSize}',
+                  3 => '${l10n.easyWhatIsIt}. ${l10n.easyDescribeHint}',
                   4 => _summary(l10n),
                   _ => '',
                 },
@@ -551,13 +600,11 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         );
       case 3:
         return _PackageStep(
-          itemType: _itemType,
-          sizeId: _sizeId,
+          descriptionController: _descriptionController,
           imagePath: _packageImagePath,
           voiceNotePath: _voiceNotePath,
           isRecording: _isRecording,
-          onSelectItem: (id) => setState(() => _itemType = id),
-          onSelectSize: (id) => setState(() => _sizeId = id),
+          onDescriptionChanged: (_) => setState(() {}),
           onTakePhoto: _takePhoto,
           onRecordStart: _startRecording,
           onRecordEnd: _stopRecording,
@@ -568,9 +615,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           summary: _summary(l10n),
           pickup: _pickupAddress,
           dropoff: _dropoffAddress,
-          itemLabel: _itemType == null
-              ? ''
-              : PackageItemCatalog.labelFor(_itemType!, l10n),
+          itemLabel: _packageLabel(l10n),
           recipient: _recipientNameController.text.trim(),
           imagePath: _packageImagePath,
           onPlay: () => VoiceHintService.instance.speak(_summary(l10n)),
@@ -1846,26 +1891,22 @@ class _RecipientStep extends StatelessWidget {
 
 class _PackageStep extends StatelessWidget {
   const _PackageStep({
-    required this.itemType,
-    required this.sizeId,
+    required this.descriptionController,
     required this.imagePath,
     required this.voiceNotePath,
     required this.isRecording,
-    required this.onSelectItem,
-    required this.onSelectSize,
+    required this.onDescriptionChanged,
     required this.onTakePhoto,
     required this.onRecordStart,
     required this.onRecordEnd,
     required this.onClearVoice,
   });
 
-  final String? itemType;
-  final String sizeId;
+  final TextEditingController descriptionController;
   final String? imagePath;
   final String? voiceNotePath;
   final bool isRecording;
-  final ValueChanged<String> onSelectItem;
-  final ValueChanged<String> onSelectSize;
+  final ValueChanged<String> onDescriptionChanged;
   final VoidCallback onTakePhoto;
   final Future<void> Function() onRecordStart;
   final Future<void> Function() onRecordEnd;
@@ -1881,50 +1922,37 @@ class _PackageStep extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
-        GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 0.88,
-          children: [
-            for (final id in PackageItemCatalog.easyModeIds)
-              _BigChoice(
-                selected: itemType == id,
-                icon: PackageItemCatalog.iconFor(id),
-                label: PackageItemCatalog.labelFor(id, l10n),
-                onTap: () => onSelectItem(id),
-              ),
-          ],
+        // Six fixed types and three sizes used to live here. Both are gone:
+        // the type never described anything a driver needed ("Other" was the
+        // honest answer for most parcels) and the size only ever fed
+        // packageWeight, which no pricing path reads — OrderPricingService
+        // charges by weight but nothing in the codebase calls it. So two
+        // required taps bought nothing. The customer says what it is instead.
+        TextField(
+          controller: descriptionController,
+          minLines: 2,
+          maxLines: 4,
+          maxLength: 140,
+          textCapitalization: TextCapitalization.sentences,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: HomeColors.textPrimaryOf(context),
+          ),
+          decoration: InputDecoration(
+            hintText: l10n.easyDescribeHint,
+            counterText: '',
+            filled: true,
+            fillColor: HomeColors.surfaceElevatedOf(context),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onChanged: onDescriptionChanged,
         ),
-        const SizedBox(height: 28),
-        _SectionTitle(l10n.easyPackageSize),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            for (final entry in [
-              ('small', l10n.easySizeSmall, 20.0),
-              ('medium', l10n.easySizeMedium, 28.0),
-              ('large', l10n.easySizeLarge, 36.0),
-            ]) ...[
-              Expanded(
-                child: SizedBox(
-                  height: 128,
-                  child: _BigChoice(
-                    selected: sizeId == entry.$1,
-                    icon: Icons.inventory_2_rounded,
-                    iconSize: entry.$3,
-                    label: entry.$2,
-                    onTap: () => onSelectSize(entry.$1),
-                  ),
-                ),
-              ),
-              if (entry.$1 != 'large') const SizedBox(width: 12),
-            ],
-          ],
-        ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 20),
         _SurfaceCard(
           onTap: onTakePhoto,
           padding: EdgeInsets.zero,
@@ -2293,114 +2321,6 @@ class _InfoRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Big picture-first choice tile. Selected = indigo border + tint + check.
-class _BigChoice extends StatelessWidget {
-  const _BigChoice({
-    required this.selected,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.iconSize = 30,
-  });
-
-  final bool selected;
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final double iconSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = HomeColors.isDark(context);
-    final accent = HomeColors.violetOf(context);
-    final tint = HomeColors.violetTintOf(context);
-    final radius = BorderRadius.circular(20);
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          boxShadow: selected ? null : AppColors.softShadow(context),
-        ),
-        child: Material(
-          color: selected ? tint : HomeColors.surfaceOf(context),
-          shape: RoundedRectangleBorder(
-            borderRadius: radius,
-            side: selected
-                ? BorderSide(color: accent, width: 2)
-                : (dark
-                    ? BorderSide(color: HomeColors.borderOf(context))
-                    : BorderSide.none),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: Stack(
-              children: [
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 12, 8, 10),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color:
-                                selected ? HomeColors.surfaceOf(context) : tint,
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Icon(icon, size: iconSize, color: accent),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          label,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14,
-                            height: 1.2,
-                            fontWeight:
-                                selected ? FontWeight.w800 : FontWeight.w700,
-                            color: HomeColors.textPrimaryOf(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (selected)
-                  PositionedDirectional(
-                    top: 8,
-                    end: 8,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: accent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

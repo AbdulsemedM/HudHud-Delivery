@@ -180,6 +180,13 @@ class _ServiceComingSoonScreenState extends State<ServiceComingSoonScreen>
             l10n.handymanComingSoonTeaser2,
           ],
         );
+      // Pharmacy and Spare parts are real marketplace views, not teasers —
+      // Home routes them to AllCategoriesScreen and never to this screen.
+      // They are listed only because the switch is exhaustive, and they fall
+      // through to the courier card so that a future routing mistake shows
+      // something sane instead of failing to compile here.
+      case HomeServiceMode.pharmacy:
+      case HomeServiceMode.spareParts:
       case HomeServiceMode.courier:
         return _ComingSoonSpec(
           brand: ServiceTabPalette.courier,

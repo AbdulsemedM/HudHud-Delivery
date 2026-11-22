@@ -8,7 +8,8 @@ import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding
 export 'package:hudhud_delivery/core/theme/service_tab_palette.dart'
     show HomeServiceMode;
 
-/// Primary home service tiles: Send Package | Delivery.
+/// Primary home service tiles: Send Package | Delivery, and — once those
+/// sectors have a live shop — Pharmacy | Spare parts.
 /// Taxi / Handyman deferred to a future release.
 class HomeServiceTabBar extends StatelessWidget {
   const HomeServiceTabBar({
@@ -16,11 +17,18 @@ class HomeServiceTabBar extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.tourKeys,
+    this.availableSectors = const <String>{},
   });
 
   final HomeServiceMode selected;
   final ValueChanged<HomeServiceMode> onSelected;
   final OnboardingTourKeys? tourKeys;
+
+  /// Sector keys the server reports as having at least one live shop, from
+  /// GET /api/public/vendors/sectors. Empty while that call is in flight or
+  /// if it failed, which is the safe reading: no tile rather than a tile that
+  /// opens an empty list.
+  final Set<String> availableSectors;
 
   @override
   Widget build(BuildContext context) {
@@ -41,34 +49,98 @@ class HomeServiceTabBar extends StatelessWidget {
       glow: ServiceTabPalette.foodGroceries,
     );
 
+    final pharmacy = _TabSpec(
+      label: l10n.homeTabPharmacy,
+      assetPath: 'assets/images/home_service_tabs/food_groceries.png',
+      fallbackIcon: Icons.medical_services_rounded,
+      gradient: const [Color(0xFF2FA37A), Color(0xFF1E7A4A)],
+      glow: const Color(0xFF1E7A4A),
+    );
+    final spareParts = _TabSpec(
+      label: l10n.homeTabSpareParts,
+      assetPath: 'assets/images/home_service_tabs/courier.png',
+      fallbackIcon: Icons.settings_rounded,
+      gradient: const [Color(0xFF5B6B7C), Color(0xFF36434F)],
+      glow: const Color(0xFF36434F),
+    );
+
     final effectiveSelected =
         selected == HomeServiceMode.taxi || selected == HomeServiceMode.handyman
             ? HomeServiceMode.courier
             : selected;
 
+    // A tile only exists once that sector has a shop behind it.
+    //
+    // This app once shipped nine hardcoded sector chips while production had
+    // two vendors, both restaurants, so seven of them opened an empty list
+    // with no explanation. /api/public/vendors/sectors exists precisely to
+    // stop that: it counts only active, publicly visible vendors. Hardcoding
+    // Pharmacy and Spare parts here would walk straight back into it — the
+    // tile would be the most prominent thing on the home screen and would
+    // lead nowhere until someone onboards a pharmacy.
+    //
+    // So they appear on their own when the shops do, and until then Home
+    // looks exactly as it does today.
+    final showPharmacy = availableSectors.contains('pharmacy');
+    final showSpareParts = availableSectors.contains('spare_parts');
+
+    final secondRow = <Widget>[
+      if (showPharmacy)
+        Expanded(
+          child: _ServiceTile(
+            spec: pharmacy,
+            selected: effectiveSelected == HomeServiceMode.pharmacy,
+            onTap: () => onSelected(HomeServiceMode.pharmacy),
+          ),
+        ),
+      if (showPharmacy && showSpareParts) const SizedBox(width: 12),
+      if (showSpareParts)
+        Expanded(
+          child: _ServiceTile(
+            spec: spareParts,
+            selected: effectiveSelected == HomeServiceMode.spareParts,
+            onTap: () => onSelected(HomeServiceMode.spareParts),
+          ),
+        ),
+      // Keeps a lone tile at half width rather than letting it stretch across
+      // the screen and outweigh the two above it.
+      if (showPharmacy != showSpareParts) ...[
+        const SizedBox(width: 12),
+        const Spacer(),
+      ],
+    ];
+
     return KeyedSubtree(
       key: tourKeys?.serviceTabsKey,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              child: _ServiceTile(
-                key: tourKeys?.courierTabKey,
-                spec: courier,
-                selected: effectiveSelected == HomeServiceMode.courier,
-                onTap: () => onSelected(HomeServiceMode.courier),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _ServiceTile(
+                    key: tourKeys?.courierTabKey,
+                    spec: courier,
+                    selected: effectiveSelected == HomeServiceMode.courier,
+                    onTap: () => onSelected(HomeServiceMode.courier),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ServiceTile(
+                    key: tourKeys?.foodTabKey,
+                    spec: delivery,
+                    selected: effectiveSelected == HomeServiceMode.foodGroceries,
+                    onTap: () => onSelected(HomeServiceMode.foodGroceries),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ServiceTile(
-                key: tourKeys?.foodTabKey,
-                spec: delivery,
-                selected: effectiveSelected == HomeServiceMode.foodGroceries,
-                onTap: () => onSelected(HomeServiceMode.foodGroceries),
-              ),
-            ),
+            if (secondRow.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Row(children: secondRow),
+            ],
           ],
         ),
       ),

@@ -621,6 +621,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTabDelivery => 'Delivery';
 
   @override
+  String get homeTabPharmacy => 'Pharmacy';
+
+  @override
+  String get homeTabSpareParts => 'Spare parts';
+
+  @override
   String get cartDifferentVendorTitle => 'Start a new cart?';
 
   @override
@@ -3232,6 +3238,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get easyVoiceHintsSubtitle => 'Off by default. The Listen button always works.';
+
+  @override
+  String get easyDescribeHint => 'What is in the package? You can also add a photo or a voice note.';
+
+  @override
+  String get easyDescribeRequired => 'Describe the package, take a photo, or record a voice note.';
 
   @override
   String get navMyDeliveries => 'My deliveries';

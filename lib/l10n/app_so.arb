@@ -1408,6 +1408,8 @@
   "easyModeSubtitle": "Badhammo waaweyn, sawirro, iyo caawin cod ah",
   "easyVoiceHints": "Tallaabooyinka kor u akhri",
   "easyVoiceHintsSubtitle": "Sida caadiga ah waa damin. Badhanka 'Dhageyso' had iyo jeer wuu shaqeeyaa.",
+  "easyDescribeHint": "Maxaa ku jira baakadda? Waxaad sidoo kale ku dari kartaa sawir ama cod.",
+  "easyDescribeRequired": "Sharrax baakadda, sawir qaad, ama cod duub.",
   "navMyDeliveries": "Gaarsiimahayga",
   "navMe": "Aniga",
   "courierNowTitle": "Hadda",
@@ -1904,6 +1906,8 @@
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
   "homeTabDelivery": "Gaarsiin",
+  "homeTabPharmacy": "Farmashiye",
+  "homeTabSpareParts": "Qalab beddel",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },

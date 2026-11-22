@@ -1256,6 +1256,18 @@ abstract class AppLocalizations {
   /// **'Delivery'**
   String get homeTabDelivery;
 
+  /// No description provided for @homeTabPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get homeTabPharmacy;
+
+  /// No description provided for @homeTabSpareParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Spare parts'**
+  String get homeTabSpareParts;
+
   /// No description provided for @cartDifferentVendorTitle.
   ///
   /// In en, this message translates to:
@@ -6097,6 +6109,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off by default. The Listen button always works.'**
   String get easyVoiceHintsSubtitle;
+
+  /// No description provided for @easyDescribeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What is in the package? You can also add a photo or a voice note.'**
+  String get easyDescribeHint;
+
+  /// No description provided for @easyDescribeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the package, take a photo, or record a voice note.'**
+  String get easyDescribeRequired;
 
   /// No description provided for @navMyDeliveries.
   ///

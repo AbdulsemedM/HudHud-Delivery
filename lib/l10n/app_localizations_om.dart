@@ -632,6 +632,12 @@ class AppLocalizationsOm extends AppLocalizations {
   String get homeTabDelivery => 'Geejjiba';
 
   @override
+  String get homeTabPharmacy => 'Faarmaasii';
+
+  @override
+  String get homeTabSpareParts => 'Meeshaalee bakka buusaa';
+
+  @override
   String get cartDifferentVendorTitle => 'Gaarii haaraa jalqabduu?';
 
   @override
@@ -3260,6 +3266,12 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get easyVoiceHintsSubtitle => 'Durduubaan ni cufama. Qabduun \'Dhaggeeffadhu\' yeroo hunda ni hojjeta.';
+
+  @override
+  String get easyDescribeHint => 'Paakeejii keessa maaltu jira? Suuraa yookaan sagalee dabaluu dandeessa.';
+
+  @override
+  String get easyDescribeRequired => 'Paakeejii ibsi, suuraa kaasi, yookaan sagalee waraabi.';
 
   @override
   String get navMyDeliveries => 'Geejjiba koo';

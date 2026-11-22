@@ -48,9 +48,17 @@ class AllCategoriesScreen extends StatelessWidget {
     this.discoveryLatitude,
     this.discoveryLongitude,
     this.title,
+    this.initialSector,
   });
 
   final bool embedded;
+
+  /// Open already narrowed to one vendor sector, e.g. 'pharmacy'.
+  ///
+  /// Set by the Pharmacy and Spare parts tabs on Home, which are this same
+  /// screen pointed at one sector rather than screens of their own. Null
+  /// keeps the old behaviour: every sector, with the chip row on top.
+  final String? initialSector;
 
   /// Phase 6 gifting: list stores near these coordinates (the recipient's
   /// market centre) instead of the device location.
@@ -79,6 +87,7 @@ class AllCategoriesScreen extends StatelessWidget {
         discoveryLatitude: discoveryLatitude,
         discoveryLongitude: discoveryLongitude,
         title: title,
+        initialSector: initialSector,
       ),
     );
   }
@@ -90,12 +99,14 @@ class _AllCategoriesBody extends StatefulWidget {
     this.discoveryLatitude,
     this.discoveryLongitude,
     this.title,
+    this.initialSector,
   });
 
   final bool embedded;
   final double? discoveryLatitude;
   final double? discoveryLongitude;
   final String? title;
+  final String? initialSector;
 
   @override
   State<_AllCategoriesBody> createState() => _AllCategoriesBodyState();
@@ -261,6 +272,10 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   @override
   void initState() {
     super.initState();
+    // Set before the first _loadVendors() below, so a sector tab's first
+    // request is already narrowed instead of fetching every shop and then
+    // immediately refetching.
+    _sector = widget.initialSector;
     GiftSession.instance.addListener(_onGiftSessionChanged);
     restoreGiftSession();
     _vendorsRepository = VendorsRepository(
