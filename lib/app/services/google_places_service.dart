@@ -154,7 +154,7 @@ class GooglePlacesService {
   /// Autocomplete returns at most 5 predictions; Text Search adds up to 20 more.
   /// Results are merged (autocomplete first) and deduped by [place_id].
   static Future<List<PlaceResult>> searchPlaces(String input) async {
-    final key = await GoogleMapsApiKeyProvider.getKey();
+    final key = await GoogleMapsApiKeyProvider.getWebKey();
     if (key.isEmpty) return [];
 
     final query = input.trim();
@@ -396,7 +396,7 @@ class GooglePlacesService {
 
   /// Closest place with its own name (not a road or area) near [point].
   static Future<NamedPlaceHit?> _nearestNamedPlace(LatLng point) async {
-    final key = await GoogleMapsApiKeyProvider.getKey();
+    final key = await GoogleMapsApiKeyProvider.getWebKey();
     if (key.isEmpty) return null;
 
     try {
@@ -489,7 +489,7 @@ class GooglePlacesService {
   /// Reverse geocode: get address(es) for the given coordinates. Uses Google Geocoding API.
   static Future<List<PlaceResult>> reverseGeocode(
       double latitude, double longitude) async {
-    final key = await GoogleMapsApiKeyProvider.getKey();
+    final key = await GoogleMapsApiKeyProvider.getWebKey();
     if (key.isEmpty) return [];
 
     try {

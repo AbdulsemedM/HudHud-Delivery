@@ -20,25 +20,64 @@ if (localPropertiesFile.exists()) {
     localProperties.load(new FileInputStream(localPropertiesFile))
 }
 
-// Read GOOGLE_MAPS_API_KEY from project root .env first, then android/local.properties
-def googleMapsApiKey = ''
-def projectRoot = rootProject.rootDir.parentFile
-def envFile = projectRoot != null ? new File(projectRoot, '.env') : null
-if (envFile != null && envFile.exists()) {
-    envFile.withReader('UTF-8') { reader ->
-        reader.eachLine { line ->
-            def m = line =~ /^\s*GOOGLE_MAPS_API_KEY\s*=\s*(.+)\s*$/
-            if (m) {
-                googleMapsApiKey = m.group(1).trim().replaceAll(/^["']|["']$/, '')
+// TWO Google keys, and they are not interchangeable.
+//
+//   GOOGLE_MAPS_API_KEY -> com.google.android.geo.API_KEY in the manifest,
+//     read by the Maps SDK for Android. The Maps SDKs are the only Google APIs
+//     that honour an "Android apps" application restriction, so this key is
+//     locked to our package names and signing fingerprints and can be scraped
+//     out of the APK without being usable.
+//
+//   GOOGLE_MAPS_WEB_KEY -> the Dart calls to maps.googleapis.com: Places
+//     autocomplete, place details, nearby search, Geocoding, Directions. Those
+//     are web-service endpoints, and Google does NOT apply Android application
+//     restrictions to them - a key restricted to an Android package is rejected
+//     outright with REQUEST_DENIED. So this has to be a second key whose
+//     application restriction is None, with its API restriction narrowed to
+//     Places + Geocoding + Directions and daily quota caps to bound the damage.
+//
+// One key used to serve both, and that only worked because the key was
+// unrestricted. Restricting it to Android apps - the obvious hardening, and the
+// one we just did - leaves the map tiles rendering while address autocomplete,
+// geocoding and the route line all fail. Address search is how a customer
+// enters a delivery address, so that failure is not cosmetic, and it is silent:
+// nothing in the build warns you. The split exists so that hardening the SDK
+// key can never take address search down with it.
+def readSecret = { String name ->
+    def projectRoot = rootProject.rootDir.parentFile
+    def envFile = projectRoot != null ? new File(projectRoot, '.env') : null
+    def value = ''
+    if (envFile != null && envFile.exists()) {
+        envFile.withReader('UTF-8') { reader ->
+            reader.eachLine { line ->
+                def m = line =~ /^\s*${name}\s*=\s*(.+)\s*$/
+                if (m) {
+                    value = m.group(1).trim().replaceAll(/^["']|["']$/, '')
+                }
             }
         }
     }
+    if (!value) {
+        value = localProperties.getProperty(name, '').trim()
+    }
+    return value
 }
-if (!googleMapsApiKey) {
-    googleMapsApiKey = localProperties.getProperty('GOOGLE_MAPS_API_KEY', '').trim()
-}
+
+def googleMapsApiKey = readSecret('GOOGLE_MAPS_API_KEY')
 if (!googleMapsApiKey) {
     println 'WARNING: GOOGLE_MAPS_API_KEY not set. Add it to project root .env or android/local.properties. Google Maps will show a blank screen.'
+}
+
+// Falls back to the SDK key rather than to empty. A build from before this
+// split, or one where only the old secret is configured, then behaves exactly
+// as it always did instead of losing address search outright - the worse of the
+// two failures, and the harder one to notice.
+def googleMapsWebKey = readSecret('GOOGLE_MAPS_WEB_KEY')
+if (!googleMapsWebKey) {
+    googleMapsWebKey = googleMapsApiKey
+    if (googleMapsWebKey) {
+        println 'WARNING: GOOGLE_MAPS_WEB_KEY not set; falling back to GOOGLE_MAPS_API_KEY for Places/Geocoding/Directions. If that key carries an Android application restriction, those calls will fail with REQUEST_DENIED and address search will not work.'
+    }
 }
 
 android {
@@ -60,6 +99,7 @@ android {
             googleMapsApiKey: googleMapsApiKey
         ]
         buildConfigField "String", "GOOGLE_MAPS_API_KEY", "\"${googleMapsApiKey.replace('"', '\\"')}\""
+        buildConfigField "String", "GOOGLE_MAPS_WEB_KEY", "\"${googleMapsWebKey.replace('"', '\\"')}\""
     }
 
     compileOptions {

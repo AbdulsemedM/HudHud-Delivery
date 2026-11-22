@@ -5,3 +5,8 @@
 # GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
 GOOGLE_MAPS_API_KEY=
+
+# Places / Geocoding / Directions call maps.googleapis.com, which refuses a key
+# restricted to Android apps. Use the separate web-services key here. Blank
+# falls back to GOOGLE_MAPS_API_KEY above.
+GOOGLE_MAPS_WEB_KEY=

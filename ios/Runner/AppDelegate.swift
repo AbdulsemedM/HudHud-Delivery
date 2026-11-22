@@ -57,6 +57,8 @@ import CoreLocation
       guard let self else { return }
       if call.method == "getGoogleMapsApiKey" {
         result(self.resolvedGoogleMapsApiKey())
+      } else if call.method == "getGoogleMapsWebKey" {
+        result(self.resolvedGoogleMapsWebKey())
       } else {
         result(FlutterMethodNotImplemented)
       }
@@ -89,6 +91,31 @@ import CoreLocation
     let envKey = (ProcessInfo.processInfo.environment["GOOGLE_MAPS_API_KEY"] ?? "")
       .trimmingCharacters(in: .whitespacesAndNewlines)
     return envKey
+  }
+
+  /// The key for maps.googleapis.com web services (Places, Geocoding,
+  /// Directions) - NOT the Maps SDK key above.
+  ///
+  /// The SDK key carries an iOS/Android application restriction, and Google
+  /// applies those only to the Maps SDKs; the web-service endpoints reject such
+  /// a key with REQUEST_DENIED. Sharing one key between the two works only
+  /// while that key is unrestricted, which is the state we are moving away
+  /// from. Falls back to the SDK key so a build configured before this split
+  /// keeps behaving as it did rather than silently losing address search.
+  private func resolvedGoogleMapsWebKey() -> String {
+    let infoKey = (Bundle.main.object(forInfoDictionaryKey: "GoogleMapsWebKey") as? String ?? "")
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+    if !infoKey.isEmpty {
+      return infoKey
+    }
+
+    let envKey = (ProcessInfo.processInfo.environment["GOOGLE_MAPS_WEB_KEY"] ?? "")
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+    if !envKey.isEmpty {
+      return envKey
+    }
+
+    return resolvedGoogleMapsApiKey()
   }
 
   /// Prefer authorization status over deprecated locationServicesEnabled().

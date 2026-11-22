@@ -116,7 +116,7 @@ jobs:
           if [ "$missing" = "1" ]; then
             echo
             echo "Add them at Settings -> Secrets and variables -> Actions."
-            echo "Only the ANDROID_*, GOOGLE_SERVICES_JSON and GOOGLE_MAPS_API_KEY"
+            echo "Only the ANDROID_*, GOOGLE_SERVICES_JSON, GOOGLE_MAPS_API_KEY and GOOGLE_MAPS_WEB_KEY"
             echo "ones are needed for an Android build;"
             echo "iOS needs SHOREBIRD_TOKEN alone."
             exit 1
@@ -206,6 +206,7 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_WEB_KEY: ${{ secrets.GOOGLE_MAPS_WEB_KEY }}
         run: |
           set -euo pipefail
 
@@ -267,7 +268,24 @@ jobs:
             exit 1
           fi
           echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> android/local.properties
-          echo "Maps key appended to android/local.properties."
+          echo "Maps SDK key appended to android/local.properties."
+
+          # The web-services key is a SEPARATE Google key, on purpose. Google
+          # honours an "Android apps" application restriction on the Maps SDKs
+          # only; Places, Geocoding and Directions run over maps.googleapis.com
+          # and reject such a key with REQUEST_DENIED. Sharing one key works
+          # only while it is unrestricted.
+          #
+          # Missing is a warning, not an error: build.gradle falls back to the
+          # SDK key, which is exactly what shipped before the split. But if that
+          # key is restricted - and ours now is - the map still draws while
+          # address search silently fails, so say so loudly here.
+          if [ -n "${GOOGLE_MAPS_WEB_KEY:-}" ]; then
+            echo "GOOGLE_MAPS_WEB_KEY=${GOOGLE_MAPS_WEB_KEY}" >> android/local.properties
+            echo "Maps web-services key appended to android/local.properties."
+          else
+            echo "::warning::GOOGLE_MAPS_WEB_KEY is not set. Places, Geocoding and Directions will fall back to GOOGLE_MAPS_API_KEY. If that key is restricted to Android apps, address autocomplete and the route line will fail with REQUEST_DENIED while the map still renders."
+          fi
 
       # pubspec declares `.env` as an asset in both apps and `.env` is
       # gitignored, so a fresh checkout cannot bundle assets at all:
@@ -291,6 +309,7 @@ jobs:
       - name: Create .env (declared as a Flutter asset)
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_WEB_KEY: ${{ secrets.GOOGLE_MAPS_WEB_KEY }}
           APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
         run: |
           set -euo pipefail
@@ -345,6 +364,7 @@ jobs:
           path = pathlib.Path(".env")
           wanted = {
               "GOOGLE_MAPS_API_KEY": os.environ.get("GOOGLE_MAPS_API_KEY", ""),
+              "GOOGLE_MAPS_WEB_KEY": os.environ.get("GOOGLE_MAPS_WEB_KEY", ""),
               "BASE_URL": os.environ["BASE_URL_VALUE"],
           }
 
