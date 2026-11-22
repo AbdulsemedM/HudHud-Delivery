@@ -497,6 +497,49 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # Uploads to Play's internal testing track when the
+      # PLAY_SERVICE_ACCOUNT_JSON secret exists (a Google Cloud service
+      # account key, invited in Play Console with release permission).
+      # Without it, the AAB artifact above is the hand-off, exactly as before -
+      # a missing secret must not fail a build that otherwise produced a good
+      # bundle, so this skips with a notice rather than erroring.
+      #
+      # Mirrors the rider app (HudHud-Deliver-app) so both ship the same way.
+      # applicationId is read from build.gradle rather than hardcoded: this app
+      # is com.hudhud.userapp and the rider is com.hudhud.admin, and a wrong
+      # package name here uploads one app's bundle to the other's listing.
+      - name: Is a Play service account configured
+        id: play
+        if: ${{ inputs.dry_run != true }}
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PLAY_JSON:-}" ]; then
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON is not set; download the AAB artifact and upload it by hand."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PKG="$(grep -oE 'applicationId[[:space:]]*=?[[:space:]]*"[^"]+"' android/app/build.gradle* \
+                 | head -1 | grep -oE '"[^"]+"' | tr -d '"')"
+          if [ -z "${PKG}" ]; then
+            echo "::error::Could not read applicationId from android/app/build.gradle."
+            exit 1
+          fi
+          echo "Uploading ${PKG} to the internal track"
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "package=${PKG}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to Play internal testing
+        if: ${{ inputs.dry_run != true && steps.play.outputs.enabled == 'true' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ steps.play.outputs.package }}
+          releaseFiles: build/app/outputs/bundle/release/*.aab
+          track: internal
+          status: completed
+
   release-ios:
     if: >
       (github.event_name == 'workflow_dispatch' &&
