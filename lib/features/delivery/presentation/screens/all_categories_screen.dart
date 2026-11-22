@@ -118,6 +118,11 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   /// (vendors.business_type) and nothing used it.
   String? _sector;
 
+  /// Sector keys the server says have a shop in them. Starts empty, which
+  /// draws no chips — the honest state before the answer arrives, and the
+  /// one it stays in if the request fails.
+  List<String> _availableSectors = const [];
+
   List<PopularProductModel> _popularProducts = [];
   bool _popularLoading = true;
   late final VendorsRepository _vendorsRepository;
@@ -266,7 +271,19 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
           ProductsDataProvider(apiService: ApiService.instance),
     );
     _loadVendors();
+    _loadSectors();
     _loadPopularProducts();
+  }
+
+  /// Which sector chips are worth showing at all.
+  ///
+  /// Deliberately NOT awaited with the vendor list: the stores should
+  /// appear as soon as they load, whether or not this has answered. The
+  /// chips arriving a moment later is fine; the list waiting on them is not.
+  Future<void> _loadSectors() async {
+    final sectors = await _vendorsRepository.getAvailableSectors();
+    if (!mounted) return;
+    setState(() => _availableSectors = sectors);
   }
 
   Future<void> _onPullToRefresh() async {
@@ -274,6 +291,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     context.read<CategoriesBloc>().add(FetchCategoriesListEvent());
     await Future.wait([
       _loadVendors(),
+      _loadSectors(),
       _loadPopularProducts(),
       if (_homeFeedWasEnabled) _loadHomeFeed(),
       if (_reorderWasEnabled) _loadReorderSuggestions(),
@@ -384,6 +402,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
               vendorsError: _vendorsError,
               selectedSector: _sector,
               onSectorSelected: _onSectorSelected,
+              availableSectors: _availableSectors,
               popularProducts: _popularProducts,
               popularLoading: _popularLoading,
               onCategoryTap: (category) => _onCategoryTap(context, category),
@@ -419,6 +438,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             vendorsError: _vendorsError,
             selectedSector: _sector,
             onSectorSelected: _onSectorSelected,
+            availableSectors: _availableSectors,
             popularProducts: _popularProducts,
             popularLoading: _popularLoading,
             onCategoryTap: (category) => _onCategoryTap(context, category),
@@ -439,6 +459,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             vendorsError: _vendorsError,
             selectedSector: _sector,
             onSectorSelected: _onSectorSelected,
+            availableSectors: _availableSectors,
             popularProducts: _popularProducts,
             popularLoading: _popularLoading,
             onCategoryTap: (category) => _onCategoryTap(context, category),
@@ -630,19 +651,51 @@ class _SectionHeader extends StatelessWidget {
 /// Grocery reuses `categoryGrocery`, which already carried the word in all
 /// five locales before this screen existed. A second key for the same word
 /// is a second thing to keep in step.
-List<({String? key, String label})> _sectorChipSpecs(BuildContext context) {
+/// [available] is the sector keys the server says it can actually fill, from
+/// GET /api/public/vendors/sectors. Chips are drawn for those and no others.
+///
+/// This replaces a hardcoded nine. Production has two vendors, both
+/// restaurants, so seven of those nine opened an empty list with nothing to
+/// explain it — which reads as a broken app, not as an empty category. The
+/// platform does support all eight sectors; the marketplace does not have
+/// them yet, and the app could not tell the difference on its own.
+///
+/// The order below is the display order, kept here rather than taken from
+/// the response so the row does not reshuffle itself as counts change.
+List<({String? key, String label})> _sectorChipSpecs(
+  BuildContext context,
+  List<String> available,
+) {
   final l10n = context.l10n;
+
+  const order = <String>[
+    'restaurant', 'bakery', 'supermarket', 'grocery',
+    'market', 'pharmacy', 'spare_parts', 'general',
+  ];
+
+  final labels = <String, String>{
+    'restaurant': l10n.sectorRestaurants,
+    'bakery': l10n.sectorBakery,
+    'supermarket': l10n.sectorSupermarket,
+    // categoryGrocery already carried the word in all five locales before
+    // this screen existed; a second key for it is a second thing to keep in
+    // step.
+    'grocery': l10n.categoryGrocery,
+    'market': l10n.sectorMarket,
+    'pharmacy': l10n.sectorPharmacy,
+    'spare_parts': l10n.sectorSpareParts,
+    'general': l10n.sectorGeneral,
+  };
+
+  final present = order.where(available.contains).toList(growable: false);
+
+  // One sector is the same as none: "All" and the only sector would show an
+  // identical list, so the row would be two buttons that do the same thing.
+  if (present.length < 2) return const [];
 
   return [
     (key: null, label: l10n.sectorAll),
-    (key: 'restaurant', label: l10n.sectorRestaurants),
-    (key: 'bakery', label: l10n.sectorBakery),
-    (key: 'supermarket', label: l10n.sectorSupermarket),
-    (key: 'grocery', label: l10n.categoryGrocery),
-    (key: 'market', label: l10n.sectorMarket),
-    (key: 'pharmacy', label: l10n.sectorPharmacy),
-    (key: 'spare_parts', label: l10n.sectorSpareParts),
-    (key: 'general', label: l10n.sectorGeneral),
+    for (final key in present) (key: key, label: labels[key]!),
   ];
 }
 
@@ -660,14 +713,24 @@ List<({String? key, String label})> _sectorChipSpecs(BuildContext context) {
 /// same-day patch into a store release. Nine chips with nine new icons would
 /// do the same, and this change exists to be testable tonight.
 class _SectorChips extends StatelessWidget {
-  const _SectorChips({required this.selected, required this.onSelected});
+  const _SectorChips({
+    required this.selected,
+    required this.onSelected,
+    required this.available,
+  });
 
   final String? selected;
   final ValueChanged<String?> onSelected;
 
+  /// Sector keys the server says have a shop in them. Empty until it
+  /// answers, and empty for good if it cannot — in both cases the row
+  /// simply is not there, which is the correct thing to show.
+  final List<String> available;
+
   @override
   Widget build(BuildContext context) {
-    final chips = _sectorChipSpecs(context);
+    final chips = _sectorChipSpecs(context, available);
+    if (chips.isEmpty) return const SizedBox.shrink();
 
     return SizedBox(
       height: 44,
@@ -1098,6 +1161,7 @@ class _CategoriesGrid extends StatelessWidget {
   /// which owns the request.
   final String? selectedSector;
   final ValueChanged<String?> onSectorSelected;
+  final List<String> availableSectors;
   final List<PopularProductModel> popularProducts;
   final bool popularLoading;
   final void Function(CategoryTreeModel) onCategoryTap;
@@ -1119,6 +1183,7 @@ class _CategoriesGrid extends StatelessWidget {
     required this.vendorsError,
     required this.selectedSector,
     required this.onSectorSelected,
+    required this.availableSectors,
     required this.popularProducts,
     required this.popularLoading,
     required this.onCategoryTap,
@@ -1265,6 +1330,7 @@ class _CategoriesGrid extends StatelessWidget {
           child: _SectorChips(
             selected: selectedSector,
             onSelected: onSectorSelected,
+            available: availableSectors,
           ),
         ),
         if (vendorsLoading) ...[

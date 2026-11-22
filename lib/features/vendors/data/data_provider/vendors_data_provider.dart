@@ -58,6 +58,34 @@ class VendorsDataProvider {
     }
   }
 
+  /// GET /api/public/vendors/sectors — which sectors have a shop in them.
+  ///
+  /// The chip row used to be nine hardcoded sectors. The platform supports
+  /// all eight; the marketplace does not have them all yet, and the app had
+  /// no way to tell the difference — so tapping Pharmacy opened an empty
+  /// list with nothing to explain it, which reads as a broken app rather
+  /// than an empty category.
+  ///
+  /// The server answers with only the sectors it can actually fill, counted
+  /// against the same query that backs the list itself, so a chip and its
+  /// result cannot disagree.
+  Future<Map<String, dynamic>> getVendorSectors() async {
+    try {
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}${ApiConstants.publicVendors}/sectors',
+      );
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (e) {
+      return {'statusCode': e.statusCode, 'data': null, 'errorMessage': e.message};
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
   /// GET /api/public/vendors/{id}
   Future<Map<String, dynamic>> getVendorById(int vendorId) async {
     try {

@@ -56,6 +56,32 @@ class VendorsRepository {
         .toList();
   }
 
+  /// The sector keys that currently have at least one browsable shop.
+  ///
+  /// Never throws. The chip row is a convenience on the home screen, and a
+  /// home screen that fails to build because a decoration could not load is
+  /// a worse outcome than a home screen with no chips. An empty list is a
+  /// valid, correct answer the UI already knows how to draw.
+  Future<List<String>> getAvailableSectors() async {
+    try {
+      final response = await vendorsDataProvider.getVendorSectors();
+      if (response['statusCode'] != 200) return const [];
+
+      final rows = response['data'] is Map<String, dynamic>
+          ? (response['data'] as Map<String, dynamic>)['data']
+          : null;
+      if (rows is! List) return const [];
+
+      return rows
+          .map((e) => e is Map ? e['key']?.toString() : null)
+          .whereType<String>()
+          .where((k) => k.isNotEmpty)
+          .toList(growable: false);
+    } catch (_) {
+      return const [];
+    }
+  }
+
   String _clean(String message) {
     if (message.startsWith('Exception: ')) message = message.substring(11);
     if (message.startsWith('ApiException: ')) message = message.substring(14);
