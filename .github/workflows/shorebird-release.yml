@@ -8,10 +8,14 @@
 # ANDROID_KEYSTORE_BASE64, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD,
 # ANDROID_STORE_PASSWORD. Release builds fail without it (no debug-key fallback).
 #
-# App config: BASE_URL / SUPPORT_PHONE are compile-time dart-defines with
-# production defaults (lib/app/config/app_env.dart). To override, append e.g.
-#   args: --no-confirm -- --dart-define=BASE_URL=https://...
-# No .env file is needed or bundled.
+# App config: `.env` IS bundled - pubspec lists it under flutter: assets:,
+# so a checkout without one fails the build outright with
+#   No file or variants found for asset: .env
+# and ApiEnv.baseUrl throws StateError('BASE_URL is missing in .env') rather
+# than falling back to anything, so a .env missing that key builds green and
+# dies on the first API call. The workflow writes one; a BUILD BY HAND must
+# create it (copy .env.example, which already points at api.hudhuddelivery.com)
+# and must set BOTH Maps keys in it - see .env.example for why they differ.
 
 name: Shorebird Release
 
