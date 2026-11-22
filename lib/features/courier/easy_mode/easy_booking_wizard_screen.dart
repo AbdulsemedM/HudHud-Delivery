@@ -618,7 +618,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           itemLabel: _packageLabel(l10n),
           recipient: _recipientNameController.text.trim(),
           imagePath: _packageImagePath,
-          onPlay: () => VoiceHintService.instance.speak(_summary(l10n)),
+          onPlay: () => VoiceHintService.instance.toggle(_summary(l10n)),
         );
     }
   }

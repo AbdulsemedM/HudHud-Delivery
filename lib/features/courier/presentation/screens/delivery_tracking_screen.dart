@@ -927,7 +927,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                         color: HomeColors.violetOf(context),
                                       ),
                                       onPressed: () {
-                                        VoiceHintService.instance.speak(
+                                        VoiceHintService.instance.toggle(
                                           friendlyStatus,
                                         );
                                       },

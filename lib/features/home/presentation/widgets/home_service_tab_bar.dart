@@ -49,19 +49,21 @@ class HomeServiceTabBar extends StatelessWidget {
       glow: ServiceTabPalette.foodGroceries,
     );
 
+    // No assetPath on purpose — see _TabSpec. A medicine icon and a car-part
+    // icon say what these are far better than a borrowed basket would.
     final pharmacy = _TabSpec(
       label: l10n.homeTabPharmacy,
-      assetPath: 'assets/images/home_service_tabs/food_groceries.png',
-      fallbackIcon: Icons.medical_services_rounded,
-      gradient: const [Color(0xFF2FA37A), Color(0xFF1E7A4A)],
-      glow: const Color(0xFF1E7A4A),
+      assetPath: null,
+      fallbackIcon: Icons.medication_rounded,
+      gradient: const [Color(0xFF2FA37A), ServiceTabPalette.pharmacy],
+      glow: ServiceTabPalette.pharmacy,
     );
     final spareParts = _TabSpec(
       label: l10n.homeTabSpareParts,
-      assetPath: 'assets/images/home_service_tabs/courier.png',
-      fallbackIcon: Icons.settings_rounded,
-      gradient: const [Color(0xFF5B6B7C), Color(0xFF36434F)],
-      glow: const Color(0xFF36434F),
+      assetPath: null,
+      fallbackIcon: Icons.car_repair,
+      gradient: const [Color(0xFF5B6B7C), ServiceTabPalette.spareParts],
+      glow: ServiceTabPalette.spareParts,
     );
 
     final effectiveSelected =
@@ -158,7 +160,13 @@ class _TabSpec {
   });
 
   final String label;
-  final String assetPath;
+
+  /// Painted artwork for this service, or null to draw [fallbackIcon]
+  /// directly. Null is not a degraded state: Pharmacy and Spare parts have no
+  /// artwork yet, and borrowing another tile's PNG would put a food basket on
+  /// the pharmacy tile — which is what happened when this field was required.
+  final String? assetPath;
+
   final IconData fallbackIcon;
   final List<Color> gradient;
   final Color glow;
@@ -256,17 +264,23 @@ class _ServiceTile extends StatelessWidget {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
                       opacity: selected ? 1 : 0.9,
-                      child: Image.asset(
-                        spec.assetPath,
-                        width: 92,
-                        fit: BoxFit.contain,
-                        gaplessPlayback: true,
-                        errorBuilder: (_, __, ___) => Icon(
-                          spec.fallbackIcon,
-                          size: 44,
-                          color: selected ? Colors.white : spec.glow,
-                        ),
-                      ),
+                      child: spec.assetPath == null
+                          ? Icon(
+                              spec.fallbackIcon,
+                              size: 46,
+                              color: selected ? Colors.white : spec.glow,
+                            )
+                          : Image.asset(
+                              spec.assetPath!,
+                              width: 92,
+                              fit: BoxFit.contain,
+                              gaplessPlayback: true,
+                              errorBuilder: (_, __, ___) => Icon(
+                                spec.fallbackIcon,
+                                size: 44,
+                                color: selected ? Colors.white : spec.glow,
+                              ),
+                            ),
                     ),
                   ),
                 ),
