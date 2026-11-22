@@ -538,7 +538,17 @@ jobs:
           packageName: ${{ steps.play.outputs.package }}
           releaseFiles: build/app/outputs/bundle/release/*.aab
           track: internal
-          status: completed
+          # draft, not completed: the bundle lands in Play Console as a draft
+          # release on the internal track and waits for a human to roll it out.
+          #
+          # completed would push every green build straight to internal testers
+          # with no gate - which is fine until a build is green and wrong, and
+          # the Maps key split means "green" and "the map works" are not the
+          # same claim: the SDK key is only exercised on a real device.
+          #
+          # Switch back to completed once a few releases have gone through
+          # cleanly and the gate is costing more than it catches.
+          status: draft
 
   release-ios:
     if: >
