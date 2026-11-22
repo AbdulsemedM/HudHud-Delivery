@@ -1418,6 +1418,8 @@
   "orderByCallSubtitle": "We will help you create the delivery on a call",
   "easyMode": "Easy mode",
   "easyModeSubtitle": "Bigger buttons, pictures, and spoken help",
+  "easyVoiceHints": "Read steps aloud",
+  "easyVoiceHintsSubtitle": "Off by default. The Listen button always works.",
   "navMyDeliveries": "My deliveries",
   "navMe": "Me",
   "courierNowTitle": "Now",

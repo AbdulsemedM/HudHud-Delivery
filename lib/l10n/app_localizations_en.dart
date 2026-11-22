@@ -3228,6 +3228,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get easyModeSubtitle => 'Bigger buttons, pictures, and spoken help';
 
   @override
+  String get easyVoiceHints => 'Read steps aloud';
+
+  @override
+  String get easyVoiceHintsSubtitle => 'Off by default. The Listen button always works.';
+
+  @override
   String get navMyDeliveries => 'My deliveries';
 
   @override

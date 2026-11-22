@@ -6086,6 +6086,18 @@ abstract class AppLocalizations {
   /// **'Bigger buttons, pictures, and spoken help'**
   String get easyModeSubtitle;
 
+  /// No description provided for @easyVoiceHints.
+  ///
+  /// In en, this message translates to:
+  /// **'Read steps aloud'**
+  String get easyVoiceHints;
+
+  /// No description provided for @easyVoiceHintsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Off by default. The Listen button always works.'**
+  String get easyVoiceHintsSubtitle;
+
   /// No description provided for @navMyDeliveries.
   ///
   /// In en, this message translates to:

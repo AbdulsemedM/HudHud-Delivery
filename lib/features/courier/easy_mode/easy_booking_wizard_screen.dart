@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
+import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
@@ -125,7 +127,16 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     super.dispose();
   }
 
+  /// Speaks the current step ONLY if the customer asked for that.
+  ///
+  /// Called on entry and on every step change. It used to speak
+  /// unconditionally, so opening the wizard made the phone start talking in
+  /// whatever room the customer was standing in. The Listen button on each
+  /// step is unaffected and still speaks on demand — that is the feature;
+  /// this is only about speaking uninvited.
   void _speakCurrentStep() {
+    if (!context.read<EasyModeController>().voiceAutoSpeak) return;
+
     final l10n = context.l10n;
     final text = switch (_step) {
       0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
@@ -1137,10 +1148,15 @@ class _WizardHeader extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 26,
-                      height: 1.15,
+                      // 26 -> 22. Easy mode earns a large title, but 26 was
+                      // shouting: it wrapped the longer step titles onto three
+                      // lines on a small phone and pushed the map down. The
+                      // weight and negative tracking already carry the
+                      // hierarchy, so the size was doing work twice.
+                      fontSize: 22,
+                      height: 1.2,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -0.6,
+                      letterSpacing: -0.4,
                       color: HomeColors.textPrimaryOf(context),
                     ),
                   ),
@@ -1633,9 +1649,12 @@ class _SectionTitle extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 18,
+        // 18 -> 16. A section label inside a step should sit clearly below
+        // the step title, not compete with it. At 18 against a 22 title the
+        // two read as the same level.
+        fontSize: 16,
         fontWeight: FontWeight.w800,
-        letterSpacing: -0.3,
+        letterSpacing: -0.2,
         color: HomeColors.textPrimaryOf(context),
       ),
     );

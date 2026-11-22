@@ -3256,6 +3256,12 @@ class AppLocalizationsOm extends AppLocalizations {
       'Qabduu gurguddaa, suuraalee fi gargaarsa sagaleen';
 
   @override
+  String get easyVoiceHints => 'Tarkaanfiiwwan sagaleen dubbisi';
+
+  @override
+  String get easyVoiceHintsSubtitle => 'Durduubaan ni cufama. Qabduun \'Dhaggeeffadhu\' yeroo hunda ni hojjeta.';
+
+  @override
   String get navMyDeliveries => 'Geejjiba koo';
 
   @override

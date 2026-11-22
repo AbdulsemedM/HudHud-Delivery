@@ -1406,6 +1406,8 @@
   "orderByCallSubtitle": "Bilbilaan geejjiba akka uumtan isin gargaarra",
   "easyMode": "Haala salphaa",
   "easyModeSubtitle": "Qabduu gurguddaa, suuraalee fi gargaarsa sagaleen",
+  "easyVoiceHints": "Tarkaanfiiwwan sagaleen dubbisi",
+  "easyVoiceHintsSubtitle": "Durduubaan ni cufama. Qabduun 'Dhaggeeffadhu' yeroo hunda ni hojjeta.",
   "navMyDeliveries": "Geejjiba koo",
   "navMe": "Ana",
   "courierNowTitle": "Amma",

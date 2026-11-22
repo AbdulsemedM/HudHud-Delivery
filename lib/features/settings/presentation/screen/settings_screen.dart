@@ -885,9 +885,24 @@ class _SettingsScreenState extends State<SettingsScreen>
                       const _ProfileTileDivider(),
                       Consumer<EasyModeController>(
                         builder: (context, easyMode, _) {
-                          return _ProfileEasyModeTile(
-                            enabled: easyMode.enabled,
-                            onChanged: (v) => easyMode.setEnabled(v),
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _ProfileEasyModeTile(
+                                enabled: easyMode.enabled,
+                                onChanged: (v) => easyMode.setEnabled(v),
+                              ),
+                              // Only while Easy mode is on: off, it governs
+                              // nothing, and a dead switch invites the reader
+                              // to think the app is still talking somewhere.
+                              if (easyMode.enabled) ...[
+                                const _ProfileTileDivider(),
+                                _ProfileVoiceHintsTile(
+                                  enabled: easyMode.voiceAutoSpeak,
+                                  onChanged: (v) => easyMode.setVoiceAutoSpeak(v),
+                                ),
+                              ],
+                            ],
                           );
                         },
                       ),
@@ -1349,6 +1364,35 @@ class _ProfileEasyModeTile extends StatelessWidget {
       color: AppColors.successColor,
       title: l10n.easyMode,
       subtitle: l10n.easyModeSubtitle,
+      value: enabled,
+      onChanged: onChanged,
+    );
+  }
+}
+
+/// Opt-in for the spoken hints.
+///
+/// Shown only while Easy mode is on, because off it controls nothing. The
+/// wizard used to speak on entry and on every step with no way to stop it;
+/// now it is silent unless this is turned on, and the Listen button on each
+/// step still reads that step aloud on demand either way.
+class _ProfileVoiceHintsTile extends StatelessWidget {
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  const _ProfileVoiceHintsTile({
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return _ProfileSwitchRow(
+      icon: Icons.volume_up_rounded,
+      color: AppColors.brandIndigo,
+      title: l10n.easyVoiceHints,
+      subtitle: l10n.easyVoiceHintsSubtitle,
       value: enabled,
       onChanged: onChanged,
     );

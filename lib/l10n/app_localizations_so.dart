@@ -3261,6 +3261,12 @@ class AppLocalizationsSo extends AppLocalizations {
   String get easyModeSubtitle => 'Badhammo waaweyn, sawirro, iyo caawin cod ah';
 
   @override
+  String get easyVoiceHints => 'Tallaabooyinka kor u akhri';
+
+  @override
+  String get easyVoiceHintsSubtitle => 'Sida caadiga ah waa damin. Badhanka \'Dhageyso\' had iyo jeer wuu shaqeeyaa.';
+
+  @override
   String get navMyDeliveries => 'Gaarsiimahayga';
 
   @override

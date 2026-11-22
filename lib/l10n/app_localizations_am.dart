@@ -3166,6 +3166,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get easyModeSubtitle => 'ትልልቅ ቁልፎች፣ ስዕሎች እና የድምፅ እገዛ';
 
   @override
+  String get easyVoiceHints => 'ደረጃዎችን በድምፅ አንብብ';
+
+  @override
+  String get easyVoiceHintsSubtitle => 'በነባሪ ጠፍቷል። የ«አዳምጥ» ቁልፍ ሁልጊዜ ይሠራል።';
+
+  @override
   String get navMyDeliveries => 'የእኔ ማድረሻዎች';
 
   @override

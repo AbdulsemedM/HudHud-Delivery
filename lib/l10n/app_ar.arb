@@ -1406,6 +1406,8 @@
   "orderByCallSubtitle": "سنساعدك في إنشاء طلب التوصيل عبر مكالمة",
   "easyMode": "الوضع السهل",
   "easyModeSubtitle": "أزرار أكبر وصور ومساعدة صوتية",
+  "easyVoiceHints": "قراءة الخطوات بصوت عالٍ",
+  "easyVoiceHintsSubtitle": "مُعطَّل افتراضيًا. زر \"استماع\" يعمل دائمًا.",
   "navMyDeliveries": "توصيلاتي",
   "navMe": "حسابي",
   "courierNowTitle": "الآن",

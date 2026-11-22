@@ -1406,6 +1406,8 @@
   "orderByCallSubtitle": "Waxaan kaa caawin doonnaa inaad gaarsiinta ku sameyso wicitaan",
   "easyMode": "Habka fudud",
   "easyModeSubtitle": "Badhammo waaweyn, sawirro, iyo caawin cod ah",
+  "easyVoiceHints": "Tallaabooyinka kor u akhri",
+  "easyVoiceHintsSubtitle": "Sida caadiga ah waa damin. Badhanka 'Dhageyso' had iyo jeer wuu shaqeeyaa.",
   "navMyDeliveries": "Gaarsiimahayga",
   "navMe": "Aniga",
   "courierNowTitle": "Hadda",

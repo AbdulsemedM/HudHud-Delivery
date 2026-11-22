@@ -3205,6 +3205,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get easyModeSubtitle => 'أزرار أكبر وصور ومساعدة صوتية';
 
   @override
+  String get easyVoiceHints => 'قراءة الخطوات بصوت عالٍ';
+
+  @override
+  String get easyVoiceHintsSubtitle => 'مُعطَّل افتراضيًا. زر "استماع" يعمل دائمًا.';
+
+  @override
   String get navMyDeliveries => 'توصيلاتي';
 
   @override
