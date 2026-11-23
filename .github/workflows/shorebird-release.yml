@@ -586,6 +586,138 @@ jobs:
       # from it. Shorebird only offers Flutter versions it has built its engine
       # for, so if it does not have this one, the list printed here says what it
       # does have.
+      # release-android creates this and release-ios did not, which is the
+      # whole reason `flutter build ipa` failed: pubspec declares `.env` under
+      # `flutter: assets:` and .env is NOT committed, so the build stops at
+      #
+      #     No file or variants found for asset: .env
+      #
+      # long before signing is ever reached. Same step, verbatim, so the two
+      # platforms cannot drift into building from different configuration.
+      #
+      # iOS needs no google-services.json step: that one is Android-only, and
+      # ios/GoogleService-Info.plist is committed.
+      - name: Create .env (declared as a Flutter asset)
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_WEB_KEY: ${{ secrets.GOOGLE_MAPS_WEB_KEY }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+        run: |
+          set -euo pipefail
+
+          if ! grep -qE '^[[:space:]]*-[[:space:]]*\.env[[:space:]]*$' pubspec.yaml; then
+            echo "pubspec does not declare .env as an asset; nothing to do."
+            exit 0
+          fi
+
+          if [ -f .env ]; then
+            echo ".env already present in the checkout; leaving it alone."
+            exit 0
+          fi
+
+          BASE="${APP_BASE_URL:-}"
+          SOURCE="the APP_BASE_URL secret"
+          if [ -z "${BASE}" ] && [ -f .env.example ]; then
+            BASE="$(grep -oE '^[[:space:]]*BASE_URL[[:space:]]*=[[:space:]]*[^[:space:]]+' .env.example \
+                    | head -1 | sed -E 's/.*=[[:space:]]*//')"
+            SOURCE=".env.example"
+          fi
+          if [ -z "${BASE}" ]; then
+            # ci.yml writes this inside a printf, as
+            #   printf 'BASE_URL=https://host\n' > .env
+            # so the character class must EXCLUDE the backslash. A looser match
+            # swallows the trailing \n and ships a BASE_URL ending in a literal
+            # backslash-n, which normalizeApiBaseUrl then turns into
+            # https://host\n/api/ - a green build that cannot reach the API.
+            BASE="$(grep -oE "BASE_URL=https://[A-Za-z0-9._~:/?#@%+-]+" .github/workflows/ci.yml \
+                    | head -1 | sed 's/^BASE_URL=//')"
+            SOURCE="ci.yml"
+          fi
+          if [ -z "${BASE}" ]; then
+            echo "::error::No BASE_URL available. Set the APP_BASE_URL secret, or add BASE_URL to .env.example."
+            exit 1
+          fi
+          if ! printf '%s' "${BASE}" | grep -qE '^https://[A-Za-z0-9._~:/?#@%+-]+$'; then
+            echo "::error::BASE_URL from ${SOURCE} does not look like a clean https url: ${BASE}"
+            exit 1
+          fi
+          echo "BASE_URL from ${SOURCE}: ${BASE}"
+
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            : > .env
+          fi
+
+          BASE_URL_VALUE="${BASE}" python3 - <<'PY'
+          import os, re, pathlib
+
+          path = pathlib.Path(".env")
+          wanted = {
+              "GOOGLE_MAPS_API_KEY": os.environ.get("GOOGLE_MAPS_API_KEY", ""),
+              "GOOGLE_MAPS_WEB_KEY": os.environ.get("GOOGLE_MAPS_WEB_KEY", ""),
+              "BASE_URL": os.environ["BASE_URL_VALUE"],
+          }
+
+          lines = path.read_text().splitlines() if path.exists() else []
+          seen = set()
+          out = []
+          for line in lines:
+              m = re.match(r"^\s*([A-Z0-9_]+)\s*=", line)
+              if m and m.group(1) in wanted:
+                  key = m.group(1)
+                  out.append(f"{key}={wanted[key]}")
+                  seen.add(key)
+              else:
+                  out.append(line)
+          for key, value in wanted.items():
+              if key not in seen:
+                  out.append(f"{key}={value}")
+          path.write_text("\n".join(out) + "\n")
+          PY
+
+          # A placeholder here is not harmless: .env is bundled into the app and
+          # read ahead of local.properties, so it would ship as a real value.
+          if grep -nE 'your_[a-z_]*_here|REPLACE_ME|changeme|CHANGEME' .env; then
+            echo "::error::.env still contains a placeholder (shown above). It is bundled into the app, so that value would ship."
+            exit 1
+          fi
+
+          echo "--- .env (values hidden) ---"
+          sed -E 's/=.*/=<set>/' .env | grep -vE '^\s*(#|$)' || true
+
+      # shorebird-release declares flutter-version as REQUIRED and forwards it
+      # unconditionally - `shorebird release <platform> --flutter-version "$V"`
+      # - so leaving it out sends an empty string and the CLI answers:
+      #
+      #     Flutter  is not available to Shorebird.
+      #
+      # That doubled space IS the empty version, and nothing in the message
+      # points back at a missing workflow input. It is what the first real
+      # release attempt died on.
+      #
+      # The version is read from ci.yml so a release is built on the SDK this
+      # repository already tests on, rather than a second pin that drifts away
+      # from it. Shorebird only offers Flutter versions it has built its engine
+      # for, so if it does not have this one, the list printed here says what it
+      # does have.
+      # The release build died here once:
+      #
+      #   Execution failed for JetifyTransform: ...arm64_v8a_release-1.0.0-...jar
+      #     > Java heap space
+      #
+      # android/gradle.properties allots -Xmx2G (rider) / -Xmx3072m (customer),
+      # both tuned on developer machines - their own comments say so - while
+      # these are PRIVATE repositories, so ubuntu-latest is a 2-core / 7 GB
+      # runner and both apps still set android.enableJetifier=true. Jetifier
+      # rewriting the Flutter engine jars is what runs out of heap.
+      #
+      # Appended in CI only, never committed, so developers keep the values
+      # their comments were written for. Later keys win in a properties file.
+      #
+      # parallel and workers are pinned down too: two concurrent Jetify
+      # transforms on a 2-core runner is how the heap gets exhausted, and the
+      # customer app ships parallel=true with workers.max=2.
       - name: Which Flutter version to build with
         id: flutter
         run: |
@@ -626,7 +758,7 @@ jobs:
       #
       # Exit 70 is EX_SOFTWARE: "something went wrong". It names nothing.
       #
-      # So on failure, re-run the same command with --verbose, capture it, and
+      # So on failure, re-run the same command, capture it, and
       # push the tail into an annotation and the job summary. One ::error:: with
       # %0A for newlines, because GitHub shows only the first handful of
       # annotations per step and the interesting part is usually at the end.
@@ -637,12 +769,11 @@ jobs:
         if: failure() && steps.release.outcome == 'failure'
         run: |
           set -uo pipefail
-          echo "The release step failed. Re-running as --dry-run --verbose to capture the reason."
+          echo "The release step failed. Re-running as --dry-run to capture the reason."
 
           shorebird release ios \
             --no-confirm \
             --dry-run \
-            --verbose \
             --flutter-version "${{ steps.flutter.outputs.flutter_version }}" \
             > /tmp/ios-release.log 2>&1 || true
 
@@ -667,18 +798,62 @@ jobs:
           # So select, do not tail. The second annotation keeps a tail as well,
           # because a failure that matches none of these patterns still has to
           # say something.
+          # AN ANNOTATION IS HARD-CAPPED AT 4096 CHARACTERS.
+          #
+          # Learned the hard way: the first attempt tailed the log and caught
+          # only Shorebird's standard advice block; the second grepped a broad
+          # pattern against a --verbose log and spent all 4096 characters on
+          # `executing: xcrun xcodebuild ...` lines and `flutter build ipa
+          # --help` output, which Shorebird prints while probing which flags
+          # the bundled Flutter supports. Neither carried the error. The second
+          # annotation was dropped entirely for want of room.
+          #
+          # So: no --verbose, and a narrow pattern.
+          #
+          # --verbose does not add information here, it buries it. Xcode and
+          # clang both report failures as `error:`, and Shorebird's plain
+          # output already ends with the flutter build failure, so the clean
+          # log is the one in which the error is legible.
+          # NO COLON IN A TITLE. GitHub parses `::error <params>::<message>`
+          # and stops reading params at the first `::`, so a title of
+          # "iOS: error lines" makes the whole command invalid and the
+          # annotation is dropped silently - no error, no annotation, nothing
+          # to notice. That cost a full run: three annotations emitted, none
+          # created.
           annotate() {
             local title="$1"
             local body
-            body="$(sed -e 's/%/%25/g' -e 's/\r//g' | awk '{printf "%s%%0A", $0}')"
-            [ -n "${body}" ] && echo "::error title=${title}::${body}"
+            body="$(cut -c1-220 | sed -e 's/%/%25/g' -e 's/\r//g' | awk '{printf "%s%%0A", $0}' | cut -c1-3900)"
+            if [ -n "${body}" ]; then
+              echo "::error title=${title}::${body}"
+            else
+              echo "(nothing matched for: ${title})"
+            fi
           }
 
-          grep -n -i -E \
-            'error:|error -|errors? found|no profiles?|provisioning|codesign|signing certificate|no signing|development team|xcodebuild|CocoaPods|pod install|Could not|cannot find|Failed to|exception|Unable to|requires a (development|provisioning)' \
-            /tmp/ios-release.log \
-            | grep -v -i -E 'If the above command fails|please file an issue|strongly encourage' \
-            | head -30 \
-            | annotate 'iOS failure - matched error lines'
+          # Compiler and Xcode errors. This is the one that names a real
+          # failure, so it goes first and gets the room.
+          grep -E '(^|[[:space:]])error:' /tmp/ios-release.log \
+            | head -12 \
+            | annotate 'iOS error lines'
 
-          tail -25 /tmp/ios-release.log | annotate 'iOS failure - end of log'
+          # Signing and provisioning, which is what this job is expected to hit
+          # first: release-ios imports no Apple certificate and no provisioning
+          # profile, and the credentials preflight checks nothing Apple.
+          grep -E 'No profiles for|requires a provisioning profile|No signing certificate|no account for team|No Accounts|DEVELOPMENT_TEAM|Signing for .* requires|\*\* (BUILD|ARCHIVE|EXPORT) FAILED' \
+            /tmp/ios-release.log \
+            | head -10 \
+            | annotate 'iOS signing and build result'
+
+          # Last resort, kept small on purpose so it cannot crowd out the two
+          # above: the final lines before Shorebird's boilerplate begins.
+          grep -v -E 'If the above command fails|please file an issue|strongly encourage|underlying .flutter build. failure|providing the desired flutter version|\[Process.run\]' \
+            /tmp/ios-release.log \
+            | tail -12 \
+            | annotate 'iOS end of log'
+
+          # A diagnostic must never add a failure of its own. grep exits 1 when
+          # nothing matches, and under pipefail that became the step's exit
+          # code, so this step went red for finding nothing - on top of the
+          # real failure it was explaining.
+          exit 0
