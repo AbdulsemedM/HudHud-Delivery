@@ -1048,30 +1048,6 @@ class AppLocalizationsAm extends AppLocalizations {
   String get categoryGrocery => 'ግሮሰሪ';
 
   @override
-  String get sectorAll => 'ሁሉም';
-
-  @override
-  String get sectorRestaurants => 'ምግብ ቤቶች';
-
-  @override
-  String get sectorBakery => 'ዳቦ ቤት';
-
-  @override
-  String get sectorSupermarket => 'ሱፐርማርኬት';
-
-  @override
-  String get sectorMarket => 'ገበያ';
-
-  @override
-  String get sectorPharmacy => 'መድኃኒት ቤት';
-
-  @override
-  String get sectorSpareParts => 'የመኪና መለዋወጫ';
-
-  @override
-  String get sectorGeneral => 'አጠቃላይ';
-
-  @override
   String get categoryAmerican => 'አሜሪካዊ';
 
   @override
@@ -4571,8 +4547,33 @@ class AppLocalizationsAm extends AppLocalizations {
   String get deliveryCodeTitle => 'የማስረከቢያ ኮድዎ';
 
   @override
-  String get deliveryCodePrompt => 'ትዕዛዝዎን እንደተቀበሉ ለማረጋገጥ እነዚህን 4 ቁጥሮች ለአሽከርካሪው ያንብቡ።';
+  String get deliveryCodePrompt =>
+      'ትዕዛዝዎን እንደተቀበሉ ለማረጋገጥ እነዚህን 4 ቁጥሮች ለአሽከርካሪው ያንብቡ።';
 
   @override
   String get deliveryCodeWarning => 'ይህን ኮድ አሽከርካሪው ፊትዎ ሲሆን ብቻ ያጋሩ።';
+
+  @override
+  String get sectorAll => 'ሁሉም';
+
+  @override
+  String get sectorRestaurants => 'ምግብ ቤቶች';
+
+  @override
+  String get sectorBakery => 'ዳቦ ቤት';
+
+  @override
+  String get sectorSupermarket => 'ሱፐርማርኬት';
+
+  @override
+  String get sectorMarket => 'ገበያ';
+
+  @override
+  String get sectorPharmacy => 'መድኃኒት ቤት';
+
+  @override
+  String get sectorSpareParts => 'የመኪና መለዋወጫ';
+
+  @override
+  String get sectorGeneral => 'አጠቃላይ';
 }

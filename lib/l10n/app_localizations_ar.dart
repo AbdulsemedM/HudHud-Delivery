@@ -1065,30 +1065,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get categoryGrocery => 'خضروات';
 
   @override
-  String get sectorAll => 'الكل';
-
-  @override
-  String get sectorRestaurants => 'مطاعم';
-
-  @override
-  String get sectorBakery => 'مخبز';
-
-  @override
-  String get sectorSupermarket => 'سوبر ماركت';
-
-  @override
-  String get sectorMarket => 'سوق';
-
-  @override
-  String get sectorPharmacy => 'صيدلية';
-
-  @override
-  String get sectorSpareParts => 'قطع غيار السيارات';
-
-  @override
-  String get sectorGeneral => 'عام';
-
-  @override
   String get categoryAmerican => 'أمريكي';
 
   @override
@@ -3214,13 +3190,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get easyVoiceHints => 'قراءة الخطوات بصوت عالٍ';
 
   @override
-  String get easyVoiceHintsSubtitle => 'مُعطَّل افتراضيًا. زر "استماع" يعمل دائمًا.';
+  String get easyVoiceHintsSubtitle =>
+      'مُعطَّل افتراضيًا. زر \"استماع\" يعمل دائمًا.';
 
   @override
-  String get easyDescribeHint => 'ما الذي بداخل الطرد؟ يمكنك أيضًا إضافة صورة أو ملاحظة صوتية.';
+  String get easyDescribeHint =>
+      'ما الذي بداخل الطرد؟ يمكنك أيضًا إضافة صورة أو ملاحظة صوتية.';
 
   @override
-  String get easyDescribeRequired => 'صِف الطرد أو التقط صورة أو سجّل ملاحظة صوتية.';
+  String get easyDescribeRequired =>
+      'صِف الطرد أو التقط صورة أو سجّل ملاحظة صوتية.';
 
   @override
   String get navMyDeliveries => 'توصيلاتي';
@@ -4635,8 +4614,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deliveryCodeTitle => 'رمز التسليم الخاص بك';
 
   @override
-  String get deliveryCodePrompt => 'اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.';
+  String get deliveryCodePrompt =>
+      'اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.';
 
   @override
-  String get deliveryCodeWarning => 'لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك.';
+  String get deliveryCodeWarning =>
+      'لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك.';
+
+  @override
+  String get sectorAll => 'الكل';
+
+  @override
+  String get sectorRestaurants => 'مطاعم';
+
+  @override
+  String get sectorBakery => 'مخبز';
+
+  @override
+  String get sectorSupermarket => 'سوبر ماركت';
+
+  @override
+  String get sectorMarket => 'سوق';
+
+  @override
+  String get sectorPharmacy => 'صيدلية';
+
+  @override
+  String get sectorSpareParts => 'قطع غيار السيارات';
+
+  @override
+  String get sectorGeneral => 'عام';
 }

@@ -1073,30 +1073,6 @@ class AppLocalizationsSo extends AppLocalizations {
   String get categoryGrocery => 'Raashinka';
 
   @override
-  String get sectorAll => 'Dhammaan';
-
-  @override
-  String get sectorRestaurants => 'Maqaayado';
-
-  @override
-  String get sectorBakery => 'Rootiga';
-
-  @override
-  String get sectorSupermarket => 'Suubarmaarkeed';
-
-  @override
-  String get sectorMarket => 'Suuq';
-
-  @override
-  String get sectorPharmacy => 'Farmashiye';
-
-  @override
-  String get sectorSpareParts => 'Qalabka baabuurka';
-
-  @override
-  String get sectorGeneral => 'Guud';
-
-  @override
   String get categoryAmerican => 'Maraykan';
 
   @override
@@ -3270,13 +3246,16 @@ class AppLocalizationsSo extends AppLocalizations {
   String get easyVoiceHints => 'Tallaabooyinka kor u akhri';
 
   @override
-  String get easyVoiceHintsSubtitle => 'Sida caadiga ah waa damin. Badhanka \'Dhageyso\' had iyo jeer wuu shaqeeyaa.';
+  String get easyVoiceHintsSubtitle =>
+      'Sida caadiga ah waa damin. Badhanka \'Dhageyso\' had iyo jeer wuu shaqeeyaa.';
 
   @override
-  String get easyDescribeHint => 'Maxaa ku jira baakadda? Waxaad sidoo kale ku dari kartaa sawir ama cod.';
+  String get easyDescribeHint =>
+      'Maxaa ku jira baakadda? Waxaad sidoo kale ku dari kartaa sawir ama cod.';
 
   @override
-  String get easyDescribeRequired => 'Sharrax baakadda, sawir qaad, ama cod duub.';
+  String get easyDescribeRequired =>
+      'Sharrax baakadda, sawir qaad, ama cod duub.';
 
   @override
   String get navMyDeliveries => 'Gaarsiimahayga';
@@ -4722,8 +4701,34 @@ class AppLocalizationsSo extends AppLocalizations {
   String get deliveryCodeTitle => 'Koodhkaaga gaarsiinta';
 
   @override
-  String get deliveryCodePrompt => 'U akhri darawalka 4-da nambar si aad u xaqiijiso inaad dalabkaaga heshay.';
+  String get deliveryCodePrompt =>
+      'U akhri darawalka 4-da nambar si aad u xaqiijiso inaad dalabkaaga heshay.';
 
   @override
-  String get deliveryCodeWarning => 'Koodhkan la wadaag kaliya marka darawalka hortaada joogo.';
+  String get deliveryCodeWarning =>
+      'Koodhkan la wadaag kaliya marka darawalka hortaada joogo.';
+
+  @override
+  String get sectorAll => 'Dhammaan';
+
+  @override
+  String get sectorRestaurants => 'Maqaayado';
+
+  @override
+  String get sectorBakery => 'Rootiga';
+
+  @override
+  String get sectorSupermarket => 'Suubarmaarkeed';
+
+  @override
+  String get sectorMarket => 'Suuq';
+
+  @override
+  String get sectorPharmacy => 'Farmashiye';
+
+  @override
+  String get sectorSpareParts => 'Qalabka baabuurka';
+
+  @override
+  String get sectorGeneral => 'Guud';
 }

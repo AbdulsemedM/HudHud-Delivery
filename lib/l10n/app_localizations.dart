@@ -2090,54 +2090,6 @@ abstract class AppLocalizations {
   /// **'Grocery'**
   String get categoryGrocery;
 
-  /// No description provided for @sectorAll.
-  ///
-  /// In en, this message translates to:
-  /// **'All'**
-  String get sectorAll;
-
-  /// No description provided for @sectorRestaurants.
-  ///
-  /// In en, this message translates to:
-  /// **'Restaurants'**
-  String get sectorRestaurants;
-
-  /// No description provided for @sectorBakery.
-  ///
-  /// In en, this message translates to:
-  /// **'Bakery'**
-  String get sectorBakery;
-
-  /// No description provided for @sectorSupermarket.
-  ///
-  /// In en, this message translates to:
-  /// **'Supermarket'**
-  String get sectorSupermarket;
-
-  /// No description provided for @sectorMarket.
-  ///
-  /// In en, this message translates to:
-  /// **'Market'**
-  String get sectorMarket;
-
-  /// No description provided for @sectorPharmacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Pharmacy'**
-  String get sectorPharmacy;
-
-  /// No description provided for @sectorSpareParts.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto parts'**
-  String get sectorSpareParts;
-
-  /// No description provided for @sectorGeneral.
-  ///
-  /// In en, this message translates to:
-  /// **'General'**
-  String get sectorGeneral;
-
   /// No description provided for @categoryAmerican.
   ///
   /// In en, this message translates to:
@@ -8540,6 +8492,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Once the package or food is picked up, it can\'t be cancelled.'**
   String get cpRuleNoCancelAfterPickup;
+
+  /// Heading on the delivery-code card shown at the door
+  ///
+  /// In en, this message translates to:
+  /// **'Your delivery code'**
+  String get deliveryCodeTitle;
+
+  /// Tells the customer to read the 4-digit code aloud to the driver
+  ///
+  /// In en, this message translates to:
+  /// **'Read these 4 digits to your driver to confirm you received your order.'**
+  String get deliveryCodePrompt;
+
+  /// Warns the customer not to share the code before the driver arrives
+  ///
+  /// In en, this message translates to:
+  /// **'Only share this code once the driver is in front of you.'**
+  String get deliveryCodeWarning;
+
+  /// No description provided for @sectorAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get sectorAll;
+
+  /// No description provided for @sectorRestaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants'**
+  String get sectorRestaurants;
+
+  /// No description provided for @sectorBakery.
+  ///
+  /// In en, this message translates to:
+  /// **'Bakery'**
+  String get sectorBakery;
+
+  /// No description provided for @sectorSupermarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Supermarket'**
+  String get sectorSupermarket;
+
+  /// No description provided for @sectorMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get sectorMarket;
+
+  /// No description provided for @sectorPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get sectorPharmacy;
+
+  /// No description provided for @sectorSpareParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto parts'**
+  String get sectorSpareParts;
+
+  /// No description provided for @sectorGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get sectorGeneral;
 }
 
 class _AppLocalizationsDelegate
@@ -8579,22 +8597,4 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       'an issue with the localizations generation tool. Please file an issue '
       'on GitHub with a reproducible sample app and the gen-l10n configuration '
       'that was used.');
-
-  /// Heading on the delivery-code card shown at the door
-  ///
-  /// In en, this message translates to:
-  /// **'Your delivery code'**
-  String get deliveryCodeTitle;
-
-  /// Tells the customer to read the 4-digit code aloud to the driver
-  ///
-  /// In en, this message translates to:
-  /// **'Read these 4 digits to your driver to confirm you received your order.'**
-  String get deliveryCodePrompt;
-
-  /// Warns the customer not to share the code before the driver arrives
-  ///
-  /// In en, this message translates to:
-  /// **'Only share this code once the driver is in front of you.'**
-  String get deliveryCodeWarning;
 }
