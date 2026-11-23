@@ -3177,16 +3177,16 @@ class AppLocalizationsAm extends AppLocalizations {
   String get navMe => 'እኔ';
 
   @override
-  String get courierNowTitle => 'አሁን';
+  String get courierNowTitle => 'አሁን ይላኩ';
 
   @override
-  String get courierNowSubtitle => 'ወዲያውኑ ይላኩ';
+  String get courierNowSubtitle => 'መልእክተኛ ወዲያውኑ መጥቶ ይወስዳል';
 
   @override
-  String get courierLaterTitle => 'በኋላ';
+  String get courierLaterTitle => 'ሰዓት ይምረጡ';
 
   @override
-  String get courierLaterSubtitle => 'ቀን እና ሰዓት ይምረጡ';
+  String get courierLaterSubtitle => 'ለመውሰጃ ቀን እና ሰዓት ይምረጡ';
 
   @override
   String get homeMoreServices => 'ተጨማሪ';

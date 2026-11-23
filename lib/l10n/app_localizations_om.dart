@@ -3270,16 +3270,16 @@ class AppLocalizationsOm extends AppLocalizations {
   String get navMe => 'Ana';
 
   @override
-  String get courierNowTitle => 'Amma';
+  String get courierNowTitle => 'Amma ergi';
 
   @override
-  String get courierNowSubtitle => 'Battaluma ergi';
+  String get courierNowSubtitle => 'Geejjibaan battaluma dhufee fudhata';
 
   @override
-  String get courierLaterTitle => 'Booda';
+  String get courierLaterTitle => 'Yeroo filadhu';
 
   @override
-  String get courierLaterSubtitle => 'Guyyaa fi sa\'aatii filadhu';
+  String get courierLaterSubtitle => 'Guyyaa fi sa\'aatii fudhannaa filadhu';
 
   @override
   String get homeMoreServices => 'Dabalata';

@@ -215,21 +215,27 @@ class _CourierScreenState extends State<CourierScreen> {
     );
   }
 
+  /// One obvious action, and the less common one underneath it.
+  ///
+  /// This used to be two equal tiles labelled "Now" and "Later". Testers read
+  /// those as times, not as things to do, and two same-sized choices made
+  /// every customer stop and decide - when nearly all of them want a courier
+  /// right away. So "Send now" is the single big orange action and "Choose a
+  /// time" sits below it as a smaller secondary row.
   Widget _buildCreateDeliveryRow(AppLocalizations l10n) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: _InstantDeliveryCard(
-            l10n: l10n,
-            onTap: _openInstantDelivery,
-          ),
+        _SendNowCard(
+          title: l10n.courierNowTitle,
+          subtitle: l10n.courierNowSubtitle,
+          onTap: _openInstantDelivery,
         ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: _ScheduleDeliveryCard(
-            l10n: l10n,
-            onTap: _openScheduleDelivery,
-          ),
+        const SizedBox(height: 12),
+        _ChooseTimeRow(
+          title: l10n.courierLaterTitle,
+          subtitle: l10n.courierLaterSubtitle,
+          onTap: _openScheduleDelivery,
         ),
       ],
     );
@@ -411,100 +417,46 @@ class _CourierScreenState extends State<CourierScreen> {
   }
 }
 
-class _InstantDeliveryCard extends StatelessWidget {
-  final AppLocalizations l10n;
-  final VoidCallback onTap;
-
-  const _InstantDeliveryCard({required this.l10n, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return _BookingCard(
-      icon: Icons.bolt_rounded,
-      title: l10n.courierNowTitle,
-      subtitle: l10n.courierNowSubtitle,
-      onTap: onTap,
-      filled: true,
-    );
-  }
-}
-
-class _ScheduleDeliveryCard extends StatelessWidget {
-  final AppLocalizations l10n;
-  final VoidCallback onTap;
-
-  const _ScheduleDeliveryCard({required this.l10n, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return _BookingCard(
-      icon: Icons.event_rounded,
-      title: l10n.courierLaterTitle,
-      subtitle: l10n.courierLaterSubtitle,
-      onTap: onTap,
-      filled: false,
-    );
-  }
-}
-
-/// Big, picture-first booking choice. [filled] = the primary (orange) option.
-class _BookingCard extends StatelessWidget {
-  const _BookingCard({
-    required this.icon,
+/// The main booking action on Home: full width, orange, icon first.
+class _SendNowCard extends StatelessWidget {
+  const _SendNowCard({
     required this.title,
     required this.subtitle,
     required this.onTap,
-    required this.filled,
   });
 
-  final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
-  final bool filled;
 
   static const _radius = BorderRadius.all(Radius.circular(24));
 
   @override
   Widget build(BuildContext context) {
     final dark = HomeColors.isDark(context);
-    final accent = filled ? Colors.white : HomeColors.violetOf(context);
-    final titleColor =
-        filled ? Colors.white : HomeColors.textPrimaryOf(context);
-    final subColor = filled
-        ? Colors.white.withValues(alpha: 0.88)
-        : HomeColors.textMutedOf(context);
-    final chipBg = filled
-        ? Colors.white.withValues(alpha: 0.18)
-        : HomeColors.violetTintOf(context);
 
     return Semantics(
       button: true,
       label: '$title. $subtitle',
+      excludeSemantics: true,
       child: Container(
-        height: 184,
+        constraints: const BoxConstraints(minHeight: 124),
         decoration: BoxDecoration(
           borderRadius: _radius,
-          color: filled ? null : HomeColors.surfaceOf(context),
-          gradient: filled
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: AppColors.primaryGradient,
-                )
-              : null,
-          border: filled
-              ? null
-              : Border.all(color: HomeColors.borderOf(context), width: 1.2),
-          boxShadow: filled && !dark
-              ? [
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: AppColors.primaryGradient,
+          ),
+          boxShadow: dark
+              ? AppColors.softShadow(context)
+              : [
                   BoxShadow(
                     color: AppColors.brandOrange.withValues(alpha: 0.32),
                     blurRadius: 24,
                     offset: const Offset(0, 12),
                   ),
-                ]
-              : AppColors.softShadow(context),
+                ],
         ),
         child: Material(
           type: MaterialType.transparency,
@@ -515,81 +467,173 @@ class _BookingCard extends StatelessWidget {
               borderRadius: _radius,
               child: Stack(
                 children: [
-                  // Oversized watermark icon gives the primary card depth.
-                  if (filled)
-                    Positioned(
-                      right: -26,
-                      bottom: -30,
-                      child: Icon(
-                        icon,
-                        size: 150,
-                        color: Colors.white.withValues(alpha: 0.13),
-                      ),
+                  // Oversized watermark icon gives the card depth.
+                  Positioned(
+                    right: -18,
+                    bottom: -34,
+                    child: Icon(
+                      Icons.bolt_rounded,
+                      size: 140,
+                      color: Colors.white.withValues(alpha: 0.13),
                     ),
+                  ),
                   Padding(
-                    padding: const EdgeInsets.all(18),
+                    padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.bolt_rounded,
+                            color: Colors.white,
+                            size: 38,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 26,
+                                  height: 1.1,
+                                  letterSpacing: -0.6,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                subtitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: 15,
+                                  height: 1.3,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 22,
+                            color: AppColors.brandOrange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The less common choice: book for a later day and hour. Indigo outline,
+/// smaller than [_SendNowCard], so the screen still has one main action.
+class _ChooseTimeRow extends StatelessWidget {
+  const _ChooseTimeRow({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  static const _radius = BorderRadius.all(Radius.circular(18));
+
+  @override
+  Widget build(BuildContext context) {
+    final violet = HomeColors.violetOf(context);
+
+    return Semantics(
+      button: true,
+      label: '$title. $subtitle',
+      excludeSemantics: true,
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: _radius,
+          side: BorderSide(color: violet.withValues(alpha: 0.35), width: 1.4),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 72),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: HomeColors.violetTintOf(context),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(Icons.event_rounded, color: violet, size: 26),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 54,
-                              height: 54,
-                              decoration: BoxDecoration(
-                                color: chipBg,
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: Icon(icon, color: accent, size: 32),
-                            ),
-                            const Spacer(),
-                            Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: filled
-                                    ? Colors.white
-                                    : HomeColors.violetTintOf(context),
-                              ),
-                              child: Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 20,
-                                color: filled
-                                    ? AppColors.brandOrange
-                                    : HomeColors.violetOf(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
                         Text(
                           title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: titleColor,
-                            fontSize: 26,
-                            height: 1.1,
-                            letterSpacing: -0.6,
+                            color: HomeColors.textPrimaryOf(context),
+                            fontSize: 18,
                             fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 2),
                         Text(
                           subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: subColor,
+                            color: HomeColors.textMutedOf(context),
                             fontSize: 14,
                             height: 1.3,
                             fontWeight: FontWeight.w600,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
+                  Icon(Icons.chevron_right_rounded, color: violet, size: 28),
                 ],
               ),
             ),

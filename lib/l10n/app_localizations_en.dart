@@ -3242,16 +3242,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMe => 'Me';
 
   @override
-  String get courierNowTitle => 'Now';
+  String get courierNowTitle => 'Send now';
 
   @override
-  String get courierNowSubtitle => 'Send right away';
+  String get courierNowSubtitle => 'A courier comes to pick it up right away';
 
   @override
-  String get courierLaterTitle => 'Later';
+  String get courierLaterTitle => 'Choose a time';
 
   @override
-  String get courierLaterSubtitle => 'Pick a day and time';
+  String get courierLaterSubtitle => 'Pick a day and hour for pickup';
 
   @override
   String get homeMoreServices => 'More';

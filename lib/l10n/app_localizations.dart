@@ -6107,25 +6107,25 @@ abstract class AppLocalizations {
   /// No description provided for @courierNowTitle.
   ///
   /// In en, this message translates to:
-  /// **'Now'**
+  /// **'Send now'**
   String get courierNowTitle;
 
   /// No description provided for @courierNowSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Send right away'**
+  /// **'A courier comes to pick it up right away'**
   String get courierNowSubtitle;
 
   /// No description provided for @courierLaterTitle.
   ///
   /// In en, this message translates to:
-  /// **'Later'**
+  /// **'Choose a time'**
   String get courierLaterTitle;
 
   /// No description provided for @courierLaterSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Pick a day and time'**
+  /// **'Pick a day and hour for pickup'**
   String get courierLaterSubtitle;
 
   /// No description provided for @homeMoreServices.

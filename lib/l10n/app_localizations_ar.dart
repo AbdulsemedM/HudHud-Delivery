@@ -3219,16 +3219,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navMe => 'حسابي';
 
   @override
-  String get courierNowTitle => 'الآن';
+  String get courierNowTitle => 'أرسل الآن';
 
   @override
-  String get courierNowSubtitle => 'أرسل فوراً';
+  String get courierNowSubtitle => 'يأتي المندوب لاستلامها فوراً';
 
   @override
-  String get courierLaterTitle => 'لاحقاً';
+  String get courierLaterTitle => 'اختر وقتاً';
 
   @override
-  String get courierLaterSubtitle => 'اختر اليوم والوقت';
+  String get courierLaterSubtitle => 'اختر اليوم والساعة للاستلام';
 
   @override
   String get homeMoreServices => 'المزيد';
