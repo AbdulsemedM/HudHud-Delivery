@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hudhud_delivery/features/growth/data/models/growth_config.dart';
 
 void main() {
+  _paymentChoiceTests();
   group('GrowthConfig', () {
     test('parses the contract payload', () {
       final config = GrowthConfig.fromResponseBody({
@@ -92,6 +93,62 @@ void main() {
         'reorder': {'enabled': false},
       });
       expect(config.reorderEnabled, isFalse);
+    });
+  });
+}
+
+/*
+ * Whether the checkout offers a payment chooser at all.
+ *
+ * Off means no chooser on screen and the order placed cash on delivery. It is
+ * a server flag rather than deleted code so putting the chooser back does not
+ * need a new build in every customer's hands — and it must default to ON when
+ * the server says nothing, or an app pointed at an older API silently loses
+ * the ability to pay by wallet.
+ */
+void _paymentChoiceTests() {
+  group('GrowthConfig payment choice', () {
+    GrowthConfig parse(Map<String, dynamic> data) =>
+        GrowthConfig.fromResponseBody({'success': true, 'data': data});
+
+    test('reads the flag the server sends', () {
+      final config = parse({
+        'currency': 'ETB',
+        'checkout': {
+          'payment_choice_enabled': false,
+          'default_payment_method': 'cash_on_delivery',
+        },
+      });
+
+      expect(config.paymentChoiceEnabled, isFalse);
+      expect(config.defaultPaymentMethod, 'cash_on_delivery');
+    });
+
+    test('an older API that says nothing keeps the chooser', () {
+      final config = parse({'currency': 'ETB'});
+
+      expect(config.paymentChoiceEnabled, isTrue,
+          reason: 'silence must not remove the ability to pay by wallet');
+      expect(config.defaultPaymentMethod, 'cash_on_delivery');
+    });
+
+    test('a half-sent block still has a usable default method', () {
+      final config = parse({
+        'currency': 'ETB',
+        'checkout': {'payment_choice_enabled': false},
+      });
+
+      expect(config.paymentChoiceEnabled, isFalse);
+      expect(config.defaultPaymentMethod, 'cash_on_delivery');
+    });
+
+    test('an explicit true turns the chooser back on', () {
+      final config = parse({
+        'currency': 'ETB',
+        'checkout': {'payment_choice_enabled': true},
+      });
+
+      expect(config.paymentChoiceEnabled, isTrue);
     });
   });
 }

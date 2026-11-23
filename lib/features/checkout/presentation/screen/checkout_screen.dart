@@ -252,6 +252,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _scheduleGrowthQuote(immediate: true);
     }
     _growthQuoteWasEnabled = enabled;
+
+    // Applied here as well as when the methods load, because the config can
+    // arrive late and the methods call can fail outright. With no chooser on
+    // screen a null method is not something the customer can fix — Place
+    // Order would simply refuse with nothing to point at.
+    final growth = _growth;
+    if (growth.loaded &&
+        !_paymentChooserVisible &&
+        _selectedPaymentMethod != growth.defaultPaymentMethod) {
+      setState(() {
+        _selectedPaymentMethod = growth.defaultPaymentMethod;
+        _paymentDetails = {};
+      });
+    }
   }
 
   /// Server quote is shown only when it matches the current inputs.
@@ -282,6 +296,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   static bool _isCashMethod(Object? id) =>
       const {'cash_on_delivery', 'cod', 'cash'}.contains(id?.toString());
+
+  /// Whether the customer is shown a way to choose how they pay.
+  ///
+  /// Hidden by `checkout.payment_choice_enabled` to save most of a screen at
+  /// the point people abandon carts — but NOT in the two cases where cash is
+  /// refused, because hiding the chooser there leaves the customer holding a
+  /// basket they cannot pay for and nothing on screen to change:
+  ///
+  ///   * a gift is electronic only, the API refuses cash on delivery for it;
+  ///   * a customer with outstanding dues is sent to the dues dialog instead
+  ///     of being allowed to run up more cash.
+  ///
+  /// Any check that can block an order needs a way past it, or it becomes a
+  /// support call with a customer staring at a Place Order button that does
+  /// nothing.
+  bool get _paymentChooserVisible =>
+      _growth.paymentChoiceEnabled || _giftMode || _hasDues;
 
   /// Gifts are paid electronically only (the API refuses cash on delivery).
   List<Map<String, dynamic>> get _visiblePaymentMethods => _giftMode
@@ -1541,6 +1572,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     _selectedPaymentMethod = null;
                     _paymentDetails = {};
                   }
+                  // With no chooser on screen there is nobody to pick, and
+                  // Place Order refuses a null method — so the default is
+                  // applied here rather than at submit, where it would have
+                  // to be threaded through the dues check, the details form
+                  // and the validation separately.
+                  if (!_paymentChooserVisible) {
+                    _selectedPaymentMethod = _growth.defaultPaymentMethod;
+                    _paymentDetails = {};
+                  }
                 });
               } else if (state is PaymentTotalChanged) {
                 _onServerTotalChanged(context, state);
@@ -1769,6 +1809,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       // Phase 2: promo code, points and free-delivery hint
                       // (each hidden unless enabled by GET /growth/config).
                       ..._growthSections(context, growth),
+                      // No chooser unless the server says there is one.
+                      //
+                      // With `checkout.payment_choice_enabled` off the order
+                      // is placed cash on delivery and this whole card is
+                      // gone, which is three taps and most of a screen saved
+                      // at the point people abandon carts. It is a server
+                      // flag rather than deleted code so putting the chooser
+                      // back does not need a new build in every customer's
+                      // hands, and it defaults to ON against an older API so
+                      // nobody silently loses the ability to pay by wallet.
+                      if (_paymentChooserVisible)
                       CheckoutSectionCard(
                         icon: Icons.account_balance_wallet_outlined,
                         title: 'Payment method',

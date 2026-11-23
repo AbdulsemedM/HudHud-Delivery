@@ -44,6 +44,20 @@ class GrowthConfig {
   /// is null ("not said") unless a `gifting: {enabled}` block is ever sent.
   final bool? giftingEnabled;
 
+  /// Whether the checkout lets the customer choose how to pay.
+  ///
+  /// A server flag, not a constant: with it off the checkout shows no payment
+  /// chooser at all and the order is placed cash on delivery, and turning
+  /// choice back on must not need a new build in every customer's hands.
+  ///
+  /// Defaults to TRUE when the server does not mention it, so an app running
+  /// against an older API keeps the behaviour it has always had rather than
+  /// silently losing the ability to pay by wallet.
+  final bool paymentChoiceEnabled;
+
+  /// What to send when there is no chooser.
+  final String defaultPaymentMethod;
+
   const GrowthConfig({
     required this.loaded,
     this.currency = 'ETB',
@@ -66,6 +80,8 @@ class GrowthConfig {
     this.marketCurrency,
     this.adsEnabled = false,
     this.giftingEnabled,
+    this.paymentChoiceEnabled = true,
+    this.defaultPaymentMethod = 'cash_on_delivery',
   });
 
   static const GrowthConfig disabled = GrowthConfig(loaded: false);
@@ -86,6 +102,7 @@ class GrowthConfig {
     final market = growthMap(json['market']);
     final ads = growthMap(json['ads']);
     final gifting = growthMap(json['gifting']);
+    final checkout = growthMap(json['checkout']);
 
     final redeemPoints = growthInt(rewards['redeem_points'], 100);
     return GrowthConfig(
@@ -113,6 +130,12 @@ class GrowthConfig {
       giftingEnabled: gifting == null || !gifting.containsKey('enabled')
           ? null
           : growthBool(gifting['enabled']),
+      paymentChoiceEnabled: checkout == null
+          ? true
+          : growthBool(checkout['payment_choice_enabled'], true),
+      defaultPaymentMethod:
+          growthString(checkout?['default_payment_method']) ??
+              'cash_on_delivery',
     );
   }
 
