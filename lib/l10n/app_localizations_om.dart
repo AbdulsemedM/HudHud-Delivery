@@ -425,6 +425,14 @@ class AppLocalizationsOm extends AppLocalizations {
   String get locationSearchNoResults => 'Bakka hin argamne';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'Maqaa biraa yaali, yookaan kaartaa sochoosii mallattoo kaa\'i.';
+
+  @override
+  String get locationSearchFailed =>
+      'Amma barbaaduun hin danda\'amne. Interneetii keessan mirkaneessaa, yookaan kaartaa sochoosii mallattoo kaa\'i.';
+
+  @override
   String get locationCurrentPositionFailed =>
       'Bakka ammaa argachuu hin dandeenye';
 
@@ -577,6 +585,9 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get courierHistoryEmptySubtitle =>
       'Geejjibni keessan kan darbe asitti ni mul\'ata';
+
+  @override
+  String get courierAddDeliveryCta => 'Geejjiba dabali';
 
   @override
   String get courierInstantTitle => 'Geejjibaa Battalaa';
@@ -3259,16 +3270,16 @@ class AppLocalizationsOm extends AppLocalizations {
   String get navMe => 'Ana';
 
   @override
-  String get courierNowTitle => 'Amma';
+  String get courierNowTitle => 'Amma ergi';
 
   @override
-  String get courierNowSubtitle => 'Battaluma ergi';
+  String get courierNowSubtitle => 'Geejjibaan battaluma dhufee fudhata';
 
   @override
-  String get courierLaterTitle => 'Booda';
+  String get courierLaterTitle => 'Yeroo filadhu';
 
   @override
-  String get courierLaterSubtitle => 'Guyyaa fi sa\'aatii filadhu';
+  String get courierLaterSubtitle => 'Guyyaa fi sa\'aatii fudhannaa filadhu';
 
   @override
   String get homeMoreServices => 'Dabalata';

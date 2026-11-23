@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
@@ -153,26 +154,62 @@ class GooglePlacesService {
   ///
   /// Autocomplete returns at most 5 predictions; Text Search adds up to 20 more.
   /// Results are merged (autocomplete first) and deduped by [place_id].
-  static Future<List<PlaceResult>> searchPlaces(String input) async {
-    final key = await GoogleMapsApiKeyProvider.getWebKey();
-    if (key.isEmpty) return [];
+  static Future<List<PlaceResult>> searchPlaces(String input) async =>
+      (await searchPlacesWithStatus(input)).places;
 
+  /// Like [searchPlaces], but says whether the search itself failed.
+  ///
+  /// "Found nothing" and "could not ask" used to be the same empty list, so a
+  /// timeout on a slow connection or a REQUEST_DENIED key told the customer
+  /// "No locations found" for a place as obvious as Bole. The two legs are
+  /// also independent now: previously one leg timing out threw out of
+  /// `Future.wait` and discarded the other leg's good results with it.
+  static Future<PlaceSearchOutcome> searchPlacesWithStatus(String input) async {
     final query = input.trim();
-    if (query.length < 2) return [];
+    if (query.length < 2) return const PlaceSearchOutcome([]);
+
+    final key = await GoogleMapsApiKeyProvider.getWebKey();
+    if (key.isEmpty) {
+      debugPrint('[Places] no web key available; search disabled');
+      return const PlaceSearchOutcome([], failed: true);
+    }
 
     final area = CityScope.current;
+    final (auto, text) = await (
+      _guardLeg('autocomplete', () => _searchAutocomplete(key, query, area)),
+      _guardLeg('textsearch', () => _searchTextSearch(key, query, area)),
+    ).wait;
+
+    if (auto == null && text == null) {
+      return const PlaceSearchOutcome([], failed: true);
+    }
+    return PlaceSearchOutcome(
+      filterToSearchArea(_mergePlaces(auto ?? [], text ?? []), area),
+    );
+  }
+
+  /// Runs one search leg; null means it failed (as opposed to found nothing).
+  static Future<List<PlaceResult>?> _guardLeg(
+    String name,
+    Future<List<PlaceResult>?> Function() leg,
+  ) async {
     try {
-      final results = await Future.wait([
-        _searchAutocomplete(key, query, area),
-        _searchTextSearch(key, query, area),
-      ]);
-      return filterToSearchArea(_mergePlaces(results[0], results[1]), area);
+      return await leg();
     } catch (e) {
-      return [];
+      debugPrint('[Places] $name failed: $e');
+      return null;
     }
   }
 
-  static Future<List<PlaceResult>> _searchAutocomplete(
+  /// Network timeout for the two search legs. 5 s was tight on 3G in Addis,
+  /// and a timeout used to read as "No locations found".
+  static const _searchTimeout = Duration(seconds: 8);
+
+  /// Google statuses that mean "we asked and got a real answer".
+  static bool _isAnswer(String? status) =>
+      status == 'OK' || status == 'ZERO_RESULTS';
+
+  static Future<List<PlaceResult>?> _searchAutocomplete(
     String key,
     String query,
     CityServiceArea? area,
@@ -184,12 +221,18 @@ class GooglePlacesService {
         ...autocompleteScope(area),
       },
     );
-    final response = await http.get(uri).timeout(const Duration(seconds: 5));
-    if (response.statusCode != 200) return [];
+    final response = await http.get(uri).timeout(_searchTimeout);
+    if (response.statusCode != 200) {
+      debugPrint('[Places] autocomplete HTTP ${response.statusCode}');
+      return null;
+    }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     final status = json['status'] as String?;
-    if (status != 'OK' && status != 'ZERO_RESULTS') return [];
+    if (!_isAnswer(status)) {
+      debugPrint('[Places] autocomplete $status ${json['error_message'] ?? ''}');
+      return null;
+    }
 
     final predictions = json['predictions'] as List<dynamic>?;
     if (predictions == null || predictions.isEmpty) return [];
@@ -222,7 +265,7 @@ class GooglePlacesService {
     return resolved.whereType<PlaceResult>().toList();
   }
 
-  static Future<List<PlaceResult>> _searchTextSearch(
+  static Future<List<PlaceResult>?> _searchTextSearch(
     String key,
     String query,
     CityServiceArea? area,
@@ -234,12 +277,18 @@ class GooglePlacesService {
         ...textSearchScope(area),
       },
     );
-    final response = await http.get(uri).timeout(const Duration(seconds: 5));
-    if (response.statusCode != 200) return [];
+    final response = await http.get(uri).timeout(_searchTimeout);
+    if (response.statusCode != 200) {
+      debugPrint('[Places] textsearch HTTP ${response.statusCode}');
+      return null;
+    }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     final status = json['status'] as String?;
-    if (status != 'OK' && status != 'ZERO_RESULTS') return [];
+    if (!_isAnswer(status)) {
+      debugPrint('[Places] textsearch $status ${json['error_message'] ?? ''}');
+      return null;
+    }
 
     final resultsList = json['results'] as List<dynamic>?;
     if (resultsList == null || resultsList.isEmpty) return [];
@@ -723,6 +772,17 @@ class _ParsedAddressComponents {
     this.country,
     this.postcode,
   });
+}
+
+/// Result of a place search: the places, and whether the search failed.
+class PlaceSearchOutcome {
+  const PlaceSearchOutcome(this.places, {this.failed = false});
+
+  final List<PlaceResult> places;
+
+  /// True when Google could not be asked (network, timeout, key rejected),
+  /// so an empty [places] is not evidence the place does not exist.
+  final bool failed;
 }
 
 /// Closest named place found by Nearby Search.

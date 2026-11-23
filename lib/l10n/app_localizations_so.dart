@@ -423,6 +423,14 @@ class AppLocalizationsSo extends AppLocalizations {
   String get locationSearchNoResults => 'Goob lama helin';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'Isku day magac kale, ama dhaqaaji khariidadda si aad u dhigto calaamadda.';
+
+  @override
+  String get locationSearchFailed =>
+      'Hadda lama raadin karo. Hubi internetkaaga, ama dhaqaaji khariidadda si aad u dhigto calaamadda.';
+
+  @override
   String get locationCurrentPositionFailed => 'Lama helin goobta hadda';
 
   @override
@@ -573,6 +581,9 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get courierHistoryEmptySubtitle =>
       'keenistaadii hore waxay ka muuqan doontaa halkan';
+
+  @override
+  String get courierAddDeliveryCta => 'Ku dar keenis';
 
   @override
   String get courierInstantTitle => 'Bixinta degdega ah';
@@ -3264,16 +3275,17 @@ class AppLocalizationsSo extends AppLocalizations {
   String get navMe => 'Aniga';
 
   @override
-  String get courierNowTitle => 'Hadda';
+  String get courierNowTitle => 'Hadda dir';
 
   @override
-  String get courierNowSubtitle => 'Isla markiiba dir';
+  String get courierNowSubtitle =>
+      'Fariisku isla markiiba ayuu u imanayaa inuu qaado';
 
   @override
-  String get courierLaterTitle => 'Mar dambe';
+  String get courierLaterTitle => 'Dooro waqti';
 
   @override
-  String get courierLaterSubtitle => 'Dooro maalin iyo waqti';
+  String get courierLaterSubtitle => 'Dooro maalinta iyo saacadda la qaadayo';
 
   @override
   String get homeMoreServices => 'Kuwo kale';

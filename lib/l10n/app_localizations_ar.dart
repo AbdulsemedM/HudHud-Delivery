@@ -420,6 +420,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get locationSearchNoResults => 'لم يتم العثور على مواقع';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'جرّب اسماً آخر، أو حرّك الخريطة لوضع الدبوس.';
+
+  @override
+  String get locationSearchFailed =>
+      'تعذّر البحث الآن. تحقّق من الإنترنت، أو حرّك الخريطة لوضع الدبوس.';
+
+  @override
   String get locationCurrentPositionFailed => 'تعذر الحصول على الموقع الحالي';
 
   @override
@@ -566,6 +574,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get courierHistoryEmptySubtitle =>
       'سوف تظهر عمليات التسليم الماضية الخاصة بك هنا';
+
+  @override
+  String get courierAddDeliveryCta => 'أضف توصيلة';
 
   @override
   String get courierInstantTitle => 'التسليم الفوري';
@@ -3208,16 +3219,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navMe => 'حسابي';
 
   @override
-  String get courierNowTitle => 'الآن';
+  String get courierNowTitle => 'أرسل الآن';
 
   @override
-  String get courierNowSubtitle => 'أرسل فوراً';
+  String get courierNowSubtitle => 'يأتي المندوب لاستلامها فوراً';
 
   @override
-  String get courierLaterTitle => 'لاحقاً';
+  String get courierLaterTitle => 'اختر وقتاً';
 
   @override
-  String get courierLaterSubtitle => 'اختر اليوم والوقت';
+  String get courierLaterSubtitle => 'اختر اليوم والساعة للاستلام';
 
   @override
   String get homeMoreServices => 'المزيد';

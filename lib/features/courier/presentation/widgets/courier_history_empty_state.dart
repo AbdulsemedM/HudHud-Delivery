@@ -9,12 +9,14 @@ class CourierHistoryEmptyState extends StatelessWidget {
     super.key,
     this.onPrimaryAction,
     this.primaryActionLabel,
+    this.primaryActionIcon = Icons.flash_on_rounded,
     this.compact = true,
   });
 
   /// Optional CTA (e.g. start instant delivery).
   final VoidCallback? onPrimaryAction;
   final String? primaryActionLabel;
+  final IconData primaryActionIcon;
 
   /// Home preview uses compact layout; full history uses a larger icon.
   final bool compact;
@@ -69,6 +71,7 @@ class CourierHistoryEmptyState extends StatelessWidget {
           const SizedBox(height: 22),
           _EmptyStatePrimaryButton(
             label: primaryActionLabel ?? l10n.courierInstantTitle,
+            icon: primaryActionIcon,
             onPressed: onPrimaryAction!,
           ),
         ],
@@ -98,10 +101,14 @@ class CourierHistoryEmptyState extends StatelessWidget {
 }
 
 class _EmptyStatePrimaryButton extends StatelessWidget {
-  const _EmptyStatePrimaryButton(
-      {required this.label, required this.onPressed});
+  const _EmptyStatePrimaryButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
 
   final String label;
+  final IconData icon;
   final VoidCallback onPressed;
 
   @override
@@ -119,7 +126,7 @@ class _EmptyStatePrimaryButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.flash_on_rounded, color: Colors.white, size: 24),
+              Icon(icon, color: Colors.white, size: 24),
               const SizedBox(width: 10),
               Flexible(
                 child: Text(

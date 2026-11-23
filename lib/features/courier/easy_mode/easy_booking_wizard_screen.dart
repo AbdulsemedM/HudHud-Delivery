@@ -684,7 +684,9 @@ class _MapStepState extends State<_MapStep> {
   bool _searchActive = false;
   List<PlaceResult> _searchSuggestions = [];
   bool _searchLoading = false;
+  bool _searchFailed = false;
   String _searchQuery = '';
+  final _searchFieldKey = GlobalKey<LocationSearchFieldState>();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -885,6 +887,7 @@ class _MapStepState extends State<_MapStep> {
       _pinPlaced = true;
       _searchSuggestions = [];
       _searchLoading = false;
+      _searchFailed = false;
       _searchQuery = '';
       _mapGeneration++;
       _mapController = null;
@@ -982,6 +985,7 @@ class _MapStepState extends State<_MapStep> {
               boxShadow: AppColors.softShadow(context),
             ),
             child: LocationSearchField(
+              key: _searchFieldKey,
               controller: _searchController,
               focusNode: _searchFocusNode,
               autofocus: widget.searchFirst,
@@ -1003,11 +1007,13 @@ class _MapStepState extends State<_MapStep> {
                 required isLoading,
                 required show,
                 required query,
+                required failed,
               }) {
                 if (!mounted) return;
                 setState(() {
                   _searchSuggestions = suggestions;
                   _searchLoading = isLoading;
+                  _searchFailed = failed;
                   _searchQuery = query;
                 });
               },
@@ -1040,6 +1046,9 @@ class _MapStepState extends State<_MapStep> {
                         onLocationSelected: _onSearchPlaceSelected,
                         l10n: context.l10n,
                         colorScheme: Theme.of(context).colorScheme,
+                        failed: _searchFailed,
+                        onRetry: () =>
+                            _searchFieldKey.currentState?.retrySearch(),
                       ),
                     ),
                   ),

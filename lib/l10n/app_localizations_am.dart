@@ -415,6 +415,14 @@ class AppLocalizationsAm extends AppLocalizations {
   String get locationSearchNoResults => 'ምንም ቦታ አልተገኘም';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'ሌላ ስም ይሞክሩ፣ ወይም ካርታውን አንቀሳቅሰው ምልክቱን ያስቀምጡ።';
+
+  @override
+  String get locationSearchFailed =>
+      'አሁን መፈለግ አልተቻለም። ኢንተርኔትዎን ያረጋግጡ፣ ወይም ካርታውን አንቀሳቅሰው ምልክቱን ያስቀምጡ።';
+
+  @override
   String get locationCurrentPositionFailed => 'የአሁኑን ቦታ ማግኘት አልተቻለም';
 
   @override
@@ -557,6 +565,9 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get courierHistoryEmptySubtitle => 'ያለፈው መላኪያዎችህ እዚህ ይታያሉ';
+
+  @override
+  String get courierAddDeliveryCta => 'መላኪያ ያክሉ';
 
   @override
   String get courierInstantTitle => 'ፈጣን ማድረስ';
@@ -3166,16 +3177,16 @@ class AppLocalizationsAm extends AppLocalizations {
   String get navMe => 'እኔ';
 
   @override
-  String get courierNowTitle => 'አሁን';
+  String get courierNowTitle => 'አሁን ይላኩ';
 
   @override
-  String get courierNowSubtitle => 'ወዲያውኑ ይላኩ';
+  String get courierNowSubtitle => 'መልእክተኛ ወዲያውኑ መጥቶ ይወስዳል';
 
   @override
-  String get courierLaterTitle => 'በኋላ';
+  String get courierLaterTitle => 'ሰዓት ይምረጡ';
 
   @override
-  String get courierLaterSubtitle => 'ቀን እና ሰዓት ይምረጡ';
+  String get courierLaterSubtitle => 'ለመውሰጃ ቀን እና ሰዓት ይምረጡ';
 
   @override
   String get homeMoreServices => 'ተጨማሪ';

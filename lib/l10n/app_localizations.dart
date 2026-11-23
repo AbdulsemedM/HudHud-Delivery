@@ -884,6 +884,18 @@ abstract class AppLocalizations {
   /// **'No locations found'**
   String get locationSearchNoResults;
 
+  /// No description provided for @locationSearchNoResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another name, or move the map to place the pin.'**
+  String get locationSearchNoResultsHint;
+
+  /// No description provided for @locationSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t search right now. Check your internet, or move the map to place the pin.'**
+  String get locationSearchFailed;
+
   /// No description provided for @locationCurrentPositionFailed.
   ///
   /// In en, this message translates to:
@@ -1159,6 +1171,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your past deliveries will appear here'**
   String get courierHistoryEmptySubtitle;
+
+  /// No description provided for @courierAddDeliveryCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add delivery'**
+  String get courierAddDeliveryCta;
 
   /// No description provided for @courierInstantTitle.
   ///
@@ -6089,25 +6107,25 @@ abstract class AppLocalizations {
   /// No description provided for @courierNowTitle.
   ///
   /// In en, this message translates to:
-  /// **'Now'**
+  /// **'Send now'**
   String get courierNowTitle;
 
   /// No description provided for @courierNowSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Send right away'**
+  /// **'A courier comes to pick it up right away'**
   String get courierNowSubtitle;
 
   /// No description provided for @courierLaterTitle.
   ///
   /// In en, this message translates to:
-  /// **'Later'**
+  /// **'Choose a time'**
   String get courierLaterTitle;
 
   /// No description provided for @courierLaterSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Pick a day and time'**
+  /// **'Pick a day and hour for pickup'**
   String get courierLaterSubtitle;
 
   /// No description provided for @homeMoreServices.

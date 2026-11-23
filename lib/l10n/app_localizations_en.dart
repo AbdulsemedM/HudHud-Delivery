@@ -418,6 +418,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationSearchNoResults => 'No locations found';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'Try another name, or move the map to place the pin.';
+
+  @override
+  String get locationSearchFailed =>
+      'Couldn\'t search right now. Check your internet, or move the map to place the pin.';
+
+  @override
   String get locationCurrentPositionFailed => 'Could not get current location';
 
   @override
@@ -566,6 +574,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get courierHistoryEmptySubtitle =>
       'Your past deliveries will appear here';
+
+  @override
+  String get courierAddDeliveryCta => 'Add delivery';
 
   @override
   String get courierInstantTitle => 'Instant Delivery';
@@ -3231,16 +3242,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMe => 'Me';
 
   @override
-  String get courierNowTitle => 'Now';
+  String get courierNowTitle => 'Send now';
 
   @override
-  String get courierNowSubtitle => 'Send right away';
+  String get courierNowSubtitle => 'A courier comes to pick it up right away';
 
   @override
-  String get courierLaterTitle => 'Later';
+  String get courierLaterTitle => 'Choose a time';
 
   @override
-  String get courierLaterSubtitle => 'Pick a day and time';
+  String get courierLaterSubtitle => 'Pick a day and hour for pickup';
 
   @override
   String get homeMoreServices => 'More';
