@@ -559,6 +559,12 @@ jobs:
         (inputs.platform == 'ios' || inputs.platform == 'both'))
     needs: preflight
     runs-on: macos-latest
+    # contents: write is for the failure-log publisher below, which commits the
+    # captured output to a diagnostics branch. Without it the default token may
+    # be read-only and the write is rejected - which would cost another 10
+    # minutes to discover.
+    permissions:
+      contents: write
     defaults:
       run:
         shell: bash
@@ -736,124 +742,124 @@ jobs:
           shorebird flutter versions list || true
           echo "flutter_version=${V}" >> "$GITHUB_OUTPUT"
 
+      # CAPTURED, NOT RE-RUN.
+      #
+      # The action prints to the job log and nowhere else, and job logs come
+      # from a blob host that a terminal or an agent routinely cannot reach -
+      # so `gh api .../logs` fails and reading a failure meant a browser.
+      #
+      # The first answer to that was a second step that re-ran the command with
+      # --dry-run to capture its output. That is second-guessing: it is a
+      # DIFFERENT invocation, after the first one has already written build
+      # directories and Shorebird state, and across three runs it never
+      # reproduced anything readable. A diagnostic that re-runs the thing it is
+      # explaining is not evidence about the thing it is explaining.
+      #
+      # So the release runs through the CLI directly and tees its own output.
+      # One invocation, captured as it happens, and the reporting step reads a
+      # file rather than guessing.
+      #
+      # `shorebird` is on PATH from setup-shorebird. --flutter-version is
+      # REQUIRED and must not be empty: the action forwarded it unconditionally
+      # and an empty value produces "Flutter  is not available to Shorebird",
+      # where the doubled space IS the missing version.
       - name: Shorebird release iOS
         id: release
-        uses: shorebirdtech/shorebird-release@v1
-        with:
-          platform: ios
-          flutter-version: ${{ steps.flutter.outputs.flutter_version }}
-          args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}
-
-      # An iOS release failure has been unreadable twice in a row, and both
-      # times the reason was sitting in a log nobody could reach.
-      #
-      # The action prints to the job log and nothing else, and a job log is
-      # served from a blob host that is often unreachable from a terminal or an
-      # agent: `gh api .../logs` fails, so the only way to read WHY the release
-      # died was to open a browser and scroll a virtualised log. The REST
-      # annotations endpoint, meanwhile, is plain JSON and always reachable —
-      # but all it carried was:
-      #
-      #     Process completed with exit code 70.
-      #
-      # Exit 70 is EX_SOFTWARE: "something went wrong". It names nothing.
-      #
-      # So on failure, re-run the same command, capture it, and
-      # push the tail into an annotation and the job summary. One ::error:: with
-      # %0A for newlines, because GitHub shows only the first handful of
-      # annotations per step and the interesting part is usually at the end.
-      #
-      # This always runs a DRY RUN, whatever the job was doing: a diagnostic
-      # must not publish a release as a side effect of explaining a failure.
-      - name: Say why the iOS release failed
-        if: failure() && steps.release.outcome == 'failure'
         run: |
           set -uo pipefail
-          echo "The release step failed. Re-running as --dry-run to capture the reason."
+          ARGS="--no-confirm"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="${ARGS} --dry-run"
+          fi
 
-          shorebird release ios \
-            --no-confirm \
-            --dry-run \
+          echo "shorebird release ios ${ARGS} --flutter-version ${{ steps.flutter.outputs.flutter_version }}"
+
+          set -o pipefail
+          shorebird release ios ${ARGS} \
             --flutter-version "${{ steps.flutter.outputs.flutter_version }}" \
-            > /tmp/ios-release.log 2>&1 || true
+            2>&1 | tee /tmp/ios-release.log
+          STATUS="${PIPESTATUS[0]}"
 
-          echo "--- captured $(wc -l < /tmp/ios-release.log) lines ---"
-          tail -80 /tmp/ios-release.log
+          echo "shorebird exited ${STATUS}"
+          echo "status=${STATUS}" >> "$GITHUB_OUTPUT"
+          exit "${STATUS}"
 
-          {
-            echo "### iOS release failure"
-            echo
-            echo '```'
-            tail -80 /tmp/ios-release.log
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+      # Reports what the step above captured. Every annotation is TITLE-FREE:
+      # GitHub stops parsing `::error <params>::` at the first `::`, so a title
+      # containing a colon drops the annotation silently - no error, nothing to
+      # notice - and a previous run emitted three and created none. Without a
+      # title there is no parameter list to get wrong.
+      #
+      # It also reports the SIZE of what it captured. An empty capture is a
+      # fact about the diagnostic, not about the build, and the previous
+      # attempts could not tell those two apart.
+      # PUBLISH THE LOG WHERE IT CANNOT SILENTLY FAIL TO ARRIVE.
+      #
+      # Five runs went into trying to read this failure through annotations and
+      # none of them delivered it. The channel kept failing in ways that are
+      # invisible from outside: Shorebird's boilerplate filled the 4096-character
+      # budget, then --verbose noise filled it, then a colon in a title made the
+      # whole `::error title=...::` command invalid so three annotations were
+      # emitted and none created, and then the step started exiting non-zero
+      # before emitting anything with no way to tell whether the capture was
+      # empty or the emitter was broken.
+      #
+      # Every one of those is the same failure mode as the bugs this week: a
+      # mechanism that reports success or nothing at all, where nothing is
+      # indistinguishable from fine.
+      #
+      # So the log is committed to a branch. The contents API is plain JSON,
+      # has no size limit worth worrying about, and - the point - a failed
+      # write is a non-zero exit I can see. One file per run id, so it is
+      # always a create and never needs a blob sha.
+      #
+      # Read it with:
+      #   gh api repos/<owner>/<repo>/contents/ios-release-<run_id>.log \
+      #     --jq '.content' | base64 -d
+      - name: Publish the captured log
+        if: failure() && steps.release.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ci-ios-diagnostics
+        run: |
+          set -uo pipefail
 
-          # The tail is the WRONG window. Shorebird ends every iOS failure
-          # with the same block of advice ("if the above command fails, then
-          # this is likely not a Shorebird issue...") followed by git plumbing
-          # against its own Flutter cache, so a tail -40 captures boilerplate
-          # and nothing about this build. The real error is further up, where
-          # `flutter build ipa` reported it.
-          #
-          # So select, do not tail. The second annotation keeps a tail as well,
-          # because a failure that matches none of these patterns still has to
-          # say something.
-          # AN ANNOTATION IS HARD-CAPPED AT 4096 CHARACTERS.
-          #
-          # Learned the hard way: the first attempt tailed the log and caught
-          # only Shorebird's standard advice block; the second grepped a broad
-          # pattern against a --verbose log and spent all 4096 characters on
-          # `executing: xcrun xcodebuild ...` lines and `flutter build ipa
-          # --help` output, which Shorebird prints while probing which flags
-          # the bundled Flutter supports. Neither carried the error. The second
-          # annotation was dropped entirely for want of room.
-          #
-          # So: no --verbose, and a narrow pattern.
-          #
-          # --verbose does not add information here, it buries it. Xcode and
-          # clang both report failures as `error:`, and Shorebird's plain
-          # output already ends with the flutter build failure, so the clean
-          # log is the one in which the error is legible.
-          # NO COLON IN A TITLE. GitHub parses `::error <params>::<message>`
-          # and stops reading params at the first `::`, so a title of
-          # "iOS: error lines" makes the whole command invalid and the
-          # annotation is dropped silently - no error, no annotation, nothing
-          # to notice. That cost a full run: three annotations emitted, none
-          # created.
-          annotate() {
-            local title="$1"
-            local body
-            body="$(cut -c1-220 | sed -e 's/%/%25/g' -e 's/\r//g' | awk '{printf "%s%%0A", $0}' | cut -c1-3900)"
-            if [ -n "${body}" ]; then
-              echo "::error title=${title}::${body}"
-            else
-              echo "(nothing matched for: ${title})"
-            fi
-          }
+          if [ ! -s /tmp/ios-release.log ]; then
+            echo "::error::The capture is EMPTY (file missing or zero bytes). That is a fact about this capture, not about the build."
+            exit 0
+          fi
 
-          # Compiler and Xcode errors. This is the one that names a real
-          # failure, so it goes first and gets the room.
-          grep -E '(^|[[:space:]])error:' /tmp/ios-release.log \
-            | head -12 \
-            | annotate 'iOS error lines'
+          BYTES="$(wc -c < /tmp/ios-release.log | tr -d ' ')"
+          LINES="$(wc -l < /tmp/ios-release.log | tr -d ' ')"
+          echo "captured ${BYTES} bytes / ${LINES} lines"
 
-          # Signing and provisioning, which is what this job is expected to hit
-          # first: release-ios imports no Apple certificate and no provisioning
-          # profile, and the credentials preflight checks nothing Apple.
-          grep -E 'No profiles for|requires a provisioning profile|No signing certificate|no account for team|No Accounts|DEVELOPMENT_TEAM|Signing for .* requires|\*\* (BUILD|ARCHIVE|EXPORT) FAILED' \
-            /tmp/ios-release.log \
-            | head -10 \
-            | annotate 'iOS signing and build result'
+          # Keep it bounded. The tail is where the failure is; the head is
+          # Shorebird resolving its toolchain.
+          tail -2000 /tmp/ios-release.log > /tmp/ios-tail.log
 
-          # Last resort, kept small on purpose so it cannot crowd out the two
-          # above: the final lines before Shorebird's boilerplate begins.
-          grep -v -E 'If the above command fails|please file an issue|strongly encourage|underlying .flutter build. failure|providing the desired flutter version|\[Process.run\]' \
-            /tmp/ios-release.log \
-            | tail -12 \
-            | annotate 'iOS end of log'
+          # macOS base64 has no -w0; -A is the BSD/openssl way to get one line.
+          B64="$(openssl base64 -A -in /tmp/ios-tail.log)"
 
-          # A diagnostic must never add a failure of its own. grep exits 1 when
-          # nothing matches, and under pipefail that became the step's exit
-          # code, so this step went red for finding nothing - on top of the
-          # real failure it was explaining.
+          # The branch may not exist yet. Create it from this commit rather
+          # than from the default branch, so the log sits beside the code that
+          # produced it.
+          if ! gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${BRANCH}" >/dev/null 2>&1; then
+            echo "creating branch ${BRANCH}"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+              -f ref="refs/heads/${BRANCH}" \
+              -f sha="${GITHUB_SHA}" || true
+          fi
+
+          PATH_IN_REPO="ios-release-${GITHUB_RUN_ID}.log"
+
+          if gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/${PATH_IN_REPO}" \
+               -f message="ci: iOS release log for run ${GITHUB_RUN_ID}" \
+               -f branch="${BRANCH}" \
+               -f content="${B64}" >/dev/null; then
+            echo "::error::iOS release failed. Captured ${LINES} lines. Read it: repos/${GITHUB_REPOSITORY}/contents/${PATH_IN_REPO}?ref=${BRANCH}"
+          else
+            echo "::error::iOS release failed and the log could NOT be published. Captured ${LINES} lines; the contents API write was rejected."
+          fi
+
+          # A step that reports a failure must not add one.
           exit 0
