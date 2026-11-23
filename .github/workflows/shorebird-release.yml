@@ -605,8 +605,80 @@ jobs:
           echo "flutter_version=${V}" >> "$GITHUB_OUTPUT"
 
       - name: Shorebird release iOS
+        id: release
         uses: shorebirdtech/shorebird-release@v1
         with:
           platform: ios
           flutter-version: ${{ steps.flutter.outputs.flutter_version }}
           args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}
+
+      # An iOS release failure has been unreadable twice in a row, and both
+      # times the reason was sitting in a log nobody could reach.
+      #
+      # The action prints to the job log and nothing else, and a job log is
+      # served from a blob host that is often unreachable from a terminal or an
+      # agent: `gh api .../logs` fails, so the only way to read WHY the release
+      # died was to open a browser and scroll a virtualised log. The REST
+      # annotations endpoint, meanwhile, is plain JSON and always reachable —
+      # but all it carried was:
+      #
+      #     Process completed with exit code 70.
+      #
+      # Exit 70 is EX_SOFTWARE: "something went wrong". It names nothing.
+      #
+      # So on failure, re-run the same command with --verbose, capture it, and
+      # push the tail into an annotation and the job summary. One ::error:: with
+      # %0A for newlines, because GitHub shows only the first handful of
+      # annotations per step and the interesting part is usually at the end.
+      #
+      # This always runs a DRY RUN, whatever the job was doing: a diagnostic
+      # must not publish a release as a side effect of explaining a failure.
+      - name: Say why the iOS release failed
+        if: failure() && steps.release.outcome == 'failure'
+        run: |
+          set -uo pipefail
+          echo "The release step failed. Re-running as --dry-run --verbose to capture the reason."
+
+          shorebird release ios \
+            --no-confirm \
+            --dry-run \
+            --verbose \
+            --flutter-version "${{ steps.flutter.outputs.flutter_version }}" \
+            > /tmp/ios-release.log 2>&1 || true
+
+          echo "--- captured $(wc -l < /tmp/ios-release.log) lines ---"
+          tail -80 /tmp/ios-release.log
+
+          {
+            echo "### iOS release failure"
+            echo
+            echo '```'
+            tail -80 /tmp/ios-release.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # The tail is the WRONG window. Shorebird ends every iOS failure
+          # with the same block of advice ("if the above command fails, then
+          # this is likely not a Shorebird issue...") followed by git plumbing
+          # against its own Flutter cache, so a tail -40 captures boilerplate
+          # and nothing about this build. The real error is further up, where
+          # `flutter build ipa` reported it.
+          #
+          # So select, do not tail. The second annotation keeps a tail as well,
+          # because a failure that matches none of these patterns still has to
+          # say something.
+          annotate() {
+            local title="$1"
+            local body
+            body="$(sed -e 's/%/%25/g' -e 's/\r//g' | awk '{printf "%s%%0A", $0}')"
+            [ -n "${body}" ] && echo "::error title=${title}::${body}"
+          }
+
+          grep -n -i -E \
+            'error:|error -|errors? found|no profiles?|provisioning|codesign|signing certificate|no signing|development team|xcodebuild|CocoaPods|pod install|Could not|cannot find|Failed to|exception|Unable to|requires a (development|provisioning)' \
+            /tmp/ios-release.log \
+            | grep -v -i -E 'If the above command fails|please file an issue|strongly encourage' \
+            | head -30 \
+            | annotate 'iOS failure - matched error lines'
+
+          tail -25 /tmp/ios-release.log | annotate 'iOS failure - end of log'
