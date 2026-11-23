@@ -425,6 +425,14 @@ class AppLocalizationsOm extends AppLocalizations {
   String get locationSearchNoResults => 'Bakka hin argamne';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'Maqaa biraa yaali, yookaan kaartaa sochoosii mallattoo kaa\'i.';
+
+  @override
+  String get locationSearchFailed =>
+      'Amma barbaaduun hin danda\'amne. Interneetii keessan mirkaneessaa, yookaan kaartaa sochoosii mallattoo kaa\'i.';
+
+  @override
   String get locationCurrentPositionFailed =>
       'Bakka ammaa argachuu hin dandeenye';
 
@@ -577,6 +585,9 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get courierHistoryEmptySubtitle =>
       'Geejjibni keessan kan darbe asitti ni mul\'ata';
+
+  @override
+  String get courierAddDeliveryCta => 'Geejjiba dabali';
 
   @override
   String get courierInstantTitle => 'Geejjibaa Battalaa';
@@ -1075,30 +1086,6 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get categoryGrocery => 'Dukkaana nyaataa';
-
-  @override
-  String get sectorAll => 'Hunda';
-
-  @override
-  String get sectorRestaurants => 'Mana nyaataa';
-
-  @override
-  String get sectorBakery => 'Mana daabboo';
-
-  @override
-  String get sectorSupermarket => 'Suupermaarkeetii';
-
-  @override
-  String get sectorMarket => 'Gabaa';
-
-  @override
-  String get sectorPharmacy => 'Mana qorichaa';
-
-  @override
-  String get sectorSpareParts => 'Meeshaalee konkolaataa';
-
-  @override
-  String get sectorGeneral => 'Waliigala';
 
   @override
   String get categoryAmerican => 'Ameerikaa';
@@ -3265,13 +3252,16 @@ class AppLocalizationsOm extends AppLocalizations {
   String get easyVoiceHints => 'Tarkaanfiiwwan sagaleen dubbisi';
 
   @override
-  String get easyVoiceHintsSubtitle => 'Durduubaan ni cufama. Qabduun \'Dhaggeeffadhu\' yeroo hunda ni hojjeta.';
+  String get easyVoiceHintsSubtitle =>
+      'Durduubaan ni cufama. Qabduun \'Dhaggeeffadhu\' yeroo hunda ni hojjeta.';
 
   @override
-  String get easyDescribeHint => 'Paakeejii keessa maaltu jira? Suuraa yookaan sagalee dabaluu dandeessa.';
+  String get easyDescribeHint =>
+      'Paakeejii keessa maaltu jira? Suuraa yookaan sagalee dabaluu dandeessa.';
 
   @override
-  String get easyDescribeRequired => 'Paakeejii ibsi, suuraa kaasi, yookaan sagalee waraabi.';
+  String get easyDescribeRequired =>
+      'Paakeejii ibsi, suuraa kaasi, yookaan sagalee waraabi.';
 
   @override
   String get navMyDeliveries => 'Geejjiba koo';
@@ -4711,8 +4701,34 @@ class AppLocalizationsOm extends AppLocalizations {
   String get deliveryCodeTitle => 'Koodii geejjibaa keessan';
 
   @override
-  String get deliveryCodePrompt => 'Ajaja keessan akka fudhattan mirkaneessuuf lakkoofsota 4 kanneen konkolaachisaaf dubbisaa.';
+  String get deliveryCodePrompt =>
+      'Ajaja keessan akka fudhattan mirkaneessuuf lakkoofsota 4 kanneen konkolaachisaaf dubbisaa.';
 
   @override
-  String get deliveryCodeWarning => 'Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa.';
+  String get deliveryCodeWarning =>
+      'Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa.';
+
+  @override
+  String get sectorAll => 'Hunda';
+
+  @override
+  String get sectorRestaurants => 'Mana nyaataa';
+
+  @override
+  String get sectorBakery => 'Mana daabboo';
+
+  @override
+  String get sectorSupermarket => 'Suupermaarkeetii';
+
+  @override
+  String get sectorMarket => 'Gabaa';
+
+  @override
+  String get sectorPharmacy => 'Mana qorichaa';
+
+  @override
+  String get sectorSpareParts => 'Meeshaalee konkolaataa';
+
+  @override
+  String get sectorGeneral => 'Waliigala';
 }

@@ -418,6 +418,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationSearchNoResults => 'No locations found';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'Try another name, or move the map to place the pin.';
+
+  @override
+  String get locationSearchFailed =>
+      'Couldn\'t search right now. Check your internet, or move the map to place the pin.';
+
+  @override
   String get locationCurrentPositionFailed => 'Could not get current location';
 
   @override
@@ -566,6 +574,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get courierHistoryEmptySubtitle =>
       'Your past deliveries will appear here';
+
+  @override
+  String get courierAddDeliveryCta => 'Add delivery';
 
   @override
   String get courierInstantTitle => 'Instant Delivery';
@@ -1059,30 +1070,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryGrocery => 'Grocery';
-
-  @override
-  String get sectorAll => 'All';
-
-  @override
-  String get sectorRestaurants => 'Restaurants';
-
-  @override
-  String get sectorBakery => 'Bakery';
-
-  @override
-  String get sectorSupermarket => 'Supermarket';
-
-  @override
-  String get sectorMarket => 'Market';
-
-  @override
-  String get sectorPharmacy => 'Pharmacy';
-
-  @override
-  String get sectorSpareParts => 'Auto parts';
-
-  @override
-  String get sectorGeneral => 'General';
 
   @override
   String get categoryAmerican => 'American';
@@ -3237,13 +3224,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get easyVoiceHints => 'Read steps aloud';
 
   @override
-  String get easyVoiceHintsSubtitle => 'Off by default. The Listen button always works.';
+  String get easyVoiceHintsSubtitle =>
+      'Off by default. The Listen button always works.';
 
   @override
-  String get easyDescribeHint => 'What is in the package? You can also add a photo or a voice note.';
+  String get easyDescribeHint =>
+      'What is in the package? You can also add a photo or a voice note.';
 
   @override
-  String get easyDescribeRequired => 'Describe the package, take a photo, or record a voice note.';
+  String get easyDescribeRequired =>
+      'Describe the package, take a photo, or record a voice note.';
 
   @override
   String get navMyDeliveries => 'My deliveries';
@@ -4669,8 +4659,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryCodeTitle => 'Your delivery code';
 
   @override
-  String get deliveryCodePrompt => 'Read these 4 digits to your driver to confirm you received your order.';
+  String get deliveryCodePrompt =>
+      'Read these 4 digits to your driver to confirm you received your order.';
 
   @override
-  String get deliveryCodeWarning => 'Only share this code once the driver is in front of you.';
+  String get deliveryCodeWarning =>
+      'Only share this code once the driver is in front of you.';
+
+  @override
+  String get sectorAll => 'All';
+
+  @override
+  String get sectorRestaurants => 'Restaurants';
+
+  @override
+  String get sectorBakery => 'Bakery';
+
+  @override
+  String get sectorSupermarket => 'Supermarket';
+
+  @override
+  String get sectorMarket => 'Market';
+
+  @override
+  String get sectorPharmacy => 'Pharmacy';
+
+  @override
+  String get sectorSpareParts => 'Auto parts';
+
+  @override
+  String get sectorGeneral => 'General';
 }

@@ -368,7 +368,11 @@ class _CourierScreenState extends State<CourierScreen> {
                     CourierHistoryEmptyState(
                       compact: true,
                       onPrimaryAction: hasActive ? null : _openInstantDelivery,
-                      primaryActionLabel: l10n.courierInstantTitle,
+                      // "Instant Delivery" read as a delivery type to testers
+                      // with nothing to compare it to; a first-time customer
+                      // just needs to know this is how they start one.
+                      primaryActionLabel: l10n.courierAddDeliveryCta,
+                      primaryActionIcon: Icons.add_rounded,
                     )
                   else
                     ..._recentDeliveries.map((d) {

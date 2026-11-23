@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class LocationSearchField extends StatefulWidget {
     required bool isLoading,
     required bool show,
     required String query,
+    required bool failed,
   })? onSuggestionsStateChanged;
 
   const LocationSearchField({
@@ -41,7 +43,7 @@ class LocationSearchField extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<LocationSearchField> createState() => _LocationSearchFieldState();
+  State<LocationSearchField> createState() => LocationSearchFieldState();
 
   /// Full-height suggestion list for parent-hosted expanded search (Easy Mode).
   static Widget buildExpandedSuggestionsList({
@@ -52,6 +54,8 @@ class LocationSearchField extends StatefulWidget {
     required void Function(PlaceResult place) onLocationSelected,
     required AppLocalizations l10n,
     required ColorScheme colorScheme,
+    bool failed = false,
+    VoidCallback? onRetry,
   }) {
     if (suggestions.isEmpty) {
       if (isLoading) {
@@ -59,11 +63,11 @@ class LocationSearchField extends StatefulWidget {
           child: CircularProgressIndicator(color: colorScheme.primary),
         );
       }
-      return ListTile(
-        title: Text(
-          l10n.locationSearchNoResults,
-          style: TextStyle(color: colorScheme.onSurfaceVariant),
-        ),
+      return _emptyState(
+        failed: failed,
+        onRetry: onRetry,
+        l10n: l10n,
+        colorScheme: colorScheme,
       );
     }
 
@@ -90,6 +94,62 @@ class LocationSearchField extends StatefulWidget {
           onTap: () => onLocationSelected(place),
         );
       },
+    );
+  }
+
+  /// Shown when a search returned nothing - or could not run at all.
+  ///
+  /// The two must look different: "No locations found" after a timeout made
+  /// testers think Bole did not exist, when the network had simply dropped.
+  static Widget _emptyState({
+    required bool failed,
+    required VoidCallback? onRetry,
+    required AppLocalizations l10n,
+    required ColorScheme colorScheme,
+  }) {
+    if (!failed) {
+      return ListTile(
+        title: Text(
+          l10n.locationSearchNoResults,
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
+        ),
+        subtitle: Text(
+          l10n.locationSearchNoResultsHint,
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.wifi_off_rounded, color: colorScheme.error),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l10n.locationSearchFailed,
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (onRetry != null) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(l10n.actionRetry),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -168,7 +228,7 @@ class LocationSearchField extends StatefulWidget {
   }
 }
 
-class _LocationSearchFieldState extends State<LocationSearchField> {
+class LocationSearchFieldState extends State<LocationSearchField> {
   FocusNode? _ownFocusNode;
   FocusNode get _focusNode =>
       widget.focusNode ?? (_ownFocusNode ??= FocusNode());
@@ -177,6 +237,21 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
   List<PlaceResult> _suggestions = [];
   bool _isLoading = false;
   bool _showSuggestions = false;
+  bool _searchFailed = false;
+
+  /// Waits for a pause in typing before asking Google. Without it every
+  /// keystroke fired ~7 requests (autocomplete + its details + text search),
+  /// which on a slow connection queued up and timed out together.
+  Timer? _debounce;
+  static const _debounceDelay = Duration(milliseconds: 350);
+
+  /// Bumped per search; a response for an older query is dropped, so a slow
+  /// reply to "bo" can no longer overwrite the results for "bole".
+  int _searchSeq = 0;
+
+  /// Query that is pending or was last searched; the controller also fires
+  /// on cursor moves, which must not restart the search.
+  String _currentQuery = '';
 
   @override
   void initState() {
@@ -194,6 +269,7 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     if (widget.controller == null) {
       _controller.dispose();
     }
@@ -209,6 +285,7 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
       isLoading: _isLoading,
       show: _showSuggestions,
       query: _controller.text.trim(),
+      failed: _searchFailed,
     );
   }
 
@@ -233,47 +310,62 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
   }
 
   void _onSearchChanged() {
-    if (_controller.text.isEmpty) {
+    final query = _controller.text.trim();
+    if (query == _currentQuery) return; // cursor move, not new text
+    _currentQuery = query;
+
+    _debounce?.cancel();
+    _updateSearchActive();
+
+    if (query.length < 2) {
+      _searchSeq++; // drop any reply still in flight
       setState(() {
         _suggestions = [];
+        _isLoading = false;
+        _searchFailed = false;
         _showSuggestions = false;
       });
-      _updateSearchActive();
       _notifySuggestionsState();
       return;
     }
 
-    _updateSearchActive();
-    _searchPlaces(_controller.text);
-  }
-
-  Future<void> _searchPlaces(String query) async {
-    if (query.trim().length < 2) return;
-
+    // Spinner straight away, so a stale "No locations found" from a shorter
+    // query never shows while the customer is still typing.
     setState(() {
       _isLoading = true;
+      _searchFailed = false;
       _showSuggestions = true;
+      _suggestions = [];
     });
     _notifySuggestionsState();
 
-    try {
-      final results = await GooglePlacesService.searchPlaces(query);
-      if (mounted) {
-        setState(() {
-          _suggestions = results;
-          _isLoading = false;
-        });
-        _notifySuggestionsState();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _suggestions = [];
-          _isLoading = false;
-        });
-        _notifySuggestionsState();
-      }
-    }
+    _debounce = Timer(_debounceDelay, () => _searchPlaces(query));
+  }
+
+  Future<void> _searchPlaces(String query) async {
+    final seq = ++_searchSeq;
+    final outcome = await GooglePlacesService.searchPlacesWithStatus(query);
+    if (!mounted || seq != _searchSeq) return;
+
+    setState(() {
+      _suggestions = outcome.places;
+      _searchFailed = outcome.failed;
+      _isLoading = false;
+    });
+    _notifySuggestionsState();
+  }
+
+  /// Re-runs the current query (the Retry button after a failed search).
+  void retrySearch() {
+    final query = _controller.text.trim();
+    if (query.length < 2) return;
+    setState(() {
+      _isLoading = true;
+      _searchFailed = false;
+      _showSuggestions = true;
+    });
+    _notifySuggestionsState();
+    _searchPlaces(query);
   }
 
   void _selectLocation(PlaceResult place) {
@@ -374,7 +466,7 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
           color: colorScheme.onSurfaceVariant,
         ),
         onPressed: () {
-          _controller.clear();
+          _controller.clear(); // listener resets state and drops in-flight
           setState(() {
             _suggestions = [];
             _showSuggestions = false;
@@ -438,11 +530,11 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
           ),
         );
       }
-      return ListTile(
-        title: Text(
-          l10n.locationSearchNoResults,
-          style: TextStyle(color: colorScheme.onSurfaceVariant),
-        ),
+      return LocationSearchField._emptyState(
+        failed: _searchFailed,
+        onRetry: retrySearch,
+        l10n: l10n,
+        colorScheme: colorScheme,
       );
     }
 
