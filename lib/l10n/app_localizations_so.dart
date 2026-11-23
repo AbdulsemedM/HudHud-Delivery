@@ -659,6 +659,17 @@ class AppLocalizationsSo extends AppLocalizations {
   String get cartKeepCurrentAction => 'Hay gaadhiga';
 
   @override
+  String get searchShopsTitle => 'Dukaamada';
+
+  @override
+  String cartProductAdded(String name) {
+    return '$name waa lagu daray gaadhiga';
+  }
+
+  @override
+  String get cartItemAdded => 'Waa lagu daray gaadhiga';
+
+  @override
   String get homeTabCourier => 'Gaadhi-qaade';
 
   @override

@@ -1908,6 +1908,23 @@
   "@cartReplaceAction": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
+  "searchShopsTitle": "المتاجر",
+  "@searchShopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartProductAdded": "تمت إضافة {name} إلى السلة",
+  "@cartProductAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cartItemAdded": "تمت الإضافة إلى السلة",
+  "@cartItemAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
   "homeTabDelivery": "التوصيل",
   "homeTabPharmacy": "صيدلية",
   "homeTabSpareParts": "قطع غيار",

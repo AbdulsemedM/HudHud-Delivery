@@ -1908,6 +1908,23 @@
   "@cartReplaceAction": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
+  "searchShopsTitle": "Suuqota",
+  "@searchShopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartProductAdded": "{name} gaariitti dabalameera",
+  "@cartProductAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cartItemAdded": "Gaariitti dabalameera",
+  "@cartItemAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
   "homeTabDelivery": "Geejjiba",
   "homeTabPharmacy": "Faarmaasii",
   "homeTabSpareParts": "Meeshaalee bakka buusaa",

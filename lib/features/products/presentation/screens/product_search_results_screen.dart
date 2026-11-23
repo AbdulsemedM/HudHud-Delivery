@@ -124,7 +124,9 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${product.name ?? 'Product'} added to cart'),
+        content: Text(product.name?.trim().isNotEmpty == true
+            ? context.l10n.cartProductAdded(product.name!.trim())
+            : context.l10n.cartItemAdded),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -446,7 +448,7 @@ class _ShopResultsRow extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Text(
-            'Shops',
+            context.l10n.searchShopsTitle,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

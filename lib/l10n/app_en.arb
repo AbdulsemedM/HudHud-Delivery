@@ -263,6 +263,23 @@
   "cartDifferentVendorMessage": "Your cart has items from another store. Clear it to add items from this store.",
   "cartReplaceAction": "Clear and add",
   "cartKeepCurrentAction": "Keep cart",
+  "searchShopsTitle": "Shops",
+  "@searchShopsTitle": {
+    "description": "Heading over the row of shops matching a search."
+  },
+  "cartProductAdded": "{name} added to cart",
+  "@cartProductAdded": {
+    "description": "Snackbar after a product is added to the cart.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cartItemAdded": "Added to cart",
+  "@cartItemAdded": {
+    "description": "Snackbar after a product with no name is added to the cart."
+  },
   "homeTabCourier": "Courier",
   "homeTabTaxi": "Taxi",
   "homeTabHandyman": "Handyman",

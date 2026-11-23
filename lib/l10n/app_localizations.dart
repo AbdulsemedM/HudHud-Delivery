@@ -1310,6 +1310,24 @@ abstract class AppLocalizations {
   /// **'Keep cart'**
   String get cartKeepCurrentAction;
 
+  /// Heading over the row of shops matching a search.
+  ///
+  /// In en, this message translates to:
+  /// **'Shops'**
+  String get searchShopsTitle;
+
+  /// Snackbar after a product is added to the cart.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added to cart'**
+  String cartProductAdded(String name);
+
+  /// Snackbar after a product with no name is added to the cart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to cart'**
+  String get cartItemAdded;
+
   /// No description provided for @homeTabCourier.
   ///
   /// In en, this message translates to:

@@ -662,6 +662,17 @@ class AppLocalizationsOm extends AppLocalizations {
   String get cartKeepCurrentAction => 'Gaarii tursi';
 
   @override
+  String get searchShopsTitle => 'Suuqota';
+
+  @override
+  String cartProductAdded(String name) {
+    return '$name gaariitti dabalameera';
+  }
+
+  @override
+  String get cartItemAdded => 'Gaariitti dabalameera';
+
+  @override
   String get homeTabCourier => 'Ergamaa';
 
   @override

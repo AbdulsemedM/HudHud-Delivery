@@ -651,6 +651,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartKeepCurrentAction => 'الاحتفاظ بالسلة';
 
   @override
+  String get searchShopsTitle => 'المتاجر';
+
+  @override
+  String cartProductAdded(String name) {
+    return 'تمت إضافة $name إلى السلة';
+  }
+
+  @override
+  String get cartItemAdded => 'تمت الإضافة إلى السلة';
+
+  @override
   String get homeTabCourier => 'ساعي';
 
   @override

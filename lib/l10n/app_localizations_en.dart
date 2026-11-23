@@ -651,6 +651,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartKeepCurrentAction => 'Keep cart';
 
   @override
+  String get searchShopsTitle => 'Shops';
+
+  @override
+  String cartProductAdded(String name) {
+    return '$name added to cart';
+  }
+
+  @override
+  String get cartItemAdded => 'Added to cart';
+
+  @override
   String get homeTabCourier => 'Courier';
 
   @override

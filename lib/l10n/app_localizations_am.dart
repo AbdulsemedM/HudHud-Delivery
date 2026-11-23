@@ -640,6 +640,17 @@ class AppLocalizationsAm extends AppLocalizations {
   String get cartKeepCurrentAction => 'ጋሪውን አቆይ';
 
   @override
+  String get searchShopsTitle => 'ሱቆች';
+
+  @override
+  String cartProductAdded(String name) {
+    return '$name ወደ ጋሪ ተጨምሯል';
+  }
+
+  @override
+  String get cartItemAdded => 'ወደ ጋሪ ተጨምሯል';
+
+  @override
   String get homeTabCourier => 'መልእክተኛ';
 
   @override
