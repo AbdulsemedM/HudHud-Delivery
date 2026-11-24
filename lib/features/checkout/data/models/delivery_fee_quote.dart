@@ -191,11 +191,14 @@ class DeliveryFeeQuoteException implements Exception {
 
 /// Cache key for in-memory quote reuse until [DeliveryFeeQuote.validUntil].
 String deliveryFeeQuoteCacheKey({
-  required int branchId,
+  int? branchId,
+  int? vendorId,
   required double latitude,
   required double longitude,
   required String address,
 }) {
-  return '$branchId|${latitude.toStringAsFixed(6)}|'
+  final pickup =
+      branchId != null && branchId > 0 ? '$branchId' : 'v${vendorId ?? 0}';
+  return '$pickup|${latitude.toStringAsFixed(6)}|'
       '${longitude.toStringAsFixed(6)}|${address.trim()}';
 }

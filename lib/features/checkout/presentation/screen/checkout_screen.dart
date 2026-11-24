@@ -960,17 +960,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
     if (!mounted || requestId != _quoteRequestId) return;
 
-    if (branchId == null || branchId <= 0) {
+    // No branch is not "no delivery": the API quotes a store by its own
+    // location when it has no branch rows. Only a store with neither
+    // (422 VENDOR_NO_LOCATED_BRANCH) cannot be delivered from.
+    final hasBranch = branchId != null && branchId > 0;
+    final vendorId = _vendorId;
+    if (!hasBranch && (vendorId == null || vendorId <= 0)) {
       setState(() {
-        // The store has no branch (or none with a location) on the server.
-        // Retrying cannot fix that, so no Retry button.
         _invalidateQuote(error: context.l10n.checkoutStoreNoBranch);
       });
       return;
     }
 
     final cacheKey = deliveryFeeQuoteCacheKey(
-      branchId: branchId,
+      branchId: hasBranch ? branchId : null,
+      vendorId: vendorId,
       latitude: lat,
       longitude: lng,
       address: address,
@@ -992,7 +996,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     try {
       final quote = await _checkoutRepository.quoteDeliveryFee(
-        branchId: branchId,
+        branchId: hasBranch ? branchId : null,
+        vendorId: hasBranch ? null : vendorId,
         deliveryAddress: address,
         deliveryLatitude: lat,
         deliveryLongitude: lng,
@@ -1260,16 +1265,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    final branchId = _branchId;
-    if (branchId == null || branchId <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to determine restaurant branch.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    // Null for a store without branches: the server picks the pickup point
+    // (nearest branch, else the store's own location) and ignores this.
+    final branchId =
+        _branchId != null && _branchId! > 0 ? _branchId : null;
 
     final initiateDetails = buildInitiatePaymentDetails(
       paymentMethodCode: _selectedPaymentMethod!,
@@ -1286,7 +1285,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ...initiateDetails,
               'order_details': {
                 'vendor_id': vendorId,
-                'branch_id': branchId,
+                if (branchId != null) 'branch_id': branchId,
                 'items': orderItems,
                 'tax_amount': 0.0,
                 'discount_amount': 0.0,
