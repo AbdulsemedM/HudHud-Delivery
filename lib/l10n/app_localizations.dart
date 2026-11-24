@@ -6125,7 +6125,7 @@ abstract class AppLocalizations {
   /// No description provided for @courierNowTitle.
   ///
   /// In en, this message translates to:
-  /// **'Send now'**
+  /// **'Add Delivery'**
   String get courierNowTitle;
 
   /// No description provided for @courierNowSubtitle.

@@ -220,7 +220,7 @@ class _CourierScreenState extends State<CourierScreen> {
   /// This used to be two equal tiles labelled "Now" and "Later". Testers read
   /// those as times, not as things to do, and two same-sized choices made
   /// every customer stop and decide - when nearly all of them want a courier
-  /// right away. So "Send now" is the single big orange action and "Choose a
+  /// right away. So "Add Delivery" (send now) is the single big orange action and "Choose a
   /// time" sits below it as a smaller secondary row.
   Widget _buildCreateDeliveryRow(AppLocalizations l10n) {
     return Column(

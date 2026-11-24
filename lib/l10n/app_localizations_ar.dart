@@ -3230,7 +3230,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navMe => 'حسابي';
 
   @override
-  String get courierNowTitle => 'أرسل الآن';
+  String get courierNowTitle => 'إضافة توصيل';
 
   @override
   String get courierNowSubtitle => 'يأتي المندوب لاستلامها فوراً';

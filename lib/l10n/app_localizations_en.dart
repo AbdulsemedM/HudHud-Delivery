@@ -3253,7 +3253,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMe => 'Me';
 
   @override
-  String get courierNowTitle => 'Send now';
+  String get courierNowTitle => 'Add Delivery';
 
   @override
   String get courierNowSubtitle => 'A courier comes to pick it up right away';
