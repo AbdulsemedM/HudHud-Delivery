@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/easy_mode/voice_hint_service.dart';
@@ -29,6 +28,7 @@ import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
 import 'package:hudhud_delivery/features/courier/parcel_v2/parcel_v2_widgets.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
+import 'package:hudhud_delivery/core/utils/phone_dialer.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
   final int? deliveryId;
@@ -232,8 +232,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       );
       return;
     }
-    final uri = Uri(scheme: 'tel', path: phone);
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    // 2519… from the API dials as a local number without its "+".
+    final launched = await PhoneDialer.call(phone);
     if (!launched && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not open the phone dialer')),

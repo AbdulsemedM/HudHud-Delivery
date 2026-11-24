@@ -6,7 +6,7 @@ import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:hudhud_delivery/core/utils/phone_dialer.dart';
 
 /// Localized label for a [DeliveryStopStatus].
 String deliveryStopStatusLabel(AppLocalizations l10n, String status) {
@@ -199,10 +199,7 @@ class _StopRow extends StatelessWidget {
   final bool showConnector;
 
   Future<void> _call(BuildContext context, String phone) async {
-    final ok = await launchUrl(
-      Uri(scheme: 'tel', path: phone),
-      mode: LaunchMode.externalApplication,
-    );
+    final ok = await PhoneDialer.call(phone);
     if (!ok && context.mounted) {
       await Clipboard.setData(ClipboardData(text: phone));
     }
