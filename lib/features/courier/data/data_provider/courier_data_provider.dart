@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
@@ -350,6 +353,43 @@ class CourierDataProvider {
       final response = await apiService.post(
         '${ApiConstants.baseUrl}$path',
         data: body,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// POST /api/services/delivery/{id}/package-photo (multipart `photo`)
+  Future<Map<String, dynamic>> uploadPackagePhoto({
+    required int deliveryId,
+    required String filePath,
+  }) async {
+    try {
+      final path = ApiConstants.deliveryPackagePhoto.replaceAll(
+        '{id}',
+        deliveryId.toString(),
+      );
+      final formData = FormData.fromMap({
+        'photo': await MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split(Platform.pathSeparator).last,
+        ),
+      });
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}$path',
+        data: formData,
       );
 
       return {

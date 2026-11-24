@@ -263,6 +263,10 @@ class ApiConstants {
       'services/delivery/{id}/retry-payment';
   static const String deliveryConfirmReceipt =
       'services/delivery/{id}/confirm-receipt';
+  /// POST multipart `photo` — the customer's photo of the item, shown to the
+  /// driver before accepting. Booking customer only, before pickup, max 3.
+  static const String deliveryPackagePhoto =
+      'services/delivery/{id}/package-photo';
   /// POST {rating: 1-5, comment?} — backend canonical route
   /// (RideMessengerController@rateDelivery; delivery must be delivered).
   static const String deliveryRate = 'user/deliveries/{id}/rate';

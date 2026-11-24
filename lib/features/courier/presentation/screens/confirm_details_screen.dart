@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
@@ -797,6 +799,19 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
         _pendingCreatedDelivery = created;
         CourierHomeRefresh.instance.notifyRefresh();
+
+        // The photo goes up after the booking exists, so the driver sees it
+        // before accepting. Not awaited: a slow upload must not hold up
+        // payment or finding a courier, and a failed one costs only the
+        // photo. Only on a fresh booking, so a payment retry (which reuses
+        // _pendingCreatedDelivery) does not upload it twice.
+        final photoPath = widget.packageImagePath;
+        if (photoPath != null && photoPath.isNotEmpty) {
+          unawaited(_courierRepository.uploadPackagePhoto(
+            deliveryId: created.deliveryId,
+            filePath: photoPath,
+          ));
+        }
       }
 
       final delivery = created;
