@@ -21,8 +21,7 @@ class CheckoutHeroHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topInset =
-        MediaQuery.paddingOf(context).top + kToolbarHeight + 8;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + 8;
 
     return Container(
       width: double.infinity,
@@ -199,9 +198,10 @@ class CheckoutSectionCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           subtitle!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
                         ),
                       ],
                     ],
@@ -336,7 +336,8 @@ class CheckoutProductCard extends StatelessWidget {
                   tooltip: 'Remove',
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  constraints:
+                      const BoxConstraints(minWidth: 36, minHeight: 36),
                 ),
             ],
           ),
@@ -614,7 +615,11 @@ class DeliveryAddressSection extends StatelessWidget {
   }
 }
 
-class NotesSection extends StatelessWidget {
+/// "Add order note" as a single line; the field opens only when tapped.
+///
+/// Most orders have no note, so the open field was a full card of empty space
+/// on checkout. A note that is already typed keeps the field open.
+class NotesSection extends StatefulWidget {
   final TextEditingController notesController;
 
   const NotesSection({
@@ -623,13 +628,78 @@ class NotesSection extends StatelessWidget {
   });
 
   @override
+  State<NotesSection> createState() => _NotesSectionState();
+}
+
+class _NotesSectionState extends State<NotesSection> {
+  late bool _open = widget.notesController.text.trim().isNotEmpty;
+
+  @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasNote = widget.notesController.text.trim().isNotEmpty;
 
+    final toggle = InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () {
+        if (_open && hasNote) return; // keep a typed note visible
+        setState(() => _open = !_open);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+        child: Row(
+          children: [
+            Icon(
+              _open ? Icons.edit_note_rounded : Icons.add_circle_outline,
+              size: 20,
+              color: AppColors.primaryColor,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _open ? 'Order note' : 'Add order note',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ),
+            if (!(_open && hasNote))
+              Icon(
+                _open ? Icons.expand_less : Icons.expand_more,
+                size: 20,
+                color: scheme.onSurfaceVariant,
+              ),
+          ],
+        ),
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 180),
+        alignment: Alignment.topCenter,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            toggle,
+            if (_open) _field(context, scheme, isDark),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _field(BuildContext context, ColorScheme scheme, bool isDark) {
     return TextField(
-      controller: notesController,
+      controller: widget.notesController,
+      autofocus: widget.notesController.text.isEmpty,
+      minLines: 1,
       maxLines: 3,
+      onChanged: (_) => setState(() {}),
       decoration: InputDecoration(
         hintText: 'Any special instructions for the rider?',
         hintStyle: TextStyle(color: scheme.onSurfaceVariant),
@@ -650,7 +720,7 @@ class NotesSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        contentPadding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       ),
     );
   }
@@ -683,7 +753,8 @@ class _TipSectionState extends State<TipSection> {
   void initState() {
     super.initState();
     _selectedTip = widget.currentTip;
-    _tipController.text = _selectedTip > 0 ? _selectedTip.toStringAsFixed(0) : '';
+    _tipController.text =
+        _selectedTip > 0 ? _selectedTip.toStringAsFixed(0) : '';
   }
 
   void _selectTip(double tip) {
@@ -883,212 +954,245 @@ class OrderSummarySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
+    final deliveryLabel = setDeliveryIncluded
+        ? context.l10n.p5QuoteSetDeliveryIncluded
+        : plusFreeDelivery
+            ? context.l10n.p3QuotePlusFreeDelivery
+            : 'Delivery fee';
+    final deliveryReady = !deliveryFeeLoading && deliveryFeeError == null;
+
+    // Delivery status stays visible even collapsed: a missing fee is why the
+    // order button is waiting, so it must not hide behind a tap.
+    Widget? status;
+    if (deliveryFeeLoading) {
+      status = Row(
         children: [
-          _SummaryRow(
-            label: 'Subtotal',
-            amountLabel: _formatAmount(subtotal),
+          SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: scheme.primary,
+            ),
           ),
-          if (deliveryFeeLoading)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: scheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Calculating delivery fee…',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else if (deliveryFeeError != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      deliveryFeeError!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: scheme.error,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  if (onRetryDeliveryFee != null)
-                    TextButton(
-                      onPressed: onRetryDeliveryFee,
-                      child: const Text('Retry'),
-                    ),
-                ],
-              ),
-            )
-          else if (_deliveryFeeStruck)
-            _SummaryRow(
-              label: setDeliveryIncluded
-                  ? context.l10n.p5QuoteSetDeliveryIncluded
-                  : plusFreeDelivery
-                      ? context.l10n.p3QuotePlusFreeDelivery
-                      : context.l10n.growthDeliveryFeeLabel,
-              amountLabel: deliveryFee! <= 0.009
-                  ? context.l10n.growthFree
-                  : _formatAmount(deliveryFee!),
-              struckAmountLabel: _formatAmount(deliveryFeeBeforeDiscounts!),
-              muted: deliveryFee! <= 0.009,
-            )
-          else
-            _SummaryRow(
-              label: setDeliveryIncluded
-                  ? context.l10n.p5QuoteSetDeliveryIncluded
-                  : plusFreeDelivery
-                      ? context.l10n.p3QuotePlusFreeDelivery
-                      : 'Delivery fee',
-              amountLabel: formattedDeliveryFee?.isNotEmpty == true
-                  ? formattedDeliveryFee!
-                  : (deliveryFee != null
-                      ? (deliveryFee == 0
-                          ? 'Free'
-                          : _formatAmount(deliveryFee!))
-                      : '—'),
-              muted: deliveryFee == null || deliveryFee == 0,
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Calculating delivery fee…',
+              style: TextStyle(fontSize: 12.5, color: scheme.onSurfaceVariant),
             ),
-          if (!deliveryFeeLoading &&
-              deliveryFeeError == null &&
-              deliveryNote != null &&
-              deliveryNote!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 2, bottom: 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  deliveryNote!,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-          if (!deliveryFeeLoading &&
-              deliveryFeeError == null &&
-              (distanceKm != null || estimatedDurationMinutes != null))
-            Padding(
-              padding: const EdgeInsets.only(top: 2, bottom: 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  [
-                    if (distanceKm != null)
-                      '~${distanceKm!.toStringAsFixed(1)} km',
-                    if (estimatedDurationMinutes != null)
-                      '~$estimatedDurationMinutes min',
-                  ].join(' · '),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-          if (couponDiscount > 0.009)
-            _SummaryRow(
-              label: couponCode != null && couponCode!.isNotEmpty
-                  ? context.l10n.growthCouponDiscountWithCode(couponCode!)
-                  : context.l10n.growthCouponDiscount,
-              amountLabel: '−${_formatAmount(couponDiscount)}',
-              muted: true,
-            ),
-          if (pointsDiscount > 0.009)
-            _SummaryRow(
-              label: context.l10n.growthPointsDiscount,
-              amountLabel: '−${_formatAmount(pointsDiscount)}',
-              muted: true,
-            ),
-          if (tipAmount > 0)
-            _SummaryRow(
-              label: 'Tip',
-              amountLabel: _formatAmount(tipAmount),
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Row(
-              children: List.generate(
-                24,
-                (i) => Expanded(
-                  child: Container(
-                    height: 1,
-                    margin: EdgeInsets.only(right: i == 23 ? 0 : 4),
-                    color: scheme.outline.withValues(alpha: 0.25),
-                  ),
-                ),
+          ),
+        ],
+      );
+    } else if (deliveryFeeError != null) {
+      status = Row(
+        children: [
+          Icon(Icons.info_outline, size: 16, color: scheme.error),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              deliveryFeeError!,
+              style: TextStyle(
+                fontSize: 12.5,
+                color: scheme.error,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+          if (onRetryDeliveryFee != null)
+            TextButton(
+              onPressed: onRetryDeliveryFee,
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
-                ).createShader(bounds),
-                child: Text(
-                  _formatAmount(total),
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.lightOnPrimary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          // Without a quote the total above is items + tip only; say so, so
-          // it is not read as the final amount.
-          if (deliveryFee == null && !deliveryFeeLoading)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: Text(
-                  context.l10n.checkoutTotalExcludesDelivery,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
+              child: const Text('Retry'),
             ),
         ],
+      );
+    }
+
+    String deliveryAmount() {
+      if (deliveryFee != null && deliveryFee! <= 0.009) {
+        return _deliveryFeeStruck ? context.l10n.growthFree : 'Free';
+      }
+      if (!_deliveryFeeStruck && formattedDeliveryFee?.isNotEmpty == true) {
+        return formattedDeliveryFee!;
+      }
+      return deliveryFee != null ? _formatAmount(deliveryFee!) : '—';
+    }
+
+    final discount = couponDiscount + pointsDiscount;
+    final caption = [
+      'Items ${_formatAmount(subtotal)}',
+      if (deliveryReady && deliveryFee != null) 'Delivery ${deliveryAmount()}',
+      if (discount > 0.009) 'Discount −${_formatAmount(discount)}',
+      if (tipAmount > 0) 'Tip ${_formatAmount(tipAmount)}',
+    ].join(' · ');
+
+    final breakdown = Column(
+      children: [
+        _SummaryRow(
+          label: 'Subtotal',
+          amountLabel: _formatAmount(subtotal),
+        ),
+        if (deliveryReady)
+          _SummaryRow(
+            label: deliveryLabel,
+            amountLabel: deliveryAmount(),
+            struckAmountLabel: _deliveryFeeStruck
+                ? _formatAmount(deliveryFeeBeforeDiscounts!)
+                : null,
+            muted: deliveryFee == null || deliveryFee! <= 0.009,
+          ),
+        if (deliveryReady &&
+            ((deliveryNote?.isNotEmpty ?? false) ||
+                distanceKm != null ||
+                estimatedDurationMinutes != null))
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              [
+                if (deliveryNote?.isNotEmpty ?? false) deliveryNote!,
+                if (distanceKm != null) '~${distanceKm!.toStringAsFixed(1)} km',
+                if (estimatedDurationMinutes != null)
+                  '~$estimatedDurationMinutes min',
+              ].join(' · '),
+              style: TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+            ),
+          ),
+        if (couponDiscount > 0.009)
+          _SummaryRow(
+            label: couponCode != null && couponCode!.isNotEmpty
+                ? context.l10n.growthCouponDiscountWithCode(couponCode!)
+                : context.l10n.growthCouponDiscount,
+            amountLabel: '−${_formatAmount(couponDiscount)}',
+            muted: true,
+          ),
+        if (pointsDiscount > 0.009)
+          _SummaryRow(
+            label: context.l10n.growthPointsDiscount,
+            amountLabel: '−${_formatAmount(pointsDiscount)}',
+            muted: true,
+          ),
+        if (tipAmount > 0)
+          _SummaryRow(
+            label: 'Tip',
+            amountLabel: _formatAmount(tipAmount),
+          ),
+        Divider(height: 12, color: scheme.outline.withValues(alpha: 0.2)),
+      ],
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkBorder
+              : AppColors.lightBorder.withValues(alpha: 0.8),
+        ),
+      ),
+      child: _SummaryExpander(
+        breakdown: breakdown,
+        status: status,
+        totalBuilder: (expanded) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Total',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                const Spacer(),
+                Text(
+                  _formatAmount(total),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryColor,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  expanded ? Icons.expand_less : Icons.expand_more,
+                  size: 20,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+            if (!expanded)
+              Text(
+                caption,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+              ),
+            // Without a quote the total is items + tip only; say so.
+            if (deliveryFee == null && !deliveryFeeLoading)
+              Text(
+                context.l10n.checkoutTotalExcludesDelivery,
+                style:
+                    TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Order summary that shows only the total until tapped.
+class _SummaryExpander extends StatefulWidget {
+  final Widget breakdown;
+  final Widget? status;
+  final Widget Function(bool expanded) totalBuilder;
+
+  const _SummaryExpander({
+    required this.breakdown,
+    required this.status,
+    required this.totalBuilder,
+  });
+
+  @override
+  State<_SummaryExpander> createState() => _SummaryExpanderState();
+}
+
+class _SummaryExpanderState extends State<_SummaryExpander> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => setState(() => _expanded = !_expanded),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+        child: AnimatedSize(
+          duration: const Duration(milliseconds: 180),
+          alignment: Alignment.topCenter,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_expanded) widget.breakdown,
+              widget.totalBuilder(_expanded),
+              if (widget.status != null) ...[
+                const SizedBox(height: 6),
+                widget.status!,
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1114,14 +1218,14 @@ class _SummaryRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               color: muted ? scheme.onSurfaceVariant : scheme.onSurface,
               fontWeight: FontWeight.w500,
             ),
@@ -1184,7 +1288,11 @@ class PaymentMethodGridSection extends StatelessWidget {
         ? methods
         : const [
             {'id': 'wallet', 'name': 'Wallet', 'enabled': true},
-            {'id': 'cash_on_delivery', 'name': 'Cash on Delivery', 'enabled': true},
+            {
+              'id': 'cash_on_delivery',
+              'name': 'Cash on Delivery',
+              'enabled': true
+            },
             {'id': 'waafi', 'name': 'Waafi Pay', 'enabled': true},
             {'id': 'edahab', 'name': 'eDahab', 'enabled': true},
             {'id': 'sahay', 'name': 'Sahay', 'enabled': true},
@@ -1235,7 +1343,10 @@ class PaymentMethodGridSection extends StatelessWidget {
                 border: Border.all(
                   color: isSelected
                       ? color
-                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                      : Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
                   width: isSelected ? 2 : 1,
                 ),
                 boxShadow: isSelected
