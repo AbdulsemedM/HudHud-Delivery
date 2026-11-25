@@ -466,6 +466,7 @@
   "vehiclePickup": "በፒካፕ ማድረሻ",
   "pickupOutsideDeliveryServiceArea": "የመውሰጃው አድራሻ ከሁድሁድ የተዋቀረ የማድረሻ አገልግሎት ክልል ውጭ ነው።",
   "easyPickupNotServedIn": "ሁድሁድ ከዚህ ቦታ ገና አይወስድም። የመውሰጃ ቦታ ከእነዚህ ይምረጡ፦ {cities}።",
+  "easyCrossBorderNotServed": "ሁድሁድ በአንድ አገር ውስጥ ያደርሳል። የመውሰጃው ቦታ በ{from} ሲሆን የማድረሻው ቦታ በ{to} ነው።",
   "selectAvailableVehicleType": "ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ",
   "sendAPackageTitle": "ጥቅል ላክ",
   "courierDeliveryAddressPlaceholder": "የማድረሻ አድራሻ",

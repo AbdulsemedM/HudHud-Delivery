@@ -1144,6 +1144,11 @@ class AppLocalizationsOm extends AppLocalizations {
   }
 
   @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'HudHud biyya tokko keessatti geessa. Iddoon fuudhaa $from keessa, iddoon geessuu immoo $to keessa jira.';
+  }
+
+  @override
   String get selectAvailableVehicleType => 'Gosa konkolaataa jiru filadhu';
 
   @override

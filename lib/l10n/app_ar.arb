@@ -466,6 +466,7 @@
   "vehiclePickup": "التوصيل بالبيك أب",
   "pickupOutsideDeliveryServiceArea": "موقع الاستلام خارج منطقة خدمة التوصيل المحددة لدى هدهود.",
   "easyPickupNotServedIn": "هدهد لا يستلم من هذا المكان بعد. اختر مكان استلام في: {cities}.",
+  "easyCrossBorderNotServed": "هدهد يوصل داخل بلد واحد. مكان الاستلام في {from} ومكان التسليم في {to}.",
   "selectAvailableVehicleType": "اختر نوع مركبة متاحاً",
   "sendAPackageTitle": "أرسل طرداً",
   "courierDeliveryAddressPlaceholder": "عنوان التسليم",

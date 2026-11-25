@@ -1115,6 +1115,11 @@ class AppLocalizationsAm extends AppLocalizations {
   }
 
   @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'ሁድሁድ በአንድ አገር ውስጥ ያደርሳል። የመውሰጃው ቦታ በ$from ሲሆን የማድረሻው ቦታ በ$to ነው።';
+  }
+
+  @override
   String get selectAvailableVehicleType => 'ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ';
 
   @override

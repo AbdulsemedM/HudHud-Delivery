@@ -2210,6 +2210,12 @@ abstract class AppLocalizations {
   /// **'HudHud does not pick up from this place yet. Choose a pickup in: {cities}.'**
   String easyPickupNotServedIn(String cities);
 
+  /// Shown when the pickup and drop-off are in different countries, which no courier can cover.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud delivers inside one country. The pickup is in {from} and the drop-off is in {to}.'**
+  String easyCrossBorderNotServed(String from, String to);
+
   /// No description provided for @selectAvailableVehicleType.
   ///
   /// In en, this message translates to:

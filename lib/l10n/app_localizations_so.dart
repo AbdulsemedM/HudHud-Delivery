@@ -1140,6 +1140,11 @@ class AppLocalizationsSo extends AppLocalizations {
   }
 
   @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'HudHud wuxuu gaarsiiyaa hal dal gudihiisa. Meesha laga soo qaado waa $from, meesha la geeyana waa $to.';
+  }
+
+  @override
   String get selectAvailableVehicleType =>
       'Dooro nooca gaadhiga ee la heli karo';
 

@@ -28,6 +28,7 @@ import 'package:hudhud_delivery/features/courier/data/models/delivery_service_ar
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
+import 'package:hudhud_delivery/features/courier/utils/cross_border.dart';
 import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/confirm_details_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
@@ -79,6 +80,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   List<String> _servedAreaNames = const [];
   bool _checkingPickupArea = false;
   String? _pickupAreaNotice;
+  String? _dropoffAreaNotice;
 
   final _recipientNameController = TextEditingController();
   final _recipientPhoneController = TextEditingController();
@@ -140,6 +142,30 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         result['lookup'] as DeliveryServiceAreaLookup?,
       );
     });
+  }
+
+  /*
+   * A COURIER CANNOT CROSS A BORDER.
+   *
+   * Only the pickup is checked against the configured service areas, so a
+   * delivery from Addis Ababa to Jeddah was accepted all the way to courier
+   * search. The obvious fix - require the drop-off to resolve to a service
+   * area too - is wrong: `DeliveryServiceAreaService::resolve()` matches city
+   * aliases as substrings of the address text, so a real drop-off in a
+   * village outside any configured city resolves to nothing. Refusing those
+   * would block deliveries we can and do make.
+   *
+   * The signal that actually separates Jeddah from Sululta is the COUNTRY.
+   * See cross_border.dart for the rule and why an unknown country never
+   * refuses.
+   */
+  String? _crossBorderNotice(AppLocalizations l10n) {
+    final from = _pickupPlace?.country?.trim();
+    final to = _dropoffPlace?.country?.trim();
+
+    if (!isCrossBorder(from, to)) return null;
+
+    return l10n.easyCrossBorderNotServed(from!, to!);
   }
 
   /// Does a courier actually serve this pickup?
@@ -355,8 +381,15 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         _snack(l10n.pleaseSelectLocation);
         return;
       }
+      final crossBorder = _crossBorderNotice(l10n);
+      if (crossBorder != null) {
+        setState(() => _dropoffAreaNotice = crossBorder);
+        unawaited(VoiceHintService.instance.speak(crossBorder));
+        return;
+      }
       setState(() {
         _step = 2;
+        _dropoffAreaNotice = null;
       });
       _speakCurrentStep();
       return;
@@ -673,9 +706,12 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           requireTapToPin: false,
           showIAmHereButton: false,
           isDropoff: true,
+          notice: _dropoffAreaNotice,
           onPositionChanged: (pos) {
             setState(() {
               _dropoffPosition = LatLng(pos.latitude, pos.longitude);
+              // About the old pin, like the pickup notice.
+              _dropoffAreaNotice = null;
             });
             unawaited(_reverseGeocodeDropoff());
           },
@@ -686,6 +722,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
               _dropoffPosition = place.coordinates;
               _dropoffAddress = place.formattedAddress;
               _dropoffPlace = place;
+              _dropoffAreaNotice = null;
             });
           },
         );

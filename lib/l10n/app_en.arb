@@ -490,6 +490,18 @@
   "vehiclePickup": "Delivery by pickup",
   "pickupOutsideDeliveryServiceArea": "Pickup is outside HudHud’s configured delivery service areas.",
   "easyPickupNotServedIn": "HudHud does not pick up from this place yet. Choose a pickup in: {cities}.",
+  "easyCrossBorderNotServed": "HudHud delivers inside one country. The pickup is in {from} and the drop-off is in {to}.",
+  "@easyCrossBorderNotServed": {
+    "description": "Shown when the pickup and drop-off are in different countries, which no courier can cover.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
   "@easyPickupNotServedIn": {
     "description": "Shown when the chosen pickup address is outside every configured service area. {cities} is the list of cities HudHud delivers from.",
     "placeholders": {
@@ -2422,6 +2434,12 @@
   "pleaseDescribePackage": "Say what's in the package so the rider knows what they carry",
   "prohibitedItemsNote": "Not allowed: weapons, drugs, cash, flammables, live animals.",
   "fareRouteDistance": "{km} km",
-  "@fareRouteDistance": {"placeholders": {"km": {"type": "String"}}},
+  "@fareRouteDistance": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
   "fareEstimateNote": "Estimate - the final price uses the actual route."
 }

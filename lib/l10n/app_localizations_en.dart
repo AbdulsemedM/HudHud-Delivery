@@ -1128,6 +1128,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'HudHud delivers inside one country. The pickup is in $from and the drop-off is in $to.';
+  }
+
+  @override
   String get selectAvailableVehicleType => 'Select an available vehicle type';
 
   @override

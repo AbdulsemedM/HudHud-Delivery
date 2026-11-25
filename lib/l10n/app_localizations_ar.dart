@@ -1132,6 +1132,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'هدهد يوصل داخل بلد واحد. مكان الاستلام في $from ومكان التسليم في $to.';
+  }
+
+  @override
   String get selectAvailableVehicleType => 'اختر نوع مركبة متاحاً';
 
   @override
