@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/core/widgets/in_app_camera.dart';
 import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
@@ -164,16 +165,21 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           ),
         ),
       );
-      if (source == null || !mounted) return;
-      final picked = await _imagePicker.pickImage(
-        source: source,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-        requestFullMetadata: source != ImageSource.gallery,
-      );
-      if (picked == null || !mounted) return;
-      setState(() => _packageImagePath = picked.path);
+      if (source == null || !context.mounted) return;
+      // Camera: in the app, so low-memory phones do not kill HudHud while
+      // the phone's camera app is open (see takePackagePhoto).
+      final path = source == ImageSource.camera
+          ? await takePackagePhoto(context)
+          : (await _imagePicker.pickImage(
+              source: source,
+              maxWidth: 1200,
+              maxHeight: 1200,
+              imageQuality: 85,
+              requestFullMetadata: false,
+            ))
+              ?.path;
+      if (path == null || !mounted) return;
+      setState(() => _packageImagePath = path);
     } on PlatformException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

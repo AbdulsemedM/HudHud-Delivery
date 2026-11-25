@@ -20,6 +20,7 @@ import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
+import 'package:hudhud_delivery/core/widgets/in_app_camera.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/core/widgets/speak_button.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -35,7 +36,6 @@ import 'package:hudhud_delivery/features/courier/presentation/theme/courier_them
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart' as p;
 import 'package:record/record.dart';
@@ -105,7 +105,6 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   String? _packageImagePath;
   String? _voiceNotePath;
 
-  final _imagePicker = ImagePicker();
   final _audioRecorder = AudioRecorder();
   bool _isRecording = false;
 
@@ -537,14 +536,11 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   Future<void> _takePhoto() async {
     final l10n = context.l10n;
     try {
-      final picked = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-      );
-      if (picked == null || !mounted) return;
-      setState(() => _packageImagePath = picked.path);
+      // In the app, so low-memory phones do not kill HudHud while the
+      // phone's camera app is open (see takePackagePhoto).
+      final path = await takePackagePhoto(context);
+      if (path == null || !mounted) return;
+      setState(() => _packageImagePath = path);
     } on PlatformException catch (e) {
       if (!mounted) return;
       _snack(l10n.couldNotOpenPhotoPicker(e.message ?? e.code));
