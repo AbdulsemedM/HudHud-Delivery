@@ -2,6 +2,7 @@ import 'package:hudhud_delivery/core/utils/localized_date.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/calls/call_presenter.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
@@ -255,7 +256,83 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
     return null;
   }
 
+  /// The courier's USER id, which is what `/calls/initiate` wants.
+  ///
+  /// PackageDelivery.driver_id is a foreign key to users, and the `driver`
+  /// relation is a User, so the id on the tracking payload is the right one.
+  /// Anything else here produces NO_ACTIVE_JOB and no explanation.
+  int? _driverUserId() {
+    final liveId = _liveTracking?.driver?.id;
+    if (liveId != null && liveId > 0) return liveId;
+
+    final driver = _trackData?['driver'];
+    if (driver is Map) {
+      final raw = driver['id'];
+      final id = raw is int ? raw : int.tryParse('${raw ?? ''}');
+      if (id != null && id > 0) return id;
+    }
+    return null;
+  }
+
+  /*
+   * IN-APP CALLING IS OFFERED ALONGSIDE THE PHONE NETWORK, NOT INSTEAD OF IT.
+   *
+   * The phone number works today. In-app calling will not carry a call on
+   * mobile data until a TURN relay is running, and replacing a channel that
+   * works with one that does not yet is a regression however much nicer the
+   * new one is. So both are offered and the customer chooses.
+   *
+   * When the relay is up and in-app has been proven in the field, this sheet
+   * is where the default moves - and the phone number can then come out of
+   * the tracking payload, which is the privacy win this was always for.
+   */
   Future<void> _callDriver() async {
+    final driverId = _driverUserId();
+    if (driverId != null) {
+      final useInApp = await showModalBottomSheet<bool>(
+        context: context,
+        builder: (sheetContext) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              ListTile(
+                leading: const Icon(Icons.wifi_calling_3_rounded),
+                title: const Text('Call in the app'),
+                subtitle: const Text('Uses your data. Your number stays private.'),
+                onTap: () => Navigator.of(sheetContext).pop(true),
+              ),
+              ListTile(
+                leading: const Icon(Icons.phone_rounded),
+                title: const Text('Call on the phone network'),
+                subtitle: Text(_driverPhone() ?? ''),
+                enabled: _driverPhone() != null,
+                onTap: () => Navigator.of(sheetContext).pop(false),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      );
+
+      // Dismissed without choosing.
+      if (useInApp == null) return;
+
+      if (useInApp) {
+        if (!mounted) return;
+        await startOutgoingCall(
+          context,
+          calleeId: driverId,
+          displayName: _driverName(),
+        );
+        return;
+      }
+    }
+
+    await _dialDriver();
+  }
+
+  Future<void> _dialDriver() async {
     final phone = _driverPhone();
     if (phone == null || phone.isEmpty) {
       if (!mounted) return;
@@ -1067,7 +1144,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                                                       )
                                                       .join(' · '),
                                                   borderColor: borderColor,
-                                                  onCall: _driverPhone() != null
+                                                  onCall:
+                                                      (_driverPhone() != null ||
+                                                          _driverUserId() != null)
                                                       ? _callDriver
                                                       : null,
                                                   onMessage: _messageDriver,

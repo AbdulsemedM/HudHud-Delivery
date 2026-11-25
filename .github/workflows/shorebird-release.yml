@@ -501,6 +501,60 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # A UNIVERSAL APK FROM THE SAME BUNDLE, so a build can go straight onto
+      # a test handset.
+      #
+      # An AAB cannot be installed on a phone. It is what Play wants and it is
+      # useless for the two-phones-on-a-desk test that actually proves a
+      # feature, so every test build had to detour through Play.
+      #
+      # bundletool, NOT a second `shorebird release android --artifact apk`:
+      # that would be a second release, Shorebird would consume another
+      # version number, and the APK would carry a different release id from
+      # the AAB on Play - two builds of the same code that cannot be patched
+      # together. This extracts an APK from the bundle that was just built and
+      # signs it with the same keystore, so it is the same code and the same
+      # signature.
+      #
+      # It never gates the release: a failure here is annotated and the job
+      # carries on, because the AAB is the deliverable and this is a
+      # convenience.
+      - name: Build a sideloadable APK from the AAB
+        id: apk
+        if: ${{ inputs.dry_run != true }}
+        continue-on-error: true
+        env:
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          AAB="$(ls build/app/outputs/bundle/release/*.aab | head -1)"
+          BT="${RUNNER_TEMP}/bundletool.jar"
+          curl -fsSL -o "${BT}" \
+            https://github.com/google/bundletool/releases/download/1.17.2/bundletool-all-1.17.2.jar
+          java -jar "${BT}" build-apks \
+            --bundle="${AAB}" \
+            --output="${RUNNER_TEMP}/app.apks" \
+            --mode=universal \
+            --ks="${RUNNER_TEMP}/upload-keystore.jks" \
+            --ks-key-alias="${ANDROID_KEY_ALIAS}" \
+            --ks-pass="pass:${ANDROID_STORE_PASSWORD}" \
+            --key-pass="pass:${ANDROID_KEY_PASSWORD}"
+          unzip -o -q "${RUNNER_TEMP}/app.apks" -d "${RUNNER_TEMP}/apks"
+          mkdir -p build/app/outputs/apk/release
+          mv "${RUNNER_TEMP}/apks/universal.apk" build/app/outputs/apk/release/app-release.apk
+          ls -lh build/app/outputs/apk/release/app-release.apk
+
+      - name: Keep the APK as a run artifact
+        if: ${{ inputs.dry_run != true && steps.apk.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: hudhud-customer-${{ steps.version.outputs.version }}-apk
+          path: build/app/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
+
       # Uploads to Play's internal testing track when the
       # PLAY_SERVICE_ACCOUNT_JSON secret exists (a Google Cloud service
       # account key, invited in Play Console with release permission).
