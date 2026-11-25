@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:hudhud_delivery/features/calls/call_presenter.dart';
+import 'package:hudhud_delivery/features/calls/incoming_call_router.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -109,6 +111,24 @@ Future<void> _routeFromPayload(
   Map<String, String> data,
 ) async {
   final event = normalizeEvent(data['event']);
+
+  /*
+   * A CALL COMES FIRST, AND IT IS NOT A NAVIGATION.
+   *
+   * Everything below this opens a screen the user asked for by tapping a
+   * notification. A ring is the opposite: it must take over the screen
+   * whether or not anyone tapped anything, and it expires. A courier who
+   * has given up before the banner is noticed is the failure mode.
+   *
+   * Checked before the chat branch because a call payload can carry a
+   * delivery context that would otherwise route it into a chat room.
+   */
+  final call = IncomingCallPush.fromData(data);
+  if (call != null) {
+    if (!context.mounted) return;
+    await presentIncomingCall(context, call);
+    return;
+  }
 
   // Chat messages take priority when conversation keys are present.
   final chatId = _parseConversationId(data);

@@ -72,6 +72,11 @@ dependencies:
 
   # Location Services
   permission_handler: ^12.0.1
+
+  # Voice calls between a customer and the courier on their order. The call
+  # DECISIONS live in lib/features/calls/call_session.dart and are tested
+  # without a device; this is only the audio.
+  flutter_webrtc: ^0.12.5
   geocoding: ^3.0.0
 
   # Map and HTTP
