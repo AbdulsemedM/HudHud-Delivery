@@ -489,6 +489,15 @@
   "vehicleBajaj": "Delivery by bajaj",
   "vehiclePickup": "Delivery by pickup",
   "pickupOutsideDeliveryServiceArea": "Pickup is outside HudHud’s configured delivery service areas.",
+  "easyPickupNotServedIn": "HudHud does not pick up from this place yet. Choose a pickup in: {cities}.",
+  "@easyPickupNotServedIn": {
+    "description": "Shown when the chosen pickup address is outside every configured service area. {cities} is the list of cities HudHud delivers from.",
+    "placeholders": {
+      "cities": {
+        "type": "String"
+      }
+    }
+  },
   "selectAvailableVehicleType": "Select an available vehicle type",
   "sendAPackageTitle": "SEND A PACKAGE",
   "courierDeliveryAddressPlaceholder": "Delivery address",

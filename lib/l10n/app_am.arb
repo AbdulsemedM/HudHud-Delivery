@@ -465,6 +465,7 @@
   "vehicleBajaj": "በባጃጅ ማድረሻ",
   "vehiclePickup": "በፒካፕ ማድረሻ",
   "pickupOutsideDeliveryServiceArea": "የመውሰጃው አድራሻ ከሁድሁድ የተዋቀረ የማድረሻ አገልግሎት ክልል ውጭ ነው።",
+  "easyPickupNotServedIn": "ሁድሁድ ከዚህ ቦታ ገና አይወስድም። የመውሰጃ ቦታ ከእነዚህ ይምረጡ፦ {cities}።",
   "selectAvailableVehicleType": "ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ",
   "sendAPackageTitle": "ጥቅል ላክ",
   "courierDeliveryAddressPlaceholder": "የማድረሻ አድራሻ",

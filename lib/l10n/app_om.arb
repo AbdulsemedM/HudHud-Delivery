@@ -465,6 +465,7 @@
   "vehicleBajaj": "Geejjibaa bajaj",
   "vehiclePickup": "Geejjibaa pickup",
   "pickupOutsideDeliveryServiceArea": "Bakki fuudhaa naannoo tajaajila geessisaa HudHud qindaa'e ala.",
+  "easyPickupNotServedIn": "HudHud iddoo kanaa ammatti hin fuudhu. Iddoo fuudhaa kanneen keessaa filadhu: {cities}.",
   "selectAvailableVehicleType": "Gosa konkolaataa jiru filadhu",
   "sendAPackageTitle": "PAAKEEJII ERGI",
   "courierDeliveryAddressPlaceholder": "Teessoo geessisaa",

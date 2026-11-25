@@ -126,4 +126,62 @@ void main() {
       expect(lookup.supportedVehicleTypes, ['bajaj', 'pickup']);
     });
   });
+
+  /*
+   * A customer picked a pickup in Jeddah, photographed the parcel, named a
+   * recipient, and was told at step five of five that we do not deliver from
+   * there. The check existed - it ran on the confirm screen - so the work was
+   * wasted by WHERE it ran, not by whether it ran.
+   *
+   * The pickup step now refuses immediately, and names the cities we do serve
+   * so the refusal is something a customer can act on. This covers which
+   * names that sentence is allowed to contain.
+   */
+  group('servedAreaNames', () {
+    DeliveryServiceAreaLookup lookupWithAreas(List<Map<String, dynamic>> areas) {
+      return parseDeliveryServiceAreaLookup({
+        'success': true,
+        'data': {'supported_vehicle_types': <String>[], 'areas': areas},
+      });
+    }
+
+    test('names the enabled cities, sorted so they can be scanned', () {
+      final names = servedAreaNames(lookupWithAreas([
+        {'id': 'jijiga', 'name': 'Jijiga', 'enabled': true},
+        {'id': 'addis', 'name': 'Addis Ababa', 'enabled': true},
+        {'id': 'hargeisa', 'name': 'Hargeisa', 'enabled': true},
+      ]));
+
+      expect(names, ['Addis Ababa', 'Hargeisa', 'Jijiga']);
+    });
+
+    /// THE ONE THAT MATTERS: a configured-but-off city is not somewhere we
+    /// deliver from today, and naming it sends the customer to re-pick an
+    /// address that fails exactly the same way.
+    test('leaves out a city that is configured but switched off', () {
+      final names = servedAreaNames(lookupWithAreas([
+        {'id': 'addis', 'name': 'Addis Ababa', 'enabled': true},
+        {'id': 'jijiga', 'name': 'Jijiga', 'enabled': false},
+      ]));
+
+      expect(names, ['Addis Ababa']);
+    });
+
+    test('drops blank names rather than leaving a gap in the sentence', () {
+      final names = servedAreaNames(lookupWithAreas([
+        {'id': 'addis', 'name': 'Addis Ababa', 'enabled': true},
+        {'id': 'blank', 'name': '   ', 'enabled': true},
+        {'id': 'missing', 'enabled': true},
+      ]));
+
+      expect(names, ['Addis Ababa']);
+    });
+
+    /// Then the screen falls back to the plain refusal. Saying "choose a
+    /// pickup in: " with nothing after it is worse than saying less.
+    test('is empty when there is nothing to name', () {
+      expect(servedAreaNames(null), isEmpty);
+      expect(servedAreaNames(lookupWithAreas(const [])), isEmpty);
+    });
+  });
 }

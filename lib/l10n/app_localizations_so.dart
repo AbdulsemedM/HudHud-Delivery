@@ -1135,6 +1135,11 @@ class AppLocalizationsSo extends AppLocalizations {
       'Goobta soo qaadista kama baxdo aagga adeegga gaarsiinta ee HudHud.';
 
   @override
+  String easyPickupNotServedIn(String cities) {
+    return 'HudHud weli kama soo qaado meeshan. Dooro meel laga soo qaado oo ka mid ah: $cities.';
+  }
+
+  @override
   String get selectAvailableVehicleType =>
       'Dooro nooca gaadhiga ee la heli karo';
 

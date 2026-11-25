@@ -1110,6 +1110,11 @@ class AppLocalizationsAm extends AppLocalizations {
       'የመውሰጃው አድራሻ ከሁድሁድ የተዋቀረ የማድረሻ አገልግሎት ክልል ውጭ ነው።';
 
   @override
+  String easyPickupNotServedIn(String cities) {
+    return 'ሁድሁድ ከዚህ ቦታ ገና አይወስድም። የመውሰጃ ቦታ ከእነዚህ ይምረጡ፦ $cities።';
+  }
+
+  @override
   String get selectAvailableVehicleType => 'ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ';
 
   @override

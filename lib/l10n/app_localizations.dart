@@ -2204,6 +2204,12 @@ abstract class AppLocalizations {
   /// **'Pickup is outside HudHud’s configured delivery service areas.'**
   String get pickupOutsideDeliveryServiceArea;
 
+  /// Shown when the chosen pickup address is outside every configured service area. {cities} is the list of cities HudHud delivers from.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud does not pick up from this place yet. Choose a pickup in: {cities}.'**
+  String easyPickupNotServedIn(String cities);
+
   /// No description provided for @selectAvailableVehicleType.
   ///
   /// In en, this message translates to:

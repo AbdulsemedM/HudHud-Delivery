@@ -24,6 +24,7 @@ import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/core/widgets/speak_button.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_service_area.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
@@ -59,6 +60,26 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   PlaceResult? _pickupPlace;
   PlaceResult? _dropoffPlace;
 
+  /*
+   * WHERE WE ACTUALLY DELIVER, ASKED AT THE PICKUP STEP.
+   *
+   * The search offers every place on earth, so a customer picked an address
+   * in Jeddah, photographed their parcel, named a recipient, and was told at
+   * step five of five that we do not deliver from there. Every one of those
+   * steps was wasted, and the refusal arrived where it could teach them
+   * nothing - the one screen with no way back to the decision that caused it.
+   *
+   * The check already existed; it ran on the confirm screen. Moving it to the
+   * moment the pickup is chosen costs one request and saves four steps.
+   *
+   * [_servedAreaNames] is loaded once so the refusal can say where we DO
+   * deliver. "Not here" leaves a customer guessing; "not here, we deliver in
+   * Addis Ababa and Hargeisa" is something they can act on.
+   */
+  List<String> _servedAreaNames = const [];
+  bool _checkingPickupArea = false;
+  String? _pickupAreaNotice;
+
   final _recipientNameController = TextEditingController();
   final _recipientPhoneController = TextEditingController();
   String? _senderPhone;
@@ -89,18 +110,79 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   late final NearbyDriversPoller _nearbyPoller;
   Map<String, gmaps.BitmapDescriptor> _nearbyIconsByAsset = {};
 
+  /// One repository for the screen. The poller built its own inline, which
+  /// was fine while nothing else here called the API; the service-area check
+  /// is the second caller, and two of them would be two configurations to
+  /// keep in step.
+  final CourierRepository _courierRepository = CourierRepository(
+    courierDataProvider: CourierDataProvider(apiService: ApiService.instance),
+  );
+
   @override
   void initState() {
     super.initState();
     _nearbyPoller = NearbyDriversPoller(
-      repository: CourierRepository(
-        courierDataProvider:
-            CourierDataProvider(apiService: ApiService.instance),
-      ),
+      repository: _courierRepository,
       onUpdate: () => unawaited(_onNearbyDriversUpdated()),
     );
     unawaited(preloadCommonCourierVehicleMapIcons());
     _bootstrap();
+    unawaited(_loadServedAreaNames());
+  }
+
+  /// The configured cities, so a refusal can name them. Best effort: without
+  /// it the refusal still happens, it just cannot say where to go instead.
+  Future<void> _loadServedAreaNames() async {
+    final result = await _courierRepository.getDeliveryServiceAreas();
+    if (!mounted) return;
+    setState(() {
+      _servedAreaNames = servedAreaNames(
+        result['lookup'] as DeliveryServiceAreaLookup?,
+      );
+    });
+  }
+
+  /// Does a courier actually serve this pickup?
+  ///
+  /// Asks the same endpoint the confirm screen asks, and reads the same
+  /// signal: no supported vehicle type means nobody can collect from there.
+  ///
+  /// A FAILED REQUEST IS NOT A REFUSAL. If the lookup itself errors - no
+  /// network, server down - we do not tell the customer their city is
+  /// unserved, because we do not know that. They continue, and the confirm
+  /// screen still checks before any courier is sought.
+  Future<bool> _pickupIsServed(AppLocalizations l10n) async {
+    final pickup = _pickupAddress.trim();
+    if (pickup.isEmpty) return true;
+
+    setState(() {
+      _checkingPickupArea = true;
+      _pickupAreaNotice = null;
+    });
+
+    final result = await _courierRepository.getDeliveryServiceAreas(
+      pickupLocation: pickup,
+    );
+    if (!mounted) return false;
+
+    setState(() => _checkingPickupArea = false);
+
+    if (result['success'] != true) return true;
+
+    final types = List<String>.from(
+      result['supportedVehicleTypes'] as List? ?? const [],
+    );
+    if (types.isNotEmpty) {
+      setState(() => _pickupAreaNotice = null);
+      return true;
+    }
+
+    setState(() {
+      _pickupAreaNotice = _servedAreaNames.isEmpty
+          ? l10n.pickupOutsideDeliveryServiceArea
+          : l10n.easyPickupNotServedIn(_servedAreaNames.join(', '));
+    });
+    return false;
   }
 
   Future<void> _onNearbyDriversUpdated() async {
@@ -249,6 +331,15 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       if (_pickupAddress.trim().isEmpty ||
           !_isLocationSpecificEnough(_pickupPlace, _pickupAddress)) {
         _snack(l10n.pleaseSelectLocation);
+        return;
+      }
+      // Here, not at step five. The notice stays on screen rather than
+      // flashing past in a snackbar: in Easy Mode it is also what the speak
+      // button reads out, and a customer who cannot read it needs it to
+      // still be there when the audio starts.
+      if (!await _pickupIsServed(l10n)) {
+        final notice = _pickupAreaNotice;
+        if (notice != null) unawaited(VoiceHintService.instance.speak(notice));
         return;
       }
       setState(() => _step = 1);
@@ -545,9 +636,14 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
             iconsByAsset: _nearbyIconsByAsset,
           ),
           privacyMessage: _nearbyPoller.result.privacyMessage,
+          notice: _pickupAreaNotice,
+          isChecking: _checkingPickupArea,
           onPositionChanged: (pos) {
             setState(() {
               _pickupPosition = LatLng(pos.latitude, pos.longitude);
+              // The notice was about the old pin. Keeping it would refuse an
+              // address nobody has checked yet.
+              _pickupAreaNotice = null;
             });
             _syncNearbyDrivers();
             unawaited(_reverseGeocodePickup());
@@ -559,6 +655,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
               _pickupPosition = place.coordinates;
               _pickupAddress = place.formattedAddress;
               _pickupPlace = place;
+              _pickupAreaNotice = null;
             });
             _syncNearbyDrivers();
             unawaited(_goNext());
@@ -639,6 +736,8 @@ class _MapStep extends StatefulWidget {
     this.isDropoff = false,
     this.markers = const {},
     this.privacyMessage,
+    this.notice,
+    this.isChecking = false,
     required this.onPositionChanged,
     required this.onPlaceSelected,
   });
@@ -661,6 +760,13 @@ class _MapStep extends StatefulWidget {
   final bool isDropoff;
   final Set<gmaps.Marker> markers;
   final String? privacyMessage;
+
+  /// A refusal about the CURRENT address — shown above the address card so it
+  /// sits beside the thing it is about, and stays until the address changes.
+  final String? notice;
+
+  /// The service-area lookup is in flight.
+  final bool isChecking;
   final ValueChanged<gmaps.LatLng> onPositionChanged;
   final ValueChanged<PlaceResult> onPlaceSelected;
 
@@ -1104,6 +1210,17 @@ class _MapStepState extends State<_MapStep> {
                             ),
                             const SizedBox(height: 8),
                           ],
+                          // Tapping Next now waits on a service-area lookup.
+                          // A map that simply does nothing for a moment reads
+                          // as a dead button, so the wait is visible.
+                          if (widget.isChecking) ...[
+                            const _CheckingAreaBanner(),
+                            const SizedBox(height: 8),
+                          ] else if (widget.notice != null &&
+                              widget.notice!.isNotEmpty) ...[
+                            _OutsideAreaBanner(text: widget.notice!),
+                            const SizedBox(height: 8),
+                          ],
                           if (widget.address.isNotEmpty)
                             _AddressCard(
                               address: widget.address,
@@ -1501,6 +1618,76 @@ class _IAmHerePill extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The service-area lookup is in flight. No words: Easy Mode is for people
+/// who may not read, and a spinner beside the address says "wait" to
+/// everyone without needing a fifth translation.
+class _CheckingAreaBanner extends StatelessWidget {
+  const _CheckingAreaBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context).withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Row(
+        children: [
+          SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A refusal the customer can act on: why, and where we do deliver.
+///
+/// Red rather than grey, and it does not disappear on its own. The fault it
+/// reports cost four steps of work the last time it was reported at the end.
+class _OutsideAreaBanner extends StatelessWidget {
+  const _OutsideAreaBanner({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.error.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline_rounded, size: 20, color: scheme.error),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.35,
+                fontWeight: FontWeight.w600,
+                color: scheme.onErrorContainer,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -55,6 +55,28 @@ DeliveryServiceAreaLookup parseDeliveryServiceAreaLookup(dynamic rawData) {
   );
 }
 
+/// The cities a customer can actually be collected from, named for them.
+///
+/// A refusal that only says "not here" leaves someone guessing which of their
+/// addresses might work. Naming the served cities turns it into a decision
+/// they can make, so this is what the pickup step shows when it refuses.
+///
+/// Disabled areas are left out: an area that is configured but switched off
+/// is not somewhere we deliver from today, and listing it would send a
+/// customer to re-pick an address that fails the same way. Blank names are
+/// dropped rather than rendered as an empty gap in the sentence.
+List<String> servedAreaNames(DeliveryServiceAreaLookup? lookup) {
+  final names = <String>[];
+  for (final area in lookup?.areas ?? const <DeliveryServiceArea>[]) {
+    final name = area.name?.trim();
+    if (area.enabled && name != null && name.isNotEmpty) {
+      names.add(name);
+    }
+  }
+  names.sort();
+  return names;
+}
+
 DeliveryServiceArea? parseDeliveryServiceArea(dynamic value) {
   final map = _asMap(value);
   if (map.isEmpty) return null;

@@ -1139,6 +1139,11 @@ class AppLocalizationsOm extends AppLocalizations {
       'Bakki fuudhaa naannoo tajaajila geessisaa HudHud qindaa\'e ala.';
 
   @override
+  String easyPickupNotServedIn(String cities) {
+    return 'HudHud iddoo kanaa ammatti hin fuudhu. Iddoo fuudhaa kanneen keessaa filadhu: $cities.';
+  }
+
+  @override
   String get selectAvailableVehicleType => 'Gosa konkolaataa jiru filadhu';
 
   @override

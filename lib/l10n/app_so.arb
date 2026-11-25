@@ -465,6 +465,7 @@
   "vehicleBajaj": "Gaarsiin baajaaj",
   "vehiclePickup": "Gaarsiin pickup",
   "pickupOutsideDeliveryServiceArea": "Goobta soo qaadista kama baxdo aagga adeegga gaarsiinta ee HudHud.",
+  "easyPickupNotServedIn": "HudHud weli kama soo qaado meeshan. Dooro meel laga soo qaado oo ka mid ah: {cities}.",
   "selectAvailableVehicleType": "Dooro nooca gaadhiga ee la heli karo",
   "sendAPackageTitle": "DIR XIRMO",
   "courierDeliveryAddressPlaceholder": "Cinwaanka gaarsiinta",

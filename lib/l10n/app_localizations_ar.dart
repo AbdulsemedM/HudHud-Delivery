@@ -1127,6 +1127,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'موقع الاستلام خارج منطقة خدمة التوصيل المحددة لدى هدهود.';
 
   @override
+  String easyPickupNotServedIn(String cities) {
+    return 'هدهد لا يستلم من هذا المكان بعد. اختر مكان استلام في: $cities.';
+  }
+
+  @override
   String get selectAvailableVehicleType => 'اختر نوع مركبة متاحاً';
 
   @override

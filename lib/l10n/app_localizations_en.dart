@@ -1123,6 +1123,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Pickup is outside HudHud’s configured delivery service areas.';
 
   @override
+  String easyPickupNotServedIn(String cities) {
+    return 'HudHud does not pick up from this place yet. Choose a pickup in: $cities.';
+  }
+
+  @override
   String get selectAvailableVehicleType => 'Select an available vehicle type';
 
   @override
