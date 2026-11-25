@@ -2647,5 +2647,10 @@
   "sectorMarket": "ገበያ",
   "sectorPharmacy": "መድኃኒት ቤት",
   "sectorSpareParts": "የመኪና መለዋወጫ",
-  "sectorGeneral": "አጠቃላይ"
+  "sectorGeneral": "አጠቃላይ",
+  "packageDescriptionRequired": "በጥቅሉ ውስጥ ምን አለ?",
+  "pleaseDescribePackage": "አሽከርካሪው ምን እንደሚይዝ እንዲያውቅ በጥቅሉ ውስጥ ያለውን ይግለጹ",
+  "prohibitedItemsNote": "አይፈቀድም፦ የጦር መሳሪያ፣ አደንዛዥ ዕፅ፣ ጥሬ ገንዘብ፣ ተቀጣጣይ ነገሮች፣ ሕያው እንስሳት።",
+  "fareRouteDistance": "{km} ኪ.ሜ",
+  "fareEstimateNote": "ግምት ነው - የመጨረሻው ዋጋ በትክክለኛው መንገድ ይሰላል።"
 }

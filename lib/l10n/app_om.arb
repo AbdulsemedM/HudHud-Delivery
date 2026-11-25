@@ -2640,5 +2640,10 @@
   "sectorMarket": "Gabaa",
   "sectorPharmacy": "Mana qorichaa",
   "sectorSpareParts": "Meeshaalee konkolaataa",
-  "sectorGeneral": "Waliigala"
+  "sectorGeneral": "Waliigala",
+  "packageDescriptionRequired": "Paakeejii keessa maaltu jira?",
+  "pleaseDescribePackage": "Konkolaachisaan maal akka baatu akka beekuuf, paakeejii keessa maal akka jiru ibsi",
+  "prohibitedItemsNote": "Hin hayyamamu: meeshaa waraanaa, araada, maallaqa callaa, wantoota gubatan, bineensota lubbuun jiran.",
+  "fareRouteDistance": "{km} km",
+  "fareEstimateNote": "Tilmaama - gatiin dhumaa karaa dhugaa irratti hundaa'a."
 }

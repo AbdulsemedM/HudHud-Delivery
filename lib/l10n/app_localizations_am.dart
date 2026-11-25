@@ -4603,4 +4603,23 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get sectorGeneral => 'አጠቃላይ';
+
+  @override
+  String get packageDescriptionRequired => 'በጥቅሉ ውስጥ ምን አለ?';
+
+  @override
+  String get pleaseDescribePackage =>
+      'አሽከርካሪው ምን እንደሚይዝ እንዲያውቅ በጥቅሉ ውስጥ ያለውን ይግለጹ';
+
+  @override
+  String get prohibitedItemsNote =>
+      'አይፈቀድም፦ የጦር መሳሪያ፣ አደንዛዥ ዕፅ፣ ጥሬ ገንዘብ፣ ተቀጣጣይ ነገሮች፣ ሕያው እንስሳት።';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km ኪ.ሜ';
+  }
+
+  @override
+  String get fareEstimateNote => 'ግምት ነው - የመጨረሻው ዋጋ በትክክለኛው መንገድ ይሰላል።';
 }

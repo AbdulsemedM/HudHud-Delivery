@@ -9,6 +9,7 @@ import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 // import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/courier_screen.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_send_request.dart';
 // import 'package:hudhud_delivery/features/taxi/presentation/screens/taxi_screen.dart';
 import '../widgets/home_service_tab_bar.dart';
 import '../widgets/service_coming_soon_screen.dart';
@@ -521,6 +522,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     context
                         .read<ServiceAccentController>()
                         .updateHomeServiceMode(mode);
+                    // "Send a package" starts sending straight away (tester
+                    // report); the courier screen skips it while a delivery
+                    // is in progress, so that delivery is what they see.
+                    if (mode == HomeServiceMode.courier) {
+                      CourierSendRequest.instance.request();
+                    }
                   },
                 ),
                 Expanded(

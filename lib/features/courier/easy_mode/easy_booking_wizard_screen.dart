@@ -2148,6 +2148,12 @@ class _PackageStep extends StatelessWidget {
           ),
           onChanged: onDescriptionChanged,
         ),
+        const SizedBox(height: 6),
+        // What riders may not carry (tester report: clear rules at booking).
+        Text(
+          l10n.prohibitedItemsNote,
+          style: TextStyle(fontSize: 13, color: Colors.red.shade700),
+        ),
         const SizedBox(height: 20),
         _SurfaceCard(
           onTap: onTakePhoto,

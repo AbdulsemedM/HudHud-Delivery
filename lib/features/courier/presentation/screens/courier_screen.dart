@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:hudhud_delivery/features/cancellation/presentation/cancellation_widgets.dart'
     show CancellationStandingBanner;
 import 'package:flutter/material.dart';
@@ -22,6 +24,7 @@ import 'package:hudhud_delivery/features/courier/presentation/widgets/courier_hi
 import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_history_card.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_send_request.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_access_gate.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_live_job_screen.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
@@ -49,6 +52,9 @@ class _CourierScreenState extends State<CourierScreen> {
   String? _deliveriesError;
   Map<String, dynamic>? _activeDelivery;
   bool _isLoadingActiveDelivery = true;
+
+  /// "Send a package" was tapped before the active-delivery check finished.
+  bool _pendingSend = false;
   int _deliveriesLastPage = 1;
 
   /// Call FAB collapses to an icon while scrolling down so it never hides content.
@@ -68,6 +74,7 @@ class _CourierScreenState extends State<CourierScreen> {
     );
     _homeRefreshListener = () => _refreshData();
     CourierHomeRefresh.instance.addListener(_homeRefreshListener);
+    CourierSendRequest.instance.addListener(_onSendRequested);
     _fetchDeliveries();
     _fetchActiveDelivery();
     _loadParcelConfig();
@@ -90,6 +97,7 @@ class _CourierScreenState extends State<CourierScreen> {
   @override
   void dispose() {
     CourierHomeRefresh.instance.removeListener(_homeRefreshListener);
+    CourierSendRequest.instance.removeListener(_onSendRequested);
     super.dispose();
   }
 
@@ -118,8 +126,18 @@ class _CourierScreenState extends State<CourierScreen> {
             _activeDelivery = null;
           }
         });
+        // "Send a package" tapped while this was loading: act on it now that
+        // we know there is no delivery in progress. Only on a clean answer -
+        // a failed check is not "nothing in progress".
+        if (_pendingSend) {
+          _pendingSend = false;
+          if (result['success'] == true && _activeDelivery == null) {
+            unawaited(_openInstantDelivery());
+          }
+        }
       }
     } catch (e) {
+      _pendingSend = false;
       if (mounted) {
         setState(() {
           _isLoadingActiveDelivery = false;
@@ -184,6 +202,20 @@ class _CourierScreenState extends State<CourierScreen> {
         builder: (context) => const DeliveryHistoryScreen(),
       ),
     );
+  }
+
+  /// "Send a package" tapped on home. A delivery in progress wins: the tab is
+  /// shown so the customer sees it, rather than starting a new booking on top
+  /// of it. Still loading (the first moments after launch), the tap is kept
+  /// and acted on when the check finishes, instead of silently doing nothing.
+  void _onSendRequested() {
+    if (!mounted) return;
+    if (_isLoadingActiveDelivery) {
+      _pendingSend = true;
+      return;
+    }
+    if (_activeDelivery != null) return;
+    unawaited(_openInstantDelivery());
   }
 
   Future<void> _openInstantDelivery() async {

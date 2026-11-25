@@ -2417,5 +2417,11 @@
   "sectorMarket": "Market",
   "sectorPharmacy": "Pharmacy",
   "sectorSpareParts": "Auto parts",
-  "sectorGeneral": "General"
+  "sectorGeneral": "General",
+  "packageDescriptionRequired": "What's in the package?",
+  "pleaseDescribePackage": "Say what's in the package so the rider knows what they carry",
+  "prohibitedItemsNote": "Not allowed: weapons, drugs, cash, flammables, live animals.",
+  "fareRouteDistance": "{km} km",
+  "@fareRouteDistance": {"placeholders": {"km": {"type": "String"}}},
+  "fareEstimateNote": "Estimate - the final price uses the actual route."
 }

@@ -8600,6 +8600,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'General'**
   String get sectorGeneral;
+
+  /// No description provided for @packageDescriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s in the package?'**
+  String get packageDescriptionRequired;
+
+  /// No description provided for @pleaseDescribePackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what\'s in the package so the rider knows what they carry'**
+  String get pleaseDescribePackage;
+
+  /// No description provided for @prohibitedItemsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Not allowed: weapons, drugs, cash, flammables, live animals.'**
+  String get prohibitedItemsNote;
+
+  /// No description provided for @fareRouteDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String fareRouteDistance(String km);
+
+  /// No description provided for @fareEstimateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate - the final price uses the actual route.'**
+  String get fareEstimateNote;
 }
 
 class _AppLocalizationsDelegate

@@ -4759,4 +4759,24 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get sectorGeneral => 'Guud';
+
+  @override
+  String get packageDescriptionRequired => 'Maxaa ku jira xidhmada?';
+
+  @override
+  String get pleaseDescribePackage =>
+      'Sheeg waxa ku jira xidhmada si darawalku u ogaado waxa uu sido';
+
+  @override
+  String get prohibitedItemsNote =>
+      'Lama oggola: hub, daroogo, lacag caddaan ah, walxo gubta, xayawaan nool.';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km km';
+  }
+
+  @override
+  String get fareEstimateNote =>
+      'Qiyaas - qiimaha kama dambaysta ah wuxuu ku xisaabsamaa waddada dhabta ah.';
 }

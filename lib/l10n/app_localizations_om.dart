@@ -4747,4 +4747,24 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get sectorGeneral => 'Waliigala';
+
+  @override
+  String get packageDescriptionRequired => 'Paakeejii keessa maaltu jira?';
+
+  @override
+  String get pleaseDescribePackage =>
+      'Konkolaachisaan maal akka baatu akka beekuuf, paakeejii keessa maal akka jiru ibsi';
+
+  @override
+  String get prohibitedItemsNote =>
+      'Hin hayyamamu: meeshaa waraanaa, araada, maallaqa callaa, wantoota gubatan, bineensota lubbuun jiran.';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km km';
+  }
+
+  @override
+  String get fareEstimateNote =>
+      'Tilmaama - gatiin dhumaa karaa dhugaa irratti hundaa\'a.';
 }

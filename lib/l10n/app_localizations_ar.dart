@@ -4671,4 +4671,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sectorGeneral => 'عام';
+
+  @override
+  String get packageDescriptionRequired => 'ما محتويات الطرد؟';
+
+  @override
+  String get pleaseDescribePackage =>
+      'اكتب محتويات الطرد ليعرف السائق ما يحمله';
+
+  @override
+  String get prohibitedItemsNote =>
+      'غير مسموح: الأسلحة، المخدرات، النقود، المواد القابلة للاشتعال، الحيوانات الحية.';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km كم';
+  }
+
+  @override
+  String get fareEstimateNote =>
+      'تقديري - السعر النهائي يُحسب على المسار الفعلي.';
 }

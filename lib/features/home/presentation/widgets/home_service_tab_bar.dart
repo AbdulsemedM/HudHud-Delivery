@@ -284,31 +284,10 @@ class _ServiceTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                Positioned(
-                  left: 14,
-                  top: 14,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: selected
-                          ? Colors.white
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: selected
-                            ? Colors.white
-                            : HomeColors.textMutedOf(context)
-                                .withValues(alpha: 0.5),
-                        width: 2,
-                      ),
-                    ),
-                    child: selected
-                        ? Icon(Icons.check_rounded, size: 16, color: spec.glow)
-                        : null,
-                  ),
-                ),
+                // No tick / empty circle here any more. It made these tiles
+                // read as answers on a form (tester report: "Send a package"
+                // looked selectable, not tappable); the filled colour already
+                // shows which one is active.
                 Positioned(
                   left: 14,
                   right: 84,

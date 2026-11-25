@@ -2640,5 +2640,10 @@
   "sectorMarket": "سوق",
   "sectorPharmacy": "صيدلية",
   "sectorSpareParts": "قطع غيار السيارات",
-  "sectorGeneral": "عام"
+  "sectorGeneral": "عام",
+  "packageDescriptionRequired": "ما محتويات الطرد؟",
+  "pleaseDescribePackage": "اكتب محتويات الطرد ليعرف السائق ما يحمله",
+  "prohibitedItemsNote": "غير مسموح: الأسلحة، المخدرات، النقود، المواد القابلة للاشتعال، الحيوانات الحية.",
+  "fareRouteDistance": "{km} كم",
+  "fareEstimateNote": "تقديري - السعر النهائي يُحسب على المسار الفعلي."
 }

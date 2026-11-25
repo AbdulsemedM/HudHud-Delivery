@@ -4705,4 +4705,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sectorGeneral => 'General';
+
+  @override
+  String get packageDescriptionRequired => 'What\'s in the package?';
+
+  @override
+  String get pleaseDescribePackage =>
+      'Say what\'s in the package so the rider knows what they carry';
+
+  @override
+  String get prohibitedItemsNote =>
+      'Not allowed: weapons, drugs, cash, flammables, live animals.';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km km';
+  }
+
+  @override
+  String get fareEstimateNote =>
+      'Estimate - the final price uses the actual route.';
 }

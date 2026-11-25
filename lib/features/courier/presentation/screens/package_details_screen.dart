@@ -261,6 +261,12 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       return;
     }
 
+    // The rider has to know what they carry (tester report): required now.
+    if (_packageDescriptionController.text.trim().length < 3) {
+      _snack(l10n.pleaseDescribePackage);
+      return;
+    }
+
     final senderPhone = normalizePhoneToBackend(_senderPhoneController.text);
     if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
       _snack(l10n.pleaseEnterValidSenderPhone);
@@ -455,10 +461,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                               decoration: _fieldDecoration(
-                                labelText: l10n.packageDescriptionOptional,
+                                labelText: l10n.packageDescriptionRequired,
                                 fieldFill: fieldFill,
                                 outline: outline,
                                 icon: Icons.notes_rounded,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            // What riders may not carry (tester report).
+                            Text(
+                              l10n.prohibitedItemsNote,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.red.shade700,
                               ),
                             ),
                           ],
