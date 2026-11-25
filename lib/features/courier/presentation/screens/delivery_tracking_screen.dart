@@ -21,6 +21,7 @@ import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_s
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/driver_contact_card.dart';
+import 'package:hudhud_delivery/core/utils/vehicle_motion.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
@@ -66,9 +67,14 @@ class DeliveryTrackingScreen extends StatefulWidget {
   State<DeliveryTrackingScreen> createState() => _DeliveryTrackingScreenState();
 }
 
-class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
+class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
+    with SingleTickerProviderStateMixin {
   gmaps.GoogleMapController? _mapController;
   LatLng? _vehiclePosition;
+
+  /// Walks the marker between polled positions instead of teleporting it.
+  /// See VehicleMotion for why it is linear and when it snaps.
+  late final VehicleMotion _vehicleMotion;
   Timer? _pollTimer;
   gmaps.BitmapDescriptor? _deliveryGuyIcon;
 
@@ -88,6 +94,13 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   @override
   void initState() {
+    _vehicleMotion = VehicleMotion(
+      vsync: this,
+      // Only the marker moves, so only the marker's frame is rebuilt.
+      onChanged: () {
+        if (mounted) setState(() {});
+      },
+    );
     super.initState();
     _courierRepository = CourierRepository(
       courierDataProvider: CourierDataProvider(
@@ -158,7 +171,26 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _vehicleMotion.dispose();
     super.dispose();
+  }
+
+  /// Hand a new fix to the marker.
+  ///
+  /// Reduced motion is honoured here rather than inside VehicleMotion,
+  /// because MediaQuery belongs to the widget. Somebody who has asked their
+  /// phone to stop animating still gets a correct position - on a map the
+  /// position is the content, and the motion only ever existed to make the
+  /// gaps between readings legible.
+  void _driveMarkerTo(LatLng point, {Duration? interval}) {
+    final reduced = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    // latlong2 in, map-agnostic point out. VehicleMotion belongs to neither
+    // package precisely so this conversion is explicit and in one place.
+    _vehicleMotion.moveTo(
+      MotionPoint(point.latitude, point.longitude),
+      expectedInterval: interval,
+      animate: !reduced,
+    );
   }
 
   LatLng? _parseDriverLocation(Map<String, dynamic>? data) {
@@ -377,6 +409,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
           final parsed = _parseDriverLocation(_trackData);
           if (parsed != null) {
             _vehiclePosition = parsed;
+            _driveMarkerTo(parsed);
             _retainedDriverPoint = GeoPoint(
               latitude: parsed.latitude,
               longitude: parsed.longitude,
@@ -484,6 +517,18 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       _retainedDriverPoint = retained;
       if (retained != null) {
         _vehiclePosition = LatLng(retained.latitude, retained.longitude);
+        // Timed against the interval the server just told us to poll on, so
+        // the marker arrives as the next fix lands rather than stopping
+        // dead and waiting - which reads as the driver pulling over.
+        _driveMarkerTo(
+          _vehiclePosition!,
+          interval: Duration(seconds: nextPoll),
+        );
+      }
+      if (terminal) {
+        // The delivery is over. Hold the last position rather than easing
+        // towards a point that will never be updated again.
+        _vehicleMotion.halt();
       }
       _trackError = null;
       _trackData = {
@@ -570,11 +615,20 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         ),
       );
     }
-    if (_vehiclePosition != null) {
+    // The ANIMATED position, not the last one polled: between fixes those
+    // differ, and the whole point is that the customer sees the difference.
+    final animated = _vehicleMotion.position;
+    final vehicleAt = animated != null
+        ? gmaps.LatLng(animated.latitude, animated.longitude)
+        : (_vehiclePosition != null ? _toG(_vehiclePosition!) : null);
+    if (vehicleAt != null) {
       markers.add(
         gmaps.Marker(
           markerId: const gmaps.MarkerId('vehicle'),
-          position: _toG(_vehiclePosition!),
+          position: vehicleAt,
+          rotation: _vehicleMotion.bearing,
+          anchor: const Offset(0.5, 0.5),
+          flat: true,
           icon: _deliveryGuyIcon ??
               gmaps.BitmapDescriptor.defaultMarkerWithHue(
                 gmaps.BitmapDescriptor.hueViolet,
