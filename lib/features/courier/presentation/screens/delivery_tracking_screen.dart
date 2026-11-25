@@ -275,60 +275,37 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
   }
 
   /*
-   * IN-APP CALLING IS OFFERED ALONGSIDE THE PHONE NETWORK, NOT INSTEAD OF IT.
+   * TAPPING CALL PLACES THE CALL. It does not ask which kind.
    *
-   * The phone number works today. In-app calling will not carry a call on
-   * mobile data until a TURN relay is running, and replacing a channel that
-   * works with one that does not yet is a regression however much nicer the
-   * new one is. So both are offered and the customer chooses.
+   * A chooser was the wrong shape: WhatsApp does not ask, and a customer who
+   * wants to speak to their courier should not have to understand the
+   * difference between two transports to do it. Call means call.
    *
-   * When the relay is up and in-app has been proven in the field, this sheet
-   * is where the default moves - and the phone number can then come out of
-   * the tracking payload, which is the privacy win this was always for.
+   * The phone network is kept as a SECOND action, not an equal first one -
+   * the way WhatsApp keeps the dialler behind the contact. It is there when
+   * the data call will not go through, which is honest while the relay is
+   * being stood up, and it stops being the thing anybody reaches for once it
+   * is.
+   *
+   * Only when there is no in-app route at all (an old payload with no driver
+   * id) does Call fall straight through to the dialler, because a button
+   * that explains why it cannot work is worse than one that works.
    */
   Future<void> _callDriver() async {
     final driverId = _driverUserId();
-    if (driverId != null) {
-      final useInApp = await showModalBottomSheet<bool>(
-        context: context,
-        builder: (sheetContext) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              ListTile(
-                leading: const Icon(Icons.wifi_calling_3_rounded),
-                title: const Text('Call in the app'),
-                subtitle: const Text('Uses your data. Your number stays private.'),
-                onTap: () => Navigator.of(sheetContext).pop(true),
-              ),
-              ListTile(
-                leading: const Icon(Icons.phone_rounded),
-                title: const Text('Call on the phone network'),
-                subtitle: Text(_driverPhone() ?? ''),
-                enabled: _driverPhone() != null,
-                onTap: () => Navigator.of(sheetContext).pop(false),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      );
-
-      // Dismissed without choosing.
-      if (useInApp == null) return;
-
-      if (useInApp) {
-        if (!mounted) return;
-        await startOutgoingCall(
-          context,
-          calleeId: driverId,
-          displayName: _driverName(),
-        );
-        return;
-      }
+    if (driverId == null) {
+      await _dialDriver();
+      return;
     }
+    await startOutgoingCall(
+      context,
+      calleeId: driverId,
+      displayName: _driverName(),
+    );
+  }
 
+  /// The phone network, as a deliberate second choice.
+  Future<void> _callDriverOnPhone() async {
     await _dialDriver();
   }
 
@@ -1148,6 +1125,16 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                                                       (_driverPhone() != null ||
                                                           _driverUserId() != null)
                                                       ? _callDriver
+                                                      : null,
+                                                  // Only when the in-app
+                                                  // route exists: otherwise
+                                                  // Call IS the dialler and a
+                                                  // second button beside it
+                                                  // would do the same thing.
+                                                  onCallOnPhone:
+                                                      (_driverUserId() != null &&
+                                                          _driverPhone() != null)
+                                                      ? _callDriverOnPhone
                                                       : null,
                                                   onMessage: _messageDriver,
                                                 ),
