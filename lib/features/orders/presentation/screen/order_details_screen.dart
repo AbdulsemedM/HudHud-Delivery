@@ -17,6 +17,7 @@ import 'package:hudhud_delivery/features/wallet/services/wallet_refresh_signal.d
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
+import '../widgets/courier_contact_card.dart';
 import '../widgets/order_details_widgets.dart';
 import '../widgets/orders_widget.dart' show shortOrderNumber;
 
@@ -290,6 +291,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 ],
                 if (order.isGift) ...[
                   GiftOrderCard(order: order),
+                  const SizedBox(height: 14),
+                ],
+                // Reaching the courier belongs ABOVE the timeline and the
+                // receipt: a customer opens this screen mid-delivery to ask
+                // where the food is, not to re-read what they paid.
+                // Renders nothing until a driver is assigned.
+                if (order.driver != null && !order.isTerminal) ...[
+                  CourierContactCard(order: order),
                   const SizedBox(height: 14),
                 ],
                 if (tracking != null) ...[
