@@ -4,32 +4,61 @@ import 'package:hudhud_delivery/core/utils/phone_dialer.dart';
 import 'package:hudhud_delivery/features/calls/call_presenter.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
 
-/// The courier, and a way to reach them, on a FOOD order.
+/// Somebody on this order, and a way to reach them.
 ///
-/// The parcel tracking screen has had this since calling shipped; the food
-/// order screen never did, so on the flow that carries most of the business
-/// a customer had no way to reach their courier at all -- not in the app,
-/// not even by phone. Calling looked switched off because on this screen it
-/// was absent, which from the outside is the same thing.
+/// Serves BOTH the courier and the restaurant. They are the same card with
+/// a different name in it, and two copies would have drifted -- the gate on
+/// when a call is still allowed is the part that must not.
 ///
-/// Renders nothing until a driver is assigned, and nothing once the order is
-/// over: `CallEligibility` closes the line when the job ends, so a Call
-/// button after delivery could only produce a 403.
+/// The parcel tracking screen has had the courier half since calling
+/// shipped; the food order screen never did, so on the flow that carries
+/// most of the business a customer had no way to reach anyone at all.
+/// Calling looked switched off because on this screen it was absent, which
+/// from the outside is the same thing.
+///
+/// Renders nothing once the order is over. `CallEligibility` closes the
+/// line when the job ends -- for the shop as much as the courier, so that a
+/// restaurant cannot become a marketing channel -- and a Call button after
+/// delivery could only produce a 403. Feedback after that point goes
+/// through support.
 class CourierContactCard extends StatelessWidget {
-  const CourierContactCard({super.key, required this.order});
+  const CourierContactCard({super.key, required this.order}) : _vendor = false;
+
+  /// The restaurant on this order, rather than the courier.
+  ///
+  /// `orders.vendor_id` is the OWNER'S user id -- the dashboard's own deep
+  /// links say so (`?owner=1`) -- which is exactly what /calls/initiate
+  /// wants as `callee_id`.
+  const CourierContactCard.vendor({super.key, required this.order})
+      : _vendor = true;
 
   final OrderModel order;
+  final bool _vendor;
 
   @override
   Widget build(BuildContext context) {
-    final driver = order.driver;
-    if (driver == null || order.isTerminal) {
-      return const SizedBox.shrink();
+    if (order.isTerminal) return const SizedBox.shrink();
+
+    final String name;
+    final String phone;
+    final int calleeId;
+    final String role;
+
+    if (_vendor) {
+      name = order.vendor.name.trim();
+      phone = order.vendor.phone.trim();
+      calleeId = order.vendorId;
+      role = 'The restaurant';
+    } else {
+      final driver = order.driver;
+      if (driver == null) return const SizedBox.shrink();
+      name = driver.name.trim();
+      phone = driver.phone.trim();
+      calleeId = driver.id;
+      role = 'Your courier';
     }
 
-    final name = driver.name.trim();
-    final phone = driver.phone.trim();
-    final hasInApp = driver.id > 0;
+    final hasInApp = calleeId > 0;
     // Nothing to offer at all: no in-app route and no number.
     if (!hasInApp && phone.isEmpty) return const SizedBox.shrink();
 
@@ -69,7 +98,7 @@ class CourierContactCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Your courier',
+                      role,
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).hintColor,
@@ -77,7 +106,7 @@ class CourierContactCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      name.isNotEmpty ? name : 'Your courier',
+                      name.isNotEmpty ? name : role,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -105,7 +134,7 @@ class CourierContactCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    onPressed: () => _call(context, driverId: driver.id,
+                    onPressed: () => _call(context, calleeId: calleeId,
                         name: name, phone: phone, hasInApp: hasInApp),
                     icon: Icon(
                       hasInApp
@@ -141,7 +170,13 @@ class CourierContactCard extends StatelessWidget {
           if (hasInApp) ...[
             const SizedBox(height: 10),
             Text(
-              'Calling uses your data. Neither of you sees the other\'s number.',
+              // Accurate per side. A courier's number is private and the
+              // in-app call is what keeps it that way. A restaurant's is
+              // public and sits right there on the dialler button, so
+              // claiming it is hidden would be a plain untruth.
+              _vendor
+                  ? 'Calling uses your data, so it costs you no airtime.'
+                  : 'Calling uses your data. Neither of you sees the other\'s number.',
               style: TextStyle(
                 fontSize: 12,
                 height: 1.4,
@@ -156,7 +191,7 @@ class CourierContactCard extends StatelessWidget {
 
   Future<void> _call(
     BuildContext context, {
-    required int driverId,
+    required int calleeId,
     required String name,
     required String phone,
     required bool hasInApp,
@@ -171,7 +206,7 @@ class CourierContactCard extends StatelessWidget {
     }
     await startOutgoingCall(
       context,
-      calleeId: driverId,
+      calleeId: calleeId,
       displayName: name.isNotEmpty ? name : null,
     );
   }

@@ -301,6 +301,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   CourierContactCard(order: order),
                   const SizedBox(height: 14),
                 ],
+                // The restaurant. Available from the moment the order is
+                // placed, which is when it matters most -- an item is out,
+                // a substitution needs agreeing -- and long before there is
+                // a courier to ask. It disappears with the courier's when
+                // the order ends; after that it is support's job.
+                if (!order.isTerminal && order.vendorId > 0) ...[
+                  CourierContactCard.vendor(order: order),
+                  const SizedBox(height: 14),
+                ],
                 if (tracking != null) ...[
                   OrderTrackingCard(tracking: tracking),
                   const SizedBox(height: 14),
