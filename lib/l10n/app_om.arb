@@ -164,6 +164,8 @@
   },
   "locationConfirmButton": "Bakka mirkaneessi",
   "locationSearchNoResults": "Bakka hin argamne",
+  "locationSearchNoResultsHint": "Maqaa biraa yaali, yookaan kaartaa sochoosii mallattoo kaa'i.",
+  "locationSearchFailed": "Amma barbaaduun hin danda'amne. Interneetii keessan mirkaneessaa, yookaan kaartaa sochoosii mallattoo kaa'i.",
   "locationCurrentPositionFailed": "Bakka ammaa argachuu hin dandeenye",
   "currentLocationMap": "Bakka amma jiru",
   "verificationStatus": "Haala mirkaneessuu",
@@ -231,6 +233,7 @@
   "courierActiveDelivery": "Geejjibaa Socho'aa",
   "courierNoHistory": "Seenaa geejjibaa hin qabu",
   "courierHistoryEmptySubtitle": "Geejjibni keessan kan darbe asitti ni mul'ata",
+  "courierAddDeliveryCta": "Geejjiba dabali",
   "courierInstantTitle": "Geejjibaa Battalaa",
   "courierAddDelivery": "Geejjibaa dabali",
   "courierInstantSubtitle": "Courier paakeejii keessan qofa fudhatee battalumatti geessa.",
@@ -462,6 +465,8 @@
   "vehicleBajaj": "Geejjibaa bajaj",
   "vehiclePickup": "Geejjibaa pickup",
   "pickupOutsideDeliveryServiceArea": "Bakki fuudhaa naannoo tajaajila geessisaa HudHud qindaa'e ala.",
+  "easyPickupNotServedIn": "HudHud iddoo kanaa ammatti hin fuudhu. Iddoo fuudhaa kanneen keessaa filadhu: {cities}.",
+  "easyCrossBorderNotServed": "HudHud biyya tokko keessatti geessa. Iddoon fuudhaa {from} keessa, iddoon geessuu immoo {to} keessa jira.",
   "selectAvailableVehicleType": "Gosa konkolaataa jiru filadhu",
   "sendAPackageTitle": "PAAKEEJII ERGI",
   "courierDeliveryAddressPlaceholder": "Teessoo geessisaa",
@@ -1406,12 +1411,16 @@
   "orderByCallSubtitle": "Bilbilaan geejjiba akka uumtan isin gargaarra",
   "easyMode": "Haala salphaa",
   "easyModeSubtitle": "Qabduu gurguddaa, suuraalee fi gargaarsa sagaleen",
+  "easyVoiceHints": "Tarkaanfiiwwan sagaleen dubbisi",
+  "easyVoiceHintsSubtitle": "Durduubaan ni cufama. Qabduun 'Dhaggeeffadhu' yeroo hunda ni hojjeta.",
+  "easyDescribeHint": "Paakeejii keessa maaltu jira? Suuraa yookaan sagalee dabaluu dandeessa.",
+  "easyDescribeRequired": "Paakeejii ibsi, suuraa kaasi, yookaan sagalee waraabi.",
   "navMyDeliveries": "Geejjiba koo",
   "navMe": "Ana",
-  "courierNowTitle": "Amma",
-  "courierNowSubtitle": "Battaluma ergi",
-  "courierLaterTitle": "Booda",
-  "courierLaterSubtitle": "Guyyaa fi sa'aatii filadhu",
+  "courierNowTitle": "Amma ergi",
+  "courierNowSubtitle": "Geejjibaan battaluma dhufee fudhata",
+  "courierLaterTitle": "Yeroo filadhu",
+  "courierLaterSubtitle": "Guyyaa fi sa'aatii fudhannaa filadhu",
   "homeMoreServices": "Dabalata",
   "homeHideMoreServices": "Dhoksi",
   "homeSendPackage": "Paakeejii ergi",
@@ -1901,7 +1910,26 @@
   "@cartReplaceAction": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
+  "searchShopsTitle": "Suuqota",
+  "@searchShopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartProductAdded": "{name} gaariitti dabalameera",
+  "@cartProductAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cartItemAdded": "Gaariitti dabalameera",
+  "@cartItemAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
   "homeTabDelivery": "Geejjiba",
+  "homeTabPharmacy": "Faarmaasii",
+  "homeTabSpareParts": "Meeshaalee bakka buusaa",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
@@ -2605,5 +2633,25 @@
   "cpRuleNoCancelAfterPickup": "Erga meeshaan ykn nyaanni fudhatamee booda haqamuu hin danda'u.",
   "deliveryCodeTitle": "Koodii geejjibaa keessan",
   "deliveryCodePrompt": "Ajaja keessan akka fudhattan mirkaneessuuf lakkoofsota 4 kanneen konkolaachisaaf dubbisaa.",
-  "deliveryCodeWarning": "Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa."
+  "deliveryCodeWarning": "Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa.",
+  "sectorAll": "Hunda",
+  "sectorRestaurants": "Mana nyaataa",
+  "sectorBakery": "Mana daabboo",
+  "sectorSupermarket": "Suupermaarkeetii",
+  "sectorMarket": "Gabaa",
+  "sectorPharmacy": "Mana qorichaa",
+  "sectorSpareParts": "Meeshaalee konkolaataa",
+  "sectorGeneral": "Waliigala",
+  "packageDescriptionRequired": "Paakeejii keessa maaltu jira?",
+  "pleaseDescribePackage": "Konkolaachisaan maal akka baatu akka beekuuf, paakeejii keessa maal akka jiru ibsi",
+  "prohibitedItemsNote": "Hin hayyamamu: meeshaa waraanaa, araada, maallaqa callaa, wantoota gubatan, bineensota lubbuun jiran.",
+  "fareRouteDistance": "{km} km",
+  "fareEstimateNote": "Tilmaama - gatiin dhumaa karaa dhugaa irratti hundaa'a.",
+  "productFiltersTitle": "Calalii",
+  "productFiltersClear": "Calalii hunda haqi",
+  "productFilterQuick": "Daqiiqaa {minutes} ykn isaa gadi keessatti qophaa'a",
+  "productFilterOnSale": "Gatii hir'ate",
+  "productFilterCustomizable": "Jijjiiramuu kan danda'u",
+  "productFilterContainsAllergens": "Waan alarjii fidu qaba",
+  "productFilterNutritionInfo": "Odeeffannoo nyaataa"
 }

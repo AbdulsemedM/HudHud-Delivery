@@ -7,8 +7,12 @@ class CheckoutDataProvider {
   CheckoutDataProvider({required this.apiService});
 
   /// POST /api/customer/delivery-fee/quote
+  ///
+  /// [branchId] or, for a store with no branch, [vendorId]: the API then
+  /// prices from the store's own location (`required_without`).
   Future<Map<String, dynamic>> quoteDeliveryFee({
-    required int branchId,
+    int? branchId,
+    int? vendorId,
     required String deliveryAddress,
     required double deliveryLatitude,
     required double deliveryLongitude,
@@ -17,7 +21,9 @@ class CheckoutDataProvider {
       final response = await apiService.post(
         '${ApiConstants.baseUrl}${ApiConstants.customerDeliveryFeeQuote}',
         data: {
-          'branch_id': branchId,
+          if (branchId != null && branchId > 0) 'branch_id': branchId,
+          if ((branchId == null || branchId <= 0) && vendorId != null)
+            'vendor_id': vendorId,
           'delivery_address': deliveryAddress,
           'delivery_latitude': deliveryLatitude,
           'delivery_longitude': deliveryLongitude,

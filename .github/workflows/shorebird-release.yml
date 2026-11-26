@@ -8,10 +8,14 @@
 # ANDROID_KEYSTORE_BASE64, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD,
 # ANDROID_STORE_PASSWORD. Release builds fail without it (no debug-key fallback).
 #
-# App config: BASE_URL / SUPPORT_PHONE are compile-time dart-defines with
-# production defaults (lib/app/config/app_env.dart). To override, append e.g.
-#   args: --no-confirm -- --dart-define=BASE_URL=https://...
-# No .env file is needed or bundled.
+# App config: `.env` IS bundled - pubspec lists it under flutter: assets:,
+# so a checkout without one fails the build outright with
+#   No file or variants found for asset: .env
+# and ApiEnv.baseUrl throws StateError('BASE_URL is missing in .env') rather
+# than falling back to anything, so a .env missing that key builds green and
+# dies on the first API call. The workflow writes one; a BUILD BY HAND must
+# create it (copy .env.example, which already points at api.hudhuddelivery.com)
+# and must set BOTH Maps keys in it - see .env.example for why they differ.
 
 name: Shorebird Release
 
@@ -68,8 +72,7 @@ jobs:
           KPW: ${{ secrets.ANDROID_KEY_PASSWORD }}
           SPW: ${{ secrets.ANDROID_STORE_PASSWORD }}
           GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
-          MAPS: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
-          MAPS_DEDICATED: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          MAPS: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
           set -uo pipefail
           missing=0
@@ -103,20 +106,29 @@ jobs:
           # and ships an app whose map is blank - build.gradle's own warning
           # says exactly that. A delivery app with no map is worth failing a
           # build over.
-          check GOOGLE_MAPS_API_KEY "${MAPS:-}" "the Android Maps SDK key, as GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY; without it the build passes and the map ships blank"
+          check GOOGLE_MAPS_API_KEY "${MAPS:-}" "the Android Maps SDK key. It must be this repo's own GOOGLE_MAPS_API_KEY secret, restricted to Android apps - NOT the organisation's VITE_GOOGLE_MAPS_API_KEY, which belongs to the portal's web bundle and is rejected by the Android SDK"
 
-          # Reached the fallback, which is a web key by its name. A Maps key
-          # restricted to HTTP referrers is rejected by the Maps SDK for
-          # Android, and the symptom is the same blank map. Android needs a key
-          # either unrestricted or restricted to Android apps (package name plus
-          # signing SHA-1), with "Maps SDK for Android" enabled on the project.
-          if [ -n "${MAPS:-}" ] && [ -z "${MAPS_DEDICATED:-}" ]; then
-            echo "::warning::Using VITE_GOOGLE_MAPS_API_KEY. That name belongs to a web bundle; if the key is restricted to HTTP referrers, Android will reject it and the map ships blank anyway. Check its Application restrictions in Google Cloud Console, or add a separate Android key as GOOGLE_MAPS_API_KEY."
-          fi
+          # The VITE_GOOGLE_MAPS_API_KEY fallback that used to live here is gone,
+          # deliberately, and it must not come back.
+          #
+          # That name is an ORGANISATION secret shared with the vendor portal's
+          # web bundle. Both app repos had no GOOGLE_MAPS_API_KEY of their own,
+          # so every release quietly fell through to it - which is how one
+          # unrestricted key ended up serving the portal and both apps at once.
+          #
+          # It worked only while that key was unrestricted. The portal's key is
+          # now restricted to HTTP referrers, and the Maps SDK for Android
+          # rejects a referrer-restricted key outright: the build would succeed
+          # and the app would ship a blank map. A fallback that silently
+          # substitutes a key belonging to a different platform is worse than no
+          # key at all, because no key at least fails here.
+          #
+          # Android needs its own key, restricted to Android apps (package name
+          # plus signing SHA-1) with Maps SDK for Android enabled.
           if [ "$missing" = "1" ]; then
             echo
             echo "Add them at Settings -> Secrets and variables -> Actions."
-            echo "Only the ANDROID_*, GOOGLE_SERVICES_JSON and GOOGLE_MAPS_API_KEY"
+            echo "Only the ANDROID_*, GOOGLE_SERVICES_JSON, GOOGLE_MAPS_API_KEY and GOOGLE_MAPS_WEB_KEY"
             echo "ones are needed for an Android build;"
             echo "iOS needs SHOREBIRD_TOKEN alone."
             exit 1
@@ -134,6 +146,32 @@ jobs:
       run:
         shell: bash
     steps:
+      # Free the runner's disk BEFORE anything builds.
+      #
+      # The 21 Nov patch run failed its post-job cache save with "No space left
+      # on device". The patch itself had already succeeded, so it cost nothing
+      # that day - but the next build with slightly more output fails earlier,
+      # and a build that dies after `shorebird patch` has published is a much
+      # worse failure than one that dies before.
+      #
+      # Clearing the Actions cache would have bought one run; the cache refills.
+      # This removes preinstalled toolchains this build never touches: .NET,
+      # Haskell, Boost, CodeQL and the Docker image store, roughly 8-10 GB.
+      #
+      # DELIBERATELY NOT the Android SDK or NDK. This build installs CMake and
+      # compiles native code through Gradle, so removing them - the usual
+      # headline advice for freeing runner disk - would break it.
+      - name: Free disk space
+        run: |
+          set -uo pipefail
+          echo "before:"; df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          docker image prune -af >/dev/null 2>&1 || true
+          echo "after:"; df -h / | tail -1
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -179,7 +217,8 @@ jobs:
       - name: Create Firebase and Maps config from secrets
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_WEB_KEY: ${{ secrets.GOOGLE_MAPS_WEB_KEY }}
         run: |
           set -euo pipefail
 
@@ -237,11 +276,28 @@ jobs:
           # runner already put there.
           touch android/local.properties
           if [ -z "${GOOGLE_MAPS_API_KEY:-}" ]; then
-            echo "::error::No Maps key in GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY. build.gradle would default it to an empty string and ship a blank map."
+            echo "::error::GOOGLE_MAPS_API_KEY is not set on this repository. build.gradle would default it to an empty string and ship a blank map. Set the Android-restricted key as a repository secret; do not reuse the organisation VITE_GOOGLE_MAPS_API_KEY, which is referrer-restricted and the Android SDK rejects it."
             exit 1
           fi
           echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> android/local.properties
-          echo "Maps key appended to android/local.properties."
+          echo "Maps SDK key appended to android/local.properties."
+
+          # The web-services key is a SEPARATE Google key, on purpose. Google
+          # honours an "Android apps" application restriction on the Maps SDKs
+          # only; Places, Geocoding and Directions run over maps.googleapis.com
+          # and reject such a key with REQUEST_DENIED. Sharing one key works
+          # only while it is unrestricted.
+          #
+          # Missing is a warning, not an error: build.gradle falls back to the
+          # SDK key, which is exactly what shipped before the split. But if that
+          # key is restricted - and ours now is - the map still draws while
+          # address search silently fails, so say so loudly here.
+          if [ -n "${GOOGLE_MAPS_WEB_KEY:-}" ]; then
+            echo "GOOGLE_MAPS_WEB_KEY=${GOOGLE_MAPS_WEB_KEY}" >> android/local.properties
+            echo "Maps web-services key appended to android/local.properties."
+          else
+            echo "::warning::GOOGLE_MAPS_WEB_KEY is not set. Places, Geocoding and Directions will fall back to GOOGLE_MAPS_API_KEY. If that key is restricted to Android apps, address autocomplete and the route line will fail with REQUEST_DENIED while the map still renders."
+          fi
 
       # pubspec declares `.env` as an asset in both apps and `.env` is
       # gitignored, so a fresh checkout cannot bundle assets at all:
@@ -264,7 +320,8 @@ jobs:
       # secret, else .env.example, else the repo's own ci.yml.
       - name: Create .env (declared as a Flutter asset)
         env:
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_WEB_KEY: ${{ secrets.GOOGLE_MAPS_WEB_KEY }}
           APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
         run: |
           set -euo pipefail
@@ -319,6 +376,7 @@ jobs:
           path = pathlib.Path(".env")
           wanted = {
               "GOOGLE_MAPS_API_KEY": os.environ.get("GOOGLE_MAPS_API_KEY", ""),
+              "GOOGLE_MAPS_WEB_KEY": os.environ.get("GOOGLE_MAPS_WEB_KEY", ""),
               "BASE_URL": os.environ["BASE_URL_VALUE"],
           }
 
@@ -443,12 +501,124 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # A UNIVERSAL APK FROM THE SAME BUNDLE, so a build can go straight onto
+      # a test handset.
+      #
+      # An AAB cannot be installed on a phone. It is what Play wants and it is
+      # useless for the two-phones-on-a-desk test that actually proves a
+      # feature, so every test build had to detour through Play.
+      #
+      # bundletool, NOT a second `shorebird release android --artifact apk`:
+      # that would be a second release, Shorebird would consume another
+      # version number, and the APK would carry a different release id from
+      # the AAB on Play - two builds of the same code that cannot be patched
+      # together. This extracts an APK from the bundle that was just built and
+      # signs it with the same keystore, so it is the same code and the same
+      # signature.
+      #
+      # It never gates the release: a failure here is annotated and the job
+      # carries on, because the AAB is the deliverable and this is a
+      # convenience.
+      - name: Build a sideloadable APK from the AAB
+        id: apk
+        if: ${{ inputs.dry_run != true }}
+        continue-on-error: true
+        env:
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          AAB="$(ls build/app/outputs/bundle/release/*.aab | head -1)"
+          BT="${RUNNER_TEMP}/bundletool.jar"
+          curl -fsSL -o "${BT}" \
+            https://github.com/google/bundletool/releases/download/1.17.2/bundletool-all-1.17.2.jar
+          java -jar "${BT}" build-apks \
+            --bundle="${AAB}" \
+            --output="${RUNNER_TEMP}/app.apks" \
+            --mode=universal \
+            --ks="${RUNNER_TEMP}/upload-keystore.jks" \
+            --ks-key-alias="${ANDROID_KEY_ALIAS}" \
+            --ks-pass="pass:${ANDROID_STORE_PASSWORD}" \
+            --key-pass="pass:${ANDROID_KEY_PASSWORD}"
+          unzip -o -q "${RUNNER_TEMP}/app.apks" -d "${RUNNER_TEMP}/apks"
+          mkdir -p build/app/outputs/apk/release
+          mv "${RUNNER_TEMP}/apks/universal.apk" build/app/outputs/apk/release/app-release.apk
+          ls -lh build/app/outputs/apk/release/app-release.apk
+
+      - name: Keep the APK as a run artifact
+        if: ${{ inputs.dry_run != true && steps.apk.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: hudhud-customer-${{ steps.version.outputs.version }}-apk
+          path: build/app/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      # Uploads to Play's internal testing track when the
+      # PLAY_SERVICE_ACCOUNT_JSON secret exists (a Google Cloud service
+      # account key, invited in Play Console with release permission).
+      # Without it, the AAB artifact above is the hand-off, exactly as before -
+      # a missing secret must not fail a build that otherwise produced a good
+      # bundle, so this skips with a notice rather than erroring.
+      #
+      # Mirrors the rider app (HudHud-Deliver-app) so both ship the same way.
+      # applicationId is read from build.gradle rather than hardcoded: this app
+      # is com.hudhud.userapp and the rider is com.hudhud.admin, and a wrong
+      # package name here uploads one app's bundle to the other's listing.
+      - name: Is a Play service account configured
+        id: play
+        if: ${{ inputs.dry_run != true }}
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PLAY_JSON:-}" ]; then
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON is not set; download the AAB artifact and upload it by hand."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PKG="$(grep -oE 'applicationId[[:space:]]*=?[[:space:]]*"[^"]+"' android/app/build.gradle* \
+                 | head -1 | grep -oE '"[^"]+"' | tr -d '"')"
+          if [ -z "${PKG}" ]; then
+            echo "::error::Could not read applicationId from android/app/build.gradle."
+            exit 1
+          fi
+          echo "Uploading ${PKG} to the internal track"
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "package=${PKG}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to Play internal testing
+        if: ${{ inputs.dry_run != true && steps.play.outputs.enabled == 'true' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ steps.play.outputs.package }}
+          releaseFiles: build/app/outputs/bundle/release/*.aab
+          track: internal
+          # completed, not draft: a green release goes straight to internal
+          # testers. Deliberate - the internal track is testers only, never the
+          # public listing, and a gate nobody clicks is just a release that
+          # never ships.
+          #
+          # What this does NOT protect against: CI green does not mean the map
+          # draws. The Android Maps key is only exercised on a real device, so
+          # the on-device checks still matter on the first release after any
+          # key change. Set this back to draft if that ever bites.
+          status: completed
+
   release-ios:
     if: >
       (github.event_name == 'workflow_dispatch' &&
         (inputs.platform == 'ios' || inputs.platform == 'both'))
     needs: preflight
     runs-on: macos-latest
+    # contents: write is for the failure-log publisher below, which commits the
+    # captured output to a diagnostics branch. Without it the default token may
+    # be read-only and the write is rejected - which would cost another 10
+    # minutes to discover.
+    permissions:
+      contents: write
     defaults:
       run:
         shell: bash
@@ -460,6 +630,121 @@ jobs:
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
+
+      # shorebird-release declares flutter-version as REQUIRED and forwards it
+      # unconditionally - `shorebird release <platform> --flutter-version "$V"`
+      # - so leaving it out sends an empty string and the CLI answers:
+      #
+      #     Flutter  is not available to Shorebird.
+      #
+      # That doubled space IS the empty version, and nothing in the message
+      # points back at a missing workflow input. It is what the first real
+      # release attempt died on.
+      #
+      # The version is read from ci.yml so a release is built on the SDK this
+      # repository already tests on, rather than a second pin that drifts away
+      # from it. Shorebird only offers Flutter versions it has built its engine
+      # for, so if it does not have this one, the list printed here says what it
+      # does have.
+      # release-android creates this and release-ios did not, which is the
+      # whole reason `flutter build ipa` failed: pubspec declares `.env` under
+      # `flutter: assets:` and .env is NOT committed, so the build stops at
+      #
+      #     No file or variants found for asset: .env
+      #
+      # long before signing is ever reached. Same step, verbatim, so the two
+      # platforms cannot drift into building from different configuration.
+      #
+      # iOS needs no google-services.json step: that one is Android-only, and
+      # ios/GoogleService-Info.plist is committed.
+      - name: Create .env (declared as a Flutter asset)
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_WEB_KEY: ${{ secrets.GOOGLE_MAPS_WEB_KEY }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+        run: |
+          set -euo pipefail
+
+          if ! grep -qE '^[[:space:]]*-[[:space:]]*\.env[[:space:]]*$' pubspec.yaml; then
+            echo "pubspec does not declare .env as an asset; nothing to do."
+            exit 0
+          fi
+
+          if [ -f .env ]; then
+            echo ".env already present in the checkout; leaving it alone."
+            exit 0
+          fi
+
+          BASE="${APP_BASE_URL:-}"
+          SOURCE="the APP_BASE_URL secret"
+          if [ -z "${BASE}" ] && [ -f .env.example ]; then
+            BASE="$(grep -oE '^[[:space:]]*BASE_URL[[:space:]]*=[[:space:]]*[^[:space:]]+' .env.example \
+                    | head -1 | sed -E 's/.*=[[:space:]]*//')"
+            SOURCE=".env.example"
+          fi
+          if [ -z "${BASE}" ]; then
+            # ci.yml writes this inside a printf, as
+            #   printf 'BASE_URL=https://host\n' > .env
+            # so the character class must EXCLUDE the backslash. A looser match
+            # swallows the trailing \n and ships a BASE_URL ending in a literal
+            # backslash-n, which normalizeApiBaseUrl then turns into
+            # https://host\n/api/ - a green build that cannot reach the API.
+            BASE="$(grep -oE "BASE_URL=https://[A-Za-z0-9._~:/?#@%+-]+" .github/workflows/ci.yml \
+                    | head -1 | sed 's/^BASE_URL=//')"
+            SOURCE="ci.yml"
+          fi
+          if [ -z "${BASE}" ]; then
+            echo "::error::No BASE_URL available. Set the APP_BASE_URL secret, or add BASE_URL to .env.example."
+            exit 1
+          fi
+          if ! printf '%s' "${BASE}" | grep -qE '^https://[A-Za-z0-9._~:/?#@%+-]+$'; then
+            echo "::error::BASE_URL from ${SOURCE} does not look like a clean https url: ${BASE}"
+            exit 1
+          fi
+          echo "BASE_URL from ${SOURCE}: ${BASE}"
+
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            : > .env
+          fi
+
+          BASE_URL_VALUE="${BASE}" python3 - <<'PY'
+          import os, re, pathlib
+
+          path = pathlib.Path(".env")
+          wanted = {
+              "GOOGLE_MAPS_API_KEY": os.environ.get("GOOGLE_MAPS_API_KEY", ""),
+              "GOOGLE_MAPS_WEB_KEY": os.environ.get("GOOGLE_MAPS_WEB_KEY", ""),
+              "BASE_URL": os.environ["BASE_URL_VALUE"],
+          }
+
+          lines = path.read_text().splitlines() if path.exists() else []
+          seen = set()
+          out = []
+          for line in lines:
+              m = re.match(r"^\s*([A-Z0-9_]+)\s*=", line)
+              if m and m.group(1) in wanted:
+                  key = m.group(1)
+                  out.append(f"{key}={wanted[key]}")
+                  seen.add(key)
+              else:
+                  out.append(line)
+          for key, value in wanted.items():
+              if key not in seen:
+                  out.append(f"{key}={value}")
+          path.write_text("\n".join(out) + "\n")
+          PY
+
+          # A placeholder here is not harmless: .env is bundled into the app and
+          # read ahead of local.properties, so it would ship as a real value.
+          if grep -nE 'your_[a-z_]*_here|REPLACE_ME|changeme|CHANGEME' .env; then
+            echo "::error::.env still contains a placeholder (shown above). It is bundled into the app, so that value would ship."
+            exit 1
+          fi
+
+          echo "--- .env (values hidden) ---"
+          sed -E 's/=.*/=<set>/' .env | grep -vE '^\s*(#|$)' || true
 
       # shorebird-release declares flutter-version as REQUIRED and forwards it
       # unconditionally - `shorebird release <platform> --flutter-version "$V"`
@@ -493,23 +778,6 @@ jobs:
       # parallel and workers are pinned down too: two concurrent Jetify
       # transforms on a 2-core runner is how the heap gets exhausted, and the
       # customer app ships parallel=true with workers.max=2.
-      - name: Give Gradle enough heap for this runner
-        run: |
-          set -euo pipefail
-          echo "--- before ---"
-          grep -E '^org\.gradle\.(jvmargs|parallel|workers)' android/gradle.properties || echo "(none set)"
-          cat >> android/gradle.properties <<'PROPS'
-
-          # --- appended by CI; not committed ---
-          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
-          org.gradle.parallel=false
-          org.gradle.workers.max=1
-          org.gradle.daemon=false
-          PROPS
-          sed -i 's/^          //' android/gradle.properties
-          echo "--- after (last key wins) ---"
-          tail -6 android/gradle.properties
-
       - name: Which Flutter version to build with
         id: flutter
         run: |
@@ -528,9 +796,124 @@ jobs:
           shorebird flutter versions list || true
           echo "flutter_version=${V}" >> "$GITHUB_OUTPUT"
 
+      # CAPTURED, NOT RE-RUN.
+      #
+      # The action prints to the job log and nowhere else, and job logs come
+      # from a blob host that a terminal or an agent routinely cannot reach -
+      # so `gh api .../logs` fails and reading a failure meant a browser.
+      #
+      # The first answer to that was a second step that re-ran the command with
+      # --dry-run to capture its output. That is second-guessing: it is a
+      # DIFFERENT invocation, after the first one has already written build
+      # directories and Shorebird state, and across three runs it never
+      # reproduced anything readable. A diagnostic that re-runs the thing it is
+      # explaining is not evidence about the thing it is explaining.
+      #
+      # So the release runs through the CLI directly and tees its own output.
+      # One invocation, captured as it happens, and the reporting step reads a
+      # file rather than guessing.
+      #
+      # `shorebird` is on PATH from setup-shorebird. --flutter-version is
+      # REQUIRED and must not be empty: the action forwarded it unconditionally
+      # and an empty value produces "Flutter  is not available to Shorebird",
+      # where the doubled space IS the missing version.
       - name: Shorebird release iOS
-        uses: shorebirdtech/shorebird-release@v1
-        with:
-          platform: ios
-          flutter-version: ${{ steps.flutter.outputs.flutter_version }}
-          args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}
+        id: release
+        run: |
+          set -uo pipefail
+          ARGS="--no-confirm"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="${ARGS} --dry-run"
+          fi
+
+          echo "shorebird release ios ${ARGS} --flutter-version ${{ steps.flutter.outputs.flutter_version }}"
+
+          set -o pipefail
+          shorebird release ios ${ARGS} \
+            --flutter-version "${{ steps.flutter.outputs.flutter_version }}" \
+            2>&1 | tee /tmp/ios-release.log
+          STATUS="${PIPESTATUS[0]}"
+
+          echo "shorebird exited ${STATUS}"
+          echo "status=${STATUS}" >> "$GITHUB_OUTPUT"
+          exit "${STATUS}"
+
+      # Reports what the step above captured. Every annotation is TITLE-FREE:
+      # GitHub stops parsing `::error <params>::` at the first `::`, so a title
+      # containing a colon drops the annotation silently - no error, nothing to
+      # notice - and a previous run emitted three and created none. Without a
+      # title there is no parameter list to get wrong.
+      #
+      # It also reports the SIZE of what it captured. An empty capture is a
+      # fact about the diagnostic, not about the build, and the previous
+      # attempts could not tell those two apart.
+      # PUBLISH THE LOG WHERE IT CANNOT SILENTLY FAIL TO ARRIVE.
+      #
+      # Five runs went into trying to read this failure through annotations and
+      # none of them delivered it. The channel kept failing in ways that are
+      # invisible from outside: Shorebird's boilerplate filled the 4096-character
+      # budget, then --verbose noise filled it, then a colon in a title made the
+      # whole `::error title=...::` command invalid so three annotations were
+      # emitted and none created, and then the step started exiting non-zero
+      # before emitting anything with no way to tell whether the capture was
+      # empty or the emitter was broken.
+      #
+      # Every one of those is the same failure mode as the bugs this week: a
+      # mechanism that reports success or nothing at all, where nothing is
+      # indistinguishable from fine.
+      #
+      # So the log is committed to a branch. The contents API is plain JSON,
+      # has no size limit worth worrying about, and - the point - a failed
+      # write is a non-zero exit I can see. One file per run id, so it is
+      # always a create and never needs a blob sha.
+      #
+      # Read it with:
+      #   gh api repos/<owner>/<repo>/contents/ios-release-<run_id>.log \
+      #     --jq '.content' | base64 -d
+      - name: Publish the captured log
+        if: failure() && steps.release.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ci-ios-diagnostics
+        run: |
+          set -uo pipefail
+
+          if [ ! -s /tmp/ios-release.log ]; then
+            echo "::error::The capture is EMPTY (file missing or zero bytes). That is a fact about this capture, not about the build."
+            exit 0
+          fi
+
+          BYTES="$(wc -c < /tmp/ios-release.log | tr -d ' ')"
+          LINES="$(wc -l < /tmp/ios-release.log | tr -d ' ')"
+          echo "captured ${BYTES} bytes / ${LINES} lines"
+
+          # Keep it bounded. The tail is where the failure is; the head is
+          # Shorebird resolving its toolchain.
+          tail -2000 /tmp/ios-release.log > /tmp/ios-tail.log
+
+          # macOS base64 has no -w0; -A is the BSD/openssl way to get one line.
+          B64="$(openssl base64 -A -in /tmp/ios-tail.log)"
+
+          # The branch may not exist yet. Create it from this commit rather
+          # than from the default branch, so the log sits beside the code that
+          # produced it.
+          if ! gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${BRANCH}" >/dev/null 2>&1; then
+            echo "creating branch ${BRANCH}"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+              -f ref="refs/heads/${BRANCH}" \
+              -f sha="${GITHUB_SHA}" || true
+          fi
+
+          PATH_IN_REPO="ios-release-${GITHUB_RUN_ID}.log"
+
+          if gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/${PATH_IN_REPO}" \
+               -f message="ci: iOS release log for run ${GITHUB_RUN_ID}" \
+               -f branch="${BRANCH}" \
+               -f content="${B64}" >/dev/null; then
+            echo "::error::iOS release failed. Captured ${LINES} lines. Read it: repos/${GITHUB_REPOSITORY}/contents/${PATH_IN_REPO}?ref=${BRANCH}"
+          else
+            echo "::error::iOS release failed and the log could NOT be published. Captured ${LINES} lines; the contents API write was rejected."
+          fi
+
+          # A step that reports a failure must not add one.
+          exit 0

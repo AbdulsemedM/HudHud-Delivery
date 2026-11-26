@@ -164,6 +164,8 @@
   },
   "locationConfirmButton": "تأكيد الموقع",
   "locationSearchNoResults": "لم يتم العثور على مواقع",
+  "locationSearchNoResultsHint": "جرّب اسماً آخر، أو حرّك الخريطة لوضع الدبوس.",
+  "locationSearchFailed": "تعذّر البحث الآن. تحقّق من الإنترنت، أو حرّك الخريطة لوضع الدبوس.",
   "locationCurrentPositionFailed": "تعذر الحصول على الموقع الحالي",
   "currentLocationMap": "الموقع الحالي",
   "verificationStatus": "حالة التحقق",
@@ -231,6 +233,7 @@
   "courierActiveDelivery": "التسليم النشط",
   "courierNoHistory": "لا يوجد تاريخ التسليم",
   "courierHistoryEmptySubtitle": "سوف تظهر عمليات التسليم الماضية الخاصة بك هنا",
+  "courierAddDeliveryCta": "أضف توصيلة",
   "courierInstantTitle": "التسليم الفوري",
   "courierAddDelivery": "إضافة توصيل",
   "courierInstantSubtitle": "تأخذ شركة البريد الطرود الخاصة بك فقط وتسلمها على الفور.",
@@ -462,6 +465,8 @@
   "vehicleBajaj": "التوصيل بالباجاج",
   "vehiclePickup": "التوصيل بالبيك أب",
   "pickupOutsideDeliveryServiceArea": "موقع الاستلام خارج منطقة خدمة التوصيل المحددة لدى هدهود.",
+  "easyPickupNotServedIn": "هدهد لا يستلم من هذا المكان بعد. اختر مكان استلام في: {cities}.",
+  "easyCrossBorderNotServed": "هدهد يوصل داخل بلد واحد. مكان الاستلام في {from} ومكان التسليم في {to}.",
   "selectAvailableVehicleType": "اختر نوع مركبة متاحاً",
   "sendAPackageTitle": "أرسل طرداً",
   "courierDeliveryAddressPlaceholder": "عنوان التسليم",
@@ -1406,12 +1411,16 @@
   "orderByCallSubtitle": "سنساعدك في إنشاء طلب التوصيل عبر مكالمة",
   "easyMode": "الوضع السهل",
   "easyModeSubtitle": "أزرار أكبر وصور ومساعدة صوتية",
+  "easyVoiceHints": "قراءة الخطوات بصوت عالٍ",
+  "easyVoiceHintsSubtitle": "مُعطَّل افتراضيًا. زر \"استماع\" يعمل دائمًا.",
+  "easyDescribeHint": "ما الذي بداخل الطرد؟ يمكنك أيضًا إضافة صورة أو ملاحظة صوتية.",
+  "easyDescribeRequired": "صِف الطرد أو التقط صورة أو سجّل ملاحظة صوتية.",
   "navMyDeliveries": "توصيلاتي",
   "navMe": "حسابي",
-  "courierNowTitle": "الآن",
-  "courierNowSubtitle": "أرسل فوراً",
-  "courierLaterTitle": "لاحقاً",
-  "courierLaterSubtitle": "اختر اليوم والوقت",
+  "courierNowTitle": "إضافة توصيل",
+  "courierNowSubtitle": "يأتي المندوب لاستلامها فوراً",
+  "courierLaterTitle": "اختر وقتاً",
+  "courierLaterSubtitle": "اختر اليوم والساعة للاستلام",
   "homeMoreServices": "المزيد",
   "homeHideMoreServices": "إخفاء",
   "homeSendPackage": "أرسل طرداً",
@@ -1901,7 +1910,26 @@
   "@cartReplaceAction": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
+  "searchShopsTitle": "المتاجر",
+  "@searchShopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartProductAdded": "تمت إضافة {name} إلى السلة",
+  "@cartProductAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cartItemAdded": "تمت الإضافة إلى السلة",
+  "@cartItemAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
   "homeTabDelivery": "التوصيل",
+  "homeTabPharmacy": "صيدلية",
+  "homeTabSpareParts": "قطع غيار",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
@@ -2605,5 +2633,25 @@
   "cpRuleNoCancelAfterPickup": "بعد استلام الطرد أو الطعام لا يمكن الإلغاء.",
   "deliveryCodeTitle": "رمز التسليم الخاص بك",
   "deliveryCodePrompt": "اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.",
-  "deliveryCodeWarning": "لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك."
+  "deliveryCodeWarning": "لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك.",
+  "sectorAll": "الكل",
+  "sectorRestaurants": "مطاعم",
+  "sectorBakery": "مخبز",
+  "sectorSupermarket": "سوبر ماركت",
+  "sectorMarket": "سوق",
+  "sectorPharmacy": "صيدلية",
+  "sectorSpareParts": "قطع غيار السيارات",
+  "sectorGeneral": "عام",
+  "packageDescriptionRequired": "ما محتويات الطرد؟",
+  "pleaseDescribePackage": "اكتب محتويات الطرد ليعرف السائق ما يحمله",
+  "prohibitedItemsNote": "غير مسموح: الأسلحة، المخدرات، النقود، المواد القابلة للاشتعال، الحيوانات الحية.",
+  "fareRouteDistance": "{km} كم",
+  "fareEstimateNote": "تقديري - السعر النهائي يُحسب على المسار الفعلي.",
+  "productFiltersTitle": "تصفية",
+  "productFiltersClear": "مسح كل عوامل التصفية",
+  "productFilterQuick": "جاهز خلال {minutes} دقيقة أو أقل",
+  "productFilterOnSale": "عليه خصم",
+  "productFilterCustomizable": "قابل للتخصيص",
+  "productFilterContainsAllergens": "يحتوي على مسببات حساسية",
+  "productFilterNutritionInfo": "معلومات غذائية"
 }

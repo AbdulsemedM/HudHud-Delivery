@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
@@ -24,6 +26,8 @@ import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_vehicle_display.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
+import 'package:hudhud_delivery/features/courier/utils/fare_summary.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/fare_summary_line.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
@@ -114,6 +118,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   bool _isLoadingRequest = false;
   WalletBalance? _walletBalance;
   double? _estimatedCost;
+
+  /// How the estimate is made, line by line (null on an older server).
+  /// Shown only while its total is the fee on screen.
+  FareSummary? _fareSummary;
   String _estimatedCurrency = 'ETB';
   String? _estimateError;
 
@@ -460,6 +468,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     if (mounted) {
       setState(() {
         _isLoadingEstimate = false;
+        // Set with the cost it belongs to and cleared on failure, so the line
+        // never describes a different estimate than the fee above it.
+        _fareSummary = result['success'] == true
+            ? FareSummary.fromEstimateResponse(result['data'])
+            : null;
         if (result['success'] == true) {
           _estimatedCost = result['estimatedCost'] as double?;
           _estimatedCurrency = result['currency'] as String? ?? 'ETB';
@@ -797,6 +810,19 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
         _pendingCreatedDelivery = created;
         CourierHomeRefresh.instance.notifyRefresh();
+
+        // The photo goes up after the booking exists, so the driver sees it
+        // before accepting. Not awaited: a slow upload must not hold up
+        // payment or finding a courier, and a failed one costs only the
+        // photo. Only on a fresh booking, so a payment retry (which reuses
+        // _pendingCreatedDelivery) does not upload it twice.
+        final photoPath = widget.packageImagePath;
+        if (photoPath != null && photoPath.isNotEmpty) {
+          unawaited(_courierRepository.uploadPackagePhoto(
+            deliveryId: created.deliveryId,
+            filePath: photoPath,
+          ));
+        }
       }
 
       final delivery = created;
@@ -1378,6 +1404,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                             hasServerEstimate: _hasServerEstimate,
                             isLoadingEstimate: _isLoadingEstimate,
                             feeText: estimatedFeeText,
+                            fareSummary: (!_isLoadingEstimate &&
+                                    _estimateError == null &&
+                                    _estimatedCost != null)
+                                ? _fareSummary
+                                : null,
                             onLookForCourier: _createDeliveryRequest,
                           ),
                         ),
@@ -1570,7 +1601,11 @@ class _ConfirmDetailsFooter extends StatelessWidget {
     required this.isLoadingEstimate,
     required this.feeText,
     required this.onLookForCourier,
+    this.fareSummary,
   });
+
+  /// Route distance and the "estimate" note (no calculation).
+  final FareSummary? fareSummary;
 
   final double bottomInset;
   final bool isLoadingRequest;
@@ -1650,6 +1685,11 @@ class _ConfirmDetailsFooter extends StatelessWidget {
                 ],
               ),
             ),
+            if (fareSummary != null)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: FareSummaryLine(summary: fareSummary!),
+              ),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,

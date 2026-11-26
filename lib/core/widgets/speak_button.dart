@@ -23,7 +23,11 @@ class SpeakButton extends StatelessWidget {
     final accent = HomeColors.violetOf(context);
     final tint = HomeColors.violetTintOf(context);
     final enabled = text.trim().isNotEmpty;
-    void speak() => VoiceHintService.instance.speak(text);
+
+    // Tap to hear it, tap again to silence it. Previously this only ever
+    // started speech, so a hint tapped by accident — or in a quiet room —
+    // had to be waited out.
+    void speak() => VoiceHintService.instance.toggle(text);
 
     if (large) {
       return SizedBox(
@@ -39,7 +43,16 @@ class SpeakButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.volume_up_rounded, size: 26, color: accent),
+                ValueListenableBuilder<bool>(
+                  valueListenable: VoiceHintService.instance.speaking,
+                  builder: (context, isSpeaking, _) => Icon(
+                    isSpeaking
+                        ? Icons.volume_off_rounded
+                        : Icons.volume_up_rounded,
+                    size: 26,
+                    color: accent,
+                  ),
+                ),
                 const SizedBox(width: 10),
                 Text(
                   label,
@@ -72,10 +85,15 @@ class SpeakButton extends StatelessWidget {
               child: SizedBox(
                 width: 48,
                 height: 48,
-                child: Icon(
-                  Icons.volume_up_rounded,
-                  color: enabled ? accent : accent.withValues(alpha: 0.4),
-                  size: 26,
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: VoiceHintService.instance.speaking,
+                  builder: (context, isSpeaking, _) => Icon(
+                    isSpeaking
+                        ? Icons.volume_off_rounded
+                        : Icons.volume_up_rounded,
+                    color: enabled ? accent : accent.withValues(alpha: 0.4),
+                    size: 26,
+                  ),
                 ),
               ),
             ),

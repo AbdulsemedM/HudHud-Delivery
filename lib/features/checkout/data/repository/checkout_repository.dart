@@ -7,13 +7,15 @@ class CheckoutRepository {
 
   /// POST /api/customer/delivery-fee/quote — preview only.
   Future<DeliveryFeeQuote> quoteDeliveryFee({
-    required int branchId,
+    int? branchId,
+    int? vendorId,
     required String deliveryAddress,
     required double deliveryLatitude,
     required double deliveryLongitude,
   }) async {
     final response = await checkoutDataProvider.quoteDeliveryFee(
       branchId: branchId,
+      vendorId: vendorId,
       deliveryAddress: deliveryAddress,
       deliveryLatitude: deliveryLatitude,
       deliveryLongitude: deliveryLongitude,

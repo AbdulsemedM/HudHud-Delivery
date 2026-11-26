@@ -8,7 +8,8 @@ import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding
 export 'package:hudhud_delivery/core/theme/service_tab_palette.dart'
     show HomeServiceMode;
 
-/// Primary home service tiles: Send Package | Delivery.
+/// Primary home service tiles: Send Package | Delivery, and — once those
+/// sectors have a live shop — Pharmacy | Spare parts.
 /// Taxi / Handyman deferred to a future release.
 class HomeServiceTabBar extends StatelessWidget {
   const HomeServiceTabBar({
@@ -16,11 +17,18 @@ class HomeServiceTabBar extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.tourKeys,
+    this.availableSectors = const <String>{},
   });
 
   final HomeServiceMode selected;
   final ValueChanged<HomeServiceMode> onSelected;
   final OnboardingTourKeys? tourKeys;
+
+  /// Sector keys the server reports as having at least one live shop, from
+  /// GET /api/public/vendors/sectors. Empty while that call is in flight or
+  /// if it failed, which is the safe reading: no tile rather than a tile that
+  /// opens an empty list.
+  final Set<String> availableSectors;
 
   @override
   Widget build(BuildContext context) {
@@ -41,34 +49,100 @@ class HomeServiceTabBar extends StatelessWidget {
       glow: ServiceTabPalette.foodGroceries,
     );
 
+    // No assetPath on purpose — see _TabSpec. A medicine icon and a car-part
+    // icon say what these are far better than a borrowed basket would.
+    final pharmacy = _TabSpec(
+      label: l10n.homeTabPharmacy,
+      assetPath: null,
+      fallbackIcon: Icons.medication_rounded,
+      gradient: const [Color(0xFF2FA37A), ServiceTabPalette.pharmacy],
+      glow: ServiceTabPalette.pharmacy,
+    );
+    final spareParts = _TabSpec(
+      label: l10n.homeTabSpareParts,
+      assetPath: null,
+      fallbackIcon: Icons.car_repair,
+      gradient: const [Color(0xFF5B6B7C), ServiceTabPalette.spareParts],
+      glow: ServiceTabPalette.spareParts,
+    );
+
     final effectiveSelected =
         selected == HomeServiceMode.taxi || selected == HomeServiceMode.handyman
             ? HomeServiceMode.courier
             : selected;
 
+    // A tile only exists once that sector has a shop behind it.
+    //
+    // This app once shipped nine hardcoded sector chips while production had
+    // two vendors, both restaurants, so seven of them opened an empty list
+    // with no explanation. /api/public/vendors/sectors exists precisely to
+    // stop that: it counts only active, publicly visible vendors. Hardcoding
+    // Pharmacy and Spare parts here would walk straight back into it — the
+    // tile would be the most prominent thing on the home screen and would
+    // lead nowhere until someone onboards a pharmacy.
+    //
+    // So they appear on their own when the shops do, and until then Home
+    // looks exactly as it does today.
+    final showPharmacy = availableSectors.contains('pharmacy');
+    final showSpareParts = availableSectors.contains('spare_parts');
+
+    final secondRow = <Widget>[
+      if (showPharmacy)
+        Expanded(
+          child: _ServiceTile(
+            spec: pharmacy,
+            selected: effectiveSelected == HomeServiceMode.pharmacy,
+            onTap: () => onSelected(HomeServiceMode.pharmacy),
+          ),
+        ),
+      if (showPharmacy && showSpareParts) const SizedBox(width: 12),
+      if (showSpareParts)
+        Expanded(
+          child: _ServiceTile(
+            spec: spareParts,
+            selected: effectiveSelected == HomeServiceMode.spareParts,
+            onTap: () => onSelected(HomeServiceMode.spareParts),
+          ),
+        ),
+      // Keeps a lone tile at half width rather than letting it stretch across
+      // the screen and outweigh the two above it.
+      if (showPharmacy != showSpareParts) ...[
+        const SizedBox(width: 12),
+        const Spacer(),
+      ],
+    ];
+
     return KeyedSubtree(
       key: tourKeys?.serviceTabsKey,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              child: _ServiceTile(
-                key: tourKeys?.courierTabKey,
-                spec: courier,
-                selected: effectiveSelected == HomeServiceMode.courier,
-                onTap: () => onSelected(HomeServiceMode.courier),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _ServiceTile(
+                    key: tourKeys?.courierTabKey,
+                    spec: courier,
+                    selected: effectiveSelected == HomeServiceMode.courier,
+                    onTap: () => onSelected(HomeServiceMode.courier),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ServiceTile(
+                    key: tourKeys?.foodTabKey,
+                    spec: delivery,
+                    selected: effectiveSelected == HomeServiceMode.foodGroceries,
+                    onTap: () => onSelected(HomeServiceMode.foodGroceries),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ServiceTile(
-                key: tourKeys?.foodTabKey,
-                spec: delivery,
-                selected: effectiveSelected == HomeServiceMode.foodGroceries,
-                onTap: () => onSelected(HomeServiceMode.foodGroceries),
-              ),
-            ),
+            if (secondRow.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Row(children: secondRow),
+            ],
           ],
         ),
       ),
@@ -86,7 +160,13 @@ class _TabSpec {
   });
 
   final String label;
-  final String assetPath;
+
+  /// Painted artwork for this service, or null to draw [fallbackIcon]
+  /// directly. Null is not a degraded state: Pharmacy and Spare parts have no
+  /// artwork yet, and borrowing another tile's PNG would put a food basket on
+  /// the pharmacy tile — which is what happened when this field was required.
+  final String? assetPath;
+
   final IconData fallbackIcon;
   final List<Color> gradient;
   final Color glow;
@@ -184,45 +264,30 @@ class _ServiceTile extends StatelessWidget {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
                       opacity: selected ? 1 : 0.9,
-                      child: Image.asset(
-                        spec.assetPath,
-                        width: 92,
-                        fit: BoxFit.contain,
-                        gaplessPlayback: true,
-                        errorBuilder: (_, __, ___) => Icon(
-                          spec.fallbackIcon,
-                          size: 44,
-                          color: selected ? Colors.white : spec.glow,
-                        ),
-                      ),
+                      child: spec.assetPath == null
+                          ? Icon(
+                              spec.fallbackIcon,
+                              size: 46,
+                              color: selected ? Colors.white : spec.glow,
+                            )
+                          : Image.asset(
+                              spec.assetPath!,
+                              width: 92,
+                              fit: BoxFit.contain,
+                              gaplessPlayback: true,
+                              errorBuilder: (_, __, ___) => Icon(
+                                spec.fallbackIcon,
+                                size: 44,
+                                color: selected ? Colors.white : spec.glow,
+                              ),
+                            ),
                     ),
                   ),
                 ),
-                Positioned(
-                  left: 14,
-                  top: 14,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: selected
-                          ? Colors.white
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: selected
-                            ? Colors.white
-                            : HomeColors.textMutedOf(context)
-                                .withValues(alpha: 0.5),
-                        width: 2,
-                      ),
-                    ),
-                    child: selected
-                        ? Icon(Icons.check_rounded, size: 16, color: spec.glow)
-                        : null,
-                  ),
-                ),
+                // No tick / empty circle here any more. It made these tiles
+                // read as answers on a form (tester report: "Send a package"
+                // looked selectable, not tappable); the filled colour already
+                // shows which one is active.
                 Positioned(
                   left: 14,
                   right: 84,

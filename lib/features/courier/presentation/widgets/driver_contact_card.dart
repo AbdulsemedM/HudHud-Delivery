@@ -7,7 +7,14 @@ class DriverContactCard extends StatelessWidget {
   final String driverName;
   final String? details;
   final VoidCallback onMessage;
+  /// Places the in-app call. This is what "Call" means.
   final VoidCallback? onCall;
+
+  /// The phone network, as a deliberate SECOND action — the way WhatsApp
+  /// keeps the dialler behind the contact rather than beside the call
+  /// button. Present while the relay is being stood up and a data call may
+  /// not go through; it is not meant to be the thing anyone reaches for.
+  final VoidCallback? onCallOnPhone;
   final Color borderColor;
 
   /// Optional vehicle description (type / colour) shown under the name.
@@ -22,6 +29,7 @@ class DriverContactCard extends StatelessWidget {
     required this.onMessage,
     required this.borderColor,
     this.onCall,
+    this.onCallOnPhone,
     this.details,
     this.vehicle,
     this.rating,
@@ -189,6 +197,18 @@ class DriverContactCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (onCallOnPhone != null) ...[
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        height: 56,
+                        width: 56,
+                        child: IconButton(
+                          onPressed: onCallOnPhone,
+                          tooltip: 'Call on the phone network',
+                          icon: const Icon(Icons.phone_rounded, size: 22),
+                        ),
+                      ),
+                    ],
                     const SizedBox(width: 12),
                   ],
                   Expanded(

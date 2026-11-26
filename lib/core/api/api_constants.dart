@@ -159,6 +159,13 @@ class ApiConstants {
   static const String markets = 'markets';
   /// GET /api/markets/resolve?lat=&lng= — nearest active market or null.
   static const String marketsResolve = 'markets/resolve';
+
+  /// GET /api/coverage?lat=&lng= — whether we deliver there, and what to say.
+  ///
+  /// Authoritative in a way the device cannot be: a market is only open when
+  /// it is active AND has an enabled pricing zone, and the app has no idea
+  /// about pricing zones. A city with none can only produce failed checkouts.
+  static const String coverage = 'coverage';
   /// PUT /api/customer/market {market_code}
   static const String customerMarket = 'customer/market';
   /// GET /api/customer/plus — HudHud Plus status.
@@ -256,6 +263,10 @@ class ApiConstants {
       'services/delivery/{id}/retry-payment';
   static const String deliveryConfirmReceipt =
       'services/delivery/{id}/confirm-receipt';
+  /// POST multipart `photo` — the customer's photo of the item, shown to the
+  /// driver before accepting. Booking customer only, before pickup, max 3.
+  static const String deliveryPackagePhoto =
+      'services/delivery/{id}/package-photo';
   /// POST {rating: 1-5, comment?} — backend canonical route
   /// (RideMessengerController@rateDelivery; delivery must be delivered).
   static const String deliveryRate = 'user/deliveries/{id}/rate';

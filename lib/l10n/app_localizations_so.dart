@@ -423,6 +423,14 @@ class AppLocalizationsSo extends AppLocalizations {
   String get locationSearchNoResults => 'Goob lama helin';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'Isku day magac kale, ama dhaqaaji khariidadda si aad u dhigto calaamadda.';
+
+  @override
+  String get locationSearchFailed =>
+      'Hadda lama raadin karo. Hubi internetkaaga, ama dhaqaaji khariidadda si aad u dhigto calaamadda.';
+
+  @override
   String get locationCurrentPositionFailed => 'Lama helin goobta hadda';
 
   @override
@@ -575,6 +583,9 @@ class AppLocalizationsSo extends AppLocalizations {
       'keenistaadii hore waxay ka muuqan doontaa halkan';
 
   @override
+  String get courierAddDeliveryCta => 'Ku dar keenis';
+
+  @override
   String get courierInstantTitle => 'Bixinta degdega ah';
 
   @override
@@ -629,6 +640,12 @@ class AppLocalizationsSo extends AppLocalizations {
   String get homeTabDelivery => 'Gaarsiin';
 
   @override
+  String get homeTabPharmacy => 'Farmashiye';
+
+  @override
+  String get homeTabSpareParts => 'Qalab beddel';
+
+  @override
   String get cartDifferentVendorTitle => 'Ma bilowdaa gaadhi cusub?';
 
   @override
@@ -640,6 +657,17 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get cartKeepCurrentAction => 'Hay gaadhiga';
+
+  @override
+  String get searchShopsTitle => 'Dukaamada';
+
+  @override
+  String cartProductAdded(String name) {
+    return '$name waa lagu daray gaadhiga';
+  }
+
+  @override
+  String get cartItemAdded => 'Waa lagu daray gaadhiga';
 
   @override
   String get homeTabCourier => 'Gaadhi-qaade';
@@ -1105,6 +1133,16 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get pickupOutsideDeliveryServiceArea =>
       'Goobta soo qaadista kama baxdo aagga adeegga gaarsiinta ee HudHud.';
+
+  @override
+  String easyPickupNotServedIn(String cities) {
+    return 'HudHud weli kama soo qaado meeshan. Dooro meel laga soo qaado oo ka mid ah: $cities.';
+  }
+
+  @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'HudHud wuxuu gaarsiiyaa hal dal gudihiisa. Meesha laga soo qaado waa $from, meesha la geeyana waa $to.';
+  }
 
   @override
   String get selectAvailableVehicleType =>
@@ -3237,22 +3275,38 @@ class AppLocalizationsSo extends AppLocalizations {
   String get easyModeSubtitle => 'Badhammo waaweyn, sawirro, iyo caawin cod ah';
 
   @override
+  String get easyVoiceHints => 'Tallaabooyinka kor u akhri';
+
+  @override
+  String get easyVoiceHintsSubtitle =>
+      'Sida caadiga ah waa damin. Badhanka \'Dhageyso\' had iyo jeer wuu shaqeeyaa.';
+
+  @override
+  String get easyDescribeHint =>
+      'Maxaa ku jira baakadda? Waxaad sidoo kale ku dari kartaa sawir ama cod.';
+
+  @override
+  String get easyDescribeRequired =>
+      'Sharrax baakadda, sawir qaad, ama cod duub.';
+
+  @override
   String get navMyDeliveries => 'Gaarsiimahayga';
 
   @override
   String get navMe => 'Aniga';
 
   @override
-  String get courierNowTitle => 'Hadda';
+  String get courierNowTitle => 'Hadda dir';
 
   @override
-  String get courierNowSubtitle => 'Isla markiiba dir';
+  String get courierNowSubtitle =>
+      'Fariisku isla markiiba ayuu u imanayaa inuu qaado';
 
   @override
-  String get courierLaterTitle => 'Mar dambe';
+  String get courierLaterTitle => 'Dooro waqti';
 
   @override
-  String get courierLaterSubtitle => 'Dooro maalin iyo waqti';
+  String get courierLaterSubtitle => 'Dooro maalinta iyo saacadda la qaadayo';
 
   @override
   String get homeMoreServices => 'Kuwo kale';
@@ -4680,8 +4734,78 @@ class AppLocalizationsSo extends AppLocalizations {
   String get deliveryCodeTitle => 'Koodhkaaga gaarsiinta';
 
   @override
-  String get deliveryCodePrompt => 'U akhri darawalka 4-da nambar si aad u xaqiijiso inaad dalabkaaga heshay.';
+  String get deliveryCodePrompt =>
+      'U akhri darawalka 4-da nambar si aad u xaqiijiso inaad dalabkaaga heshay.';
 
   @override
-  String get deliveryCodeWarning => 'Koodhkan la wadaag kaliya marka darawalka hortaada joogo.';
+  String get deliveryCodeWarning =>
+      'Koodhkan la wadaag kaliya marka darawalka hortaada joogo.';
+
+  @override
+  String get sectorAll => 'Dhammaan';
+
+  @override
+  String get sectorRestaurants => 'Maqaayado';
+
+  @override
+  String get sectorBakery => 'Rootiga';
+
+  @override
+  String get sectorSupermarket => 'Suubarmaarkeed';
+
+  @override
+  String get sectorMarket => 'Suuq';
+
+  @override
+  String get sectorPharmacy => 'Farmashiye';
+
+  @override
+  String get sectorSpareParts => 'Qalabka baabuurka';
+
+  @override
+  String get sectorGeneral => 'Guud';
+
+  @override
+  String get packageDescriptionRequired => 'Maxaa ku jira xidhmada?';
+
+  @override
+  String get pleaseDescribePackage =>
+      'Sheeg waxa ku jira xidhmada si darawalku u ogaado waxa uu sido';
+
+  @override
+  String get prohibitedItemsNote =>
+      'Lama oggola: hub, daroogo, lacag caddaan ah, walxo gubta, xayawaan nool.';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km km';
+  }
+
+  @override
+  String get fareEstimateNote =>
+      'Qiyaas - qiimaha kama dambaysta ah wuxuu ku xisaabsamaa waddada dhabta ah.';
+
+  @override
+  String get productFiltersTitle => 'Shaandhee';
+
+  @override
+  String get productFiltersClear => 'Tirtir dhammaan shaandheyaasha';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'Diyaar $minutes daqiiqo ama ka yar';
+  }
+
+  @override
+  String get productFilterOnSale => 'Qiimo dhimis';
+
+  @override
+  String get productFilterCustomizable => 'La beddeli karo';
+
+  @override
+  String get productFilterContainsAllergens =>
+      'Waxaa ku jira walxo xasaasiyad keena';
+
+  @override
+  String get productFilterNutritionInfo => 'Macluumaad nafaqo';
 }

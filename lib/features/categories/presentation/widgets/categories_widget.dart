@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/money_format.dart';
 import '../../../home/presentation/theme/home_colors.dart';
 import '../../model/categories_products_model.dart';
+import '../../model/product_filter.dart';
 import '../../../wishlist/presentation/widgets/wishlist_toggle_button.dart';
 import '../../../growth/market_controller.dart';
 
@@ -839,9 +840,10 @@ class VegFoodToggle extends StatelessWidget {
 }
 
 class ProductFilters extends StatelessWidget {
-  final List<String> filters;
-  final List<String> selectedFilters;
-  final ValueChanged<List<String>> onFiltersChanged;
+  /// Only chips that narrow the list - see [ProductFilter.worthShowing].
+  final List<ProductFilter> filters;
+  final List<ProductFilter> selectedFilters;
+  final ValueChanged<List<ProductFilter>> onFiltersChanged;
 
   const ProductFilters({
     super.key,
@@ -853,6 +855,7 @@ class ProductFilters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (filters.isEmpty) return const SizedBox.shrink();
+    final l10n = context.l10n;
     final indigo = HomeColors.violetOf(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -864,7 +867,7 @@ class ProductFilters extends StatelessWidget {
               Icon(Icons.tune_rounded, size: 22, color: indigo),
               const SizedBox(width: 8),
               Text(
-                'Filter',
+                l10n.productFiltersTitle,
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
@@ -891,7 +894,7 @@ class ProductFilters extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: () {
-                    List<String> newSelectedFilters =
+                    List<ProductFilter> newSelectedFilters =
                         List.from(selectedFilters);
                     if (isSelected) {
                       newSelectedFilters.remove(filter);
@@ -916,7 +919,7 @@ class ProductFilters extends StatelessWidget {
                             const SizedBox(width: 6),
                           ],
                           Text(
-                            filter,
+                            filter.label(l10n),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -943,9 +946,9 @@ class ProductFilters extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
               icon: const Icon(Icons.clear_all_rounded, size: 20),
-              label: const Text(
-                'Clear All Filters',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              label: Text(
+                l10n.productFiltersClear,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
             ),
           ],

@@ -420,6 +420,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get locationSearchNoResults => 'لم يتم العثور على مواقع';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'جرّب اسماً آخر، أو حرّك الخريطة لوضع الدبوس.';
+
+  @override
+  String get locationSearchFailed =>
+      'تعذّر البحث الآن. تحقّق من الإنترنت، أو حرّك الخريطة لوضع الدبوس.';
+
+  @override
   String get locationCurrentPositionFailed => 'تعذر الحصول على الموقع الحالي';
 
   @override
@@ -568,6 +576,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'سوف تظهر عمليات التسليم الماضية الخاصة بك هنا';
 
   @override
+  String get courierAddDeliveryCta => 'أضف توصيلة';
+
+  @override
   String get courierInstantTitle => 'التسليم الفوري';
 
   @override
@@ -621,6 +632,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeTabDelivery => 'التوصيل';
 
   @override
+  String get homeTabPharmacy => 'صيدلية';
+
+  @override
+  String get homeTabSpareParts => 'قطع غيار';
+
+  @override
   String get cartDifferentVendorTitle => 'بدء سلة جديدة؟';
 
   @override
@@ -632,6 +649,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cartKeepCurrentAction => 'الاحتفاظ بالسلة';
+
+  @override
+  String get searchShopsTitle => 'المتاجر';
+
+  @override
+  String cartProductAdded(String name) {
+    return 'تمت إضافة $name إلى السلة';
+  }
+
+  @override
+  String get cartItemAdded => 'تمت الإضافة إلى السلة';
 
   @override
   String get homeTabCourier => 'ساعي';
@@ -1097,6 +1125,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get pickupOutsideDeliveryServiceArea =>
       'موقع الاستلام خارج منطقة خدمة التوصيل المحددة لدى هدهود.';
+
+  @override
+  String easyPickupNotServedIn(String cities) {
+    return 'هدهد لا يستلم من هذا المكان بعد. اختر مكان استلام في: $cities.';
+  }
+
+  @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'هدهد يوصل داخل بلد واحد. مكان الاستلام في $from ومكان التسليم في $to.';
+  }
 
   @override
   String get selectAvailableVehicleType => 'اختر نوع مركبة متاحاً';
@@ -3181,22 +3219,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get easyModeSubtitle => 'أزرار أكبر وصور ومساعدة صوتية';
 
   @override
+  String get easyVoiceHints => 'قراءة الخطوات بصوت عالٍ';
+
+  @override
+  String get easyVoiceHintsSubtitle =>
+      'مُعطَّل افتراضيًا. زر \"استماع\" يعمل دائمًا.';
+
+  @override
+  String get easyDescribeHint =>
+      'ما الذي بداخل الطرد؟ يمكنك أيضًا إضافة صورة أو ملاحظة صوتية.';
+
+  @override
+  String get easyDescribeRequired =>
+      'صِف الطرد أو التقط صورة أو سجّل ملاحظة صوتية.';
+
+  @override
   String get navMyDeliveries => 'توصيلاتي';
 
   @override
   String get navMe => 'حسابي';
 
   @override
-  String get courierNowTitle => 'الآن';
+  String get courierNowTitle => 'إضافة توصيل';
 
   @override
-  String get courierNowSubtitle => 'أرسل فوراً';
+  String get courierNowSubtitle => 'يأتي المندوب لاستلامها فوراً';
 
   @override
-  String get courierLaterTitle => 'لاحقاً';
+  String get courierLaterTitle => 'اختر وقتاً';
 
   @override
-  String get courierLaterSubtitle => 'اختر اليوم والوقت';
+  String get courierLaterSubtitle => 'اختر اليوم والساعة للاستلام';
 
   @override
   String get homeMoreServices => 'المزيد';
@@ -4593,8 +4646,77 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deliveryCodeTitle => 'رمز التسليم الخاص بك';
 
   @override
-  String get deliveryCodePrompt => 'اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.';
+  String get deliveryCodePrompt =>
+      'اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.';
 
   @override
-  String get deliveryCodeWarning => 'لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك.';
+  String get deliveryCodeWarning =>
+      'لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك.';
+
+  @override
+  String get sectorAll => 'الكل';
+
+  @override
+  String get sectorRestaurants => 'مطاعم';
+
+  @override
+  String get sectorBakery => 'مخبز';
+
+  @override
+  String get sectorSupermarket => 'سوبر ماركت';
+
+  @override
+  String get sectorMarket => 'سوق';
+
+  @override
+  String get sectorPharmacy => 'صيدلية';
+
+  @override
+  String get sectorSpareParts => 'قطع غيار السيارات';
+
+  @override
+  String get sectorGeneral => 'عام';
+
+  @override
+  String get packageDescriptionRequired => 'ما محتويات الطرد؟';
+
+  @override
+  String get pleaseDescribePackage =>
+      'اكتب محتويات الطرد ليعرف السائق ما يحمله';
+
+  @override
+  String get prohibitedItemsNote =>
+      'غير مسموح: الأسلحة، المخدرات، النقود، المواد القابلة للاشتعال، الحيوانات الحية.';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km كم';
+  }
+
+  @override
+  String get fareEstimateNote =>
+      'تقديري - السعر النهائي يُحسب على المسار الفعلي.';
+
+  @override
+  String get productFiltersTitle => 'تصفية';
+
+  @override
+  String get productFiltersClear => 'مسح كل عوامل التصفية';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'جاهز خلال $minutes دقيقة أو أقل';
+  }
+
+  @override
+  String get productFilterOnSale => 'عليه خصم';
+
+  @override
+  String get productFilterCustomizable => 'قابل للتخصيص';
+
+  @override
+  String get productFilterContainsAllergens => 'يحتوي على مسببات حساسية';
+
+  @override
+  String get productFilterNutritionInfo => 'معلومات غذائية';
 }

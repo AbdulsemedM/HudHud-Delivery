@@ -41,7 +41,7 @@ class GoogleDirectionsService {
     required double destLng,
     List<LatLng> waypoints = const [],
   }) async {
-    final key = await GoogleMapsApiKeyProvider.getKey();
+    final key = await GoogleMapsApiKeyProvider.getWebKey();
     if (key.isEmpty) {
       if (kDebugMode) {
         print('Directions: No Google Maps API key.');

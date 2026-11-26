@@ -164,6 +164,8 @@
   },
   "locationConfirmButton": "Confirm location",
   "locationSearchNoResults": "No locations found",
+  "locationSearchNoResultsHint": "Try another name, or move the map to place the pin.",
+  "locationSearchFailed": "Couldn't search right now. Check your internet, or move the map to place the pin.",
   "locationCurrentPositionFailed": "Could not get current location",
   "currentLocationMap": "Current location",
   "verificationStatus": "Verification status",
@@ -231,6 +233,7 @@
   "courierActiveDelivery": "Active Delivery",
   "courierNoHistory": "No delivery history",
   "courierHistoryEmptySubtitle": "Your past deliveries will appear here",
+  "courierAddDeliveryCta": "Add delivery",
   "courierInstantTitle": "Instant Delivery",
   "courierAddDelivery": "Add Delivery",
   "courierInstantSubtitle": "Courier takes only your package and delivers instantly.",
@@ -254,10 +257,29 @@
   "splashStatus": "Getting things moving…",
   "homeTabFood": "Food",
   "homeTabDelivery": "Delivery",
+  "homeTabPharmacy": "Pharmacy",
+  "homeTabSpareParts": "Spare parts",
   "cartDifferentVendorTitle": "Start a new cart?",
   "cartDifferentVendorMessage": "Your cart has items from another store. Clear it to add items from this store.",
   "cartReplaceAction": "Clear and add",
   "cartKeepCurrentAction": "Keep cart",
+  "searchShopsTitle": "Shops",
+  "@searchShopsTitle": {
+    "description": "Heading over the row of shops matching a search."
+  },
+  "cartProductAdded": "{name} added to cart",
+  "@cartProductAdded": {
+    "description": "Snackbar after a product is added to the cart.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cartItemAdded": "Added to cart",
+  "@cartItemAdded": {
+    "description": "Snackbar after a product with no name is added to the cart."
+  },
   "homeTabCourier": "Courier",
   "homeTabTaxi": "Taxi",
   "homeTabHandyman": "Handyman",
@@ -467,6 +489,27 @@
   "vehicleBajaj": "Delivery by bajaj",
   "vehiclePickup": "Delivery by pickup",
   "pickupOutsideDeliveryServiceArea": "Pickup is outside HudHud’s configured delivery service areas.",
+  "easyPickupNotServedIn": "HudHud does not pick up from this place yet. Choose a pickup in: {cities}.",
+  "easyCrossBorderNotServed": "HudHud delivers inside one country. The pickup is in {from} and the drop-off is in {to}.",
+  "@easyCrossBorderNotServed": {
+    "description": "Shown when the pickup and drop-off are in different countries, which no courier can cover.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "@easyPickupNotServedIn": {
+    "description": "Shown when the chosen pickup address is outside every configured service area. {cities} is the list of cities HudHud delivers from.",
+    "placeholders": {
+      "cities": {
+        "type": "String"
+      }
+    }
+  },
   "selectAvailableVehicleType": "Select an available vehicle type",
   "sendAPackageTitle": "SEND A PACKAGE",
   "courierDeliveryAddressPlaceholder": "Delivery address",
@@ -1418,12 +1461,16 @@
   "orderByCallSubtitle": "We will help you create the delivery on a call",
   "easyMode": "Easy mode",
   "easyModeSubtitle": "Bigger buttons, pictures, and spoken help",
+  "easyVoiceHints": "Read steps aloud",
+  "easyVoiceHintsSubtitle": "Off by default. The Listen button always works.",
+  "easyDescribeHint": "What is in the package? You can also add a photo or a voice note.",
+  "easyDescribeRequired": "Describe the package, take a photo, or record a voice note.",
   "navMyDeliveries": "My deliveries",
   "navMe": "Me",
-  "courierNowTitle": "Now",
-  "courierNowSubtitle": "Send right away",
-  "courierLaterTitle": "Later",
-  "courierLaterSubtitle": "Pick a day and time",
+  "courierNowTitle": "Add Delivery",
+  "courierNowSubtitle": "A courier comes to pick it up right away",
+  "courierLaterTitle": "Choose a time",
+  "courierLaterSubtitle": "Pick a day and hour for pickup",
   "homeMoreServices": "More",
   "homeHideMoreServices": "Hide",
   "homeSendPackage": "Send a package",
@@ -2374,5 +2421,39 @@
   "deliveryCodeWarning": "Only share this code once the driver is in front of you.",
   "@deliveryCodeWarning": {
     "description": "Warns the customer not to share the code before the driver arrives"
-  }
+  },
+  "sectorAll": "All",
+  "sectorRestaurants": "Restaurants",
+  "sectorBakery": "Bakery",
+  "sectorSupermarket": "Supermarket",
+  "sectorMarket": "Market",
+  "sectorPharmacy": "Pharmacy",
+  "sectorSpareParts": "Auto parts",
+  "sectorGeneral": "General",
+  "packageDescriptionRequired": "What's in the package?",
+  "pleaseDescribePackage": "Say what's in the package so the rider knows what they carry",
+  "prohibitedItemsNote": "Not allowed: weapons, drugs, cash, flammables, live animals.",
+  "fareRouteDistance": "{km} km",
+  "@fareRouteDistance": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "fareEstimateNote": "Estimate - the final price uses the actual route.",
+  "productFiltersTitle": "Filter",
+  "productFiltersClear": "Clear all filters",
+  "productFilterQuick": "Ready in {minutes} min or less",
+  "@productFilterQuick": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "productFilterOnSale": "On sale",
+  "productFilterCustomizable": "Customizable",
+  "productFilterContainsAllergens": "Contains allergens",
+  "productFilterNutritionInfo": "Nutrition info"
 }

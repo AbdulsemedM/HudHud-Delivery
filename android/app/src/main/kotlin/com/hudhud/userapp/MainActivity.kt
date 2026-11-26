@@ -105,6 +105,15 @@ class MainActivity: FlutterFragmentActivity() {
                 "getGoogleMapsApiKey" -> {
                     result.success(BuildConfig.GOOGLE_MAPS_API_KEY ?: "")
                 }
+                // Deliberately a different key from the one above: the Maps SDK
+                // key carries an Android application restriction, and Google does
+                // not apply those to the maps.googleapis.com web services, so
+                // sending it to Places/Geocoding/Directions earns a REQUEST_DENIED.
+                // See the comment block in android/app/build.gradle.
+                "getGoogleMapsWebKey" -> {
+                    val web = BuildConfig.GOOGLE_MAPS_WEB_KEY ?: ""
+                    result.success(if (web.isNotEmpty()) web else (BuildConfig.GOOGLE_MAPS_API_KEY ?: ""))
+                }
                 else -> result.notImplemented()
             }
         }

@@ -6,7 +6,8 @@ import '../../../../app/services/cart_service.dart';
 import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/l10n/api_error_l10n.dart';
-import '../../../../core/utils/api_error_result.dart' show kCityMarketMismatchCode;
+import '../../../../core/utils/api_error_result.dart'
+    show kCityMarketMismatchCode;
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
@@ -252,6 +253,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _scheduleGrowthQuote(immediate: true);
     }
     _growthQuoteWasEnabled = enabled;
+
+    // Applied here as well as when the methods load, because the config can
+    // arrive late and the methods call can fail outright. With no chooser on
+    // screen a null method is not something the customer can fix — Place
+    // Order would simply refuse with nothing to point at.
+    final growth = _growth;
+    if (growth.loaded &&
+        !_paymentChooserVisible &&
+        _selectedPaymentMethod != growth.defaultPaymentMethod) {
+      setState(() {
+        _selectedPaymentMethod = growth.defaultPaymentMethod;
+        _paymentDetails = {};
+      });
+    }
   }
 
   /// Server quote is shown only when it matches the current inputs.
@@ -282,6 +297,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   static bool _isCashMethod(Object? id) =>
       const {'cash_on_delivery', 'cod', 'cash'}.contains(id?.toString());
+
+  /// Whether the customer is shown a way to choose how they pay.
+  ///
+  /// Hidden by `checkout.payment_choice_enabled` to save most of a screen at
+  /// the point people abandon carts — but NOT in the two cases where cash is
+  /// refused, because hiding the chooser there leaves the customer holding a
+  /// basket they cannot pay for and nothing on screen to change:
+  ///
+  ///   * a gift is electronic only, the API refuses cash on delivery for it;
+  ///   * a customer with outstanding dues is sent to the dues dialog instead
+  ///     of being allowed to run up more cash.
+  ///
+  /// Any check that can block an order needs a way past it, or it becomes a
+  /// support call with a customer staring at a Place Order button that does
+  /// nothing.
+  bool get _paymentChooserVisible =>
+      _growth.paymentChoiceEnabled || _giftMode || _hasDues;
 
   /// Gifts are paid electronically only (the API refuses cash on delivery).
   List<Map<String, dynamic>> get _visiblePaymentMethods => _giftMode
@@ -587,8 +619,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _refreshGrowthQuote() async {
     if (!mounted) return;
-    final request =
-        _quoteEnabled ? _currentGrowthRequest() : null;
+    final request = _quoteEnabled ? _currentGrowthRequest() : null;
     if (request == null) {
       setState(() => _growthQuotePending = false);
       return;
@@ -770,7 +801,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _incrementItem(String productId) {
-    final index = _cartItems.indexWhere((item) => _productId(item) == productId);
+    final index =
+        _cartItems.indexWhere((item) => _productId(item) == productId);
     if (index < 0) return;
     setState(() {
       final next = _quantityOf(_cartItems[index]) + 1;
@@ -781,7 +813,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _decrementItem(String productId) {
-    final index = _cartItems.indexWhere((item) => _productId(item) == productId);
+    final index =
+        _cartItems.indexWhere((item) => _productId(item) == productId);
     if (index < 0) return;
     final current = _quantityOf(_cartItems[index]);
     if (current <= 1) {
@@ -847,7 +880,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _deliveryAddress = 'Select delivery address';
           _deliveryLatitude = null;
           _deliveryLongitude = null;
-          _invalidateQuote(error: 'Choose a delivery location with coordinates.');
+          _invalidateQuote(
+              error: 'Choose a delivery location with coordinates.');
         });
       }
     }
@@ -926,17 +960,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
     if (!mounted || requestId != _quoteRequestId) return;
 
-    if (branchId == null || branchId <= 0) {
+    // No branch is not "no delivery": the API quotes a store by its own
+    // location when it has no branch rows. Only a store with neither
+    // (422 VENDOR_NO_LOCATED_BRANCH) cannot be delivered from.
+    final hasBranch = branchId != null && branchId > 0;
+    final vendorId = _vendorId;
+    if (!hasBranch && (vendorId == null || vendorId <= 0)) {
       setState(() {
-        // The store has no branch (or none with a location) on the server.
-        // Retrying cannot fix that, so no Retry button.
         _invalidateQuote(error: context.l10n.checkoutStoreNoBranch);
       });
       return;
     }
 
     final cacheKey = deliveryFeeQuoteCacheKey(
-      branchId: branchId,
+      branchId: hasBranch ? branchId : null,
+      vendorId: vendorId,
       latitude: lat,
       longitude: lng,
       address: address,
@@ -958,7 +996,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     try {
       final quote = await _checkoutRepository.quoteDeliveryFee(
-        branchId: branchId,
+        branchId: hasBranch ? branchId : null,
+        vendorId: hasBranch ? null : vendorId,
         deliveryAddress: address,
         deliveryLatitude: lat,
         deliveryLongitude: lng,
@@ -1125,8 +1164,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _quoteError ??
-                'Delivery fee is required before placing the order.',
+            _quoteError ?? 'Delivery fee is required before placing the order.',
           ),
           backgroundColor: Colors.red,
         ),
@@ -1227,16 +1265,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    final branchId = _branchId;
-    if (branchId == null || branchId <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to determine restaurant branch.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    // Null for a store without branches: the server picks the pickup point
+    // (nearest branch, else the store's own location) and ignores this.
+    final branchId =
+        _branchId != null && _branchId! > 0 ? _branchId : null;
 
     final initiateDetails = buildInitiatePaymentDetails(
       paymentMethodCode: _selectedPaymentMethod!,
@@ -1253,7 +1285,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ...initiateDetails,
               'order_details': {
                 'vendor_id': vendorId,
-                'branch_id': branchId,
+                if (branchId != null) 'branch_id': branchId,
                 'items': orderItems,
                 'tax_amount': 0.0,
                 'discount_amount': 0.0,
@@ -1267,8 +1299,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     : _notesController.text.trim(),
                 'subtotal': _subtotal,
                 // Comparison only — never trusted by the backend as fee authority.
-                'quoted_delivery_fee': _activeGrowthQuote?.deliveryFee ??
-                    _quotedDeliveryFee,
+                'quoted_delivery_fee':
+                    _activeGrowthQuote?.deliveryFee ?? _quotedDeliveryFee,
                 // Phase 2 inputs; the server validates and prices them.
                 if (_growth.promoCodesEnabled && _appliedPromoCode != null)
                   'coupon_code': _appliedPromoCode,
@@ -1541,6 +1573,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     _selectedPaymentMethod = null;
                     _paymentDetails = {};
                   }
+                  // With no chooser on screen there is nobody to pick, and
+                  // Place Order refuses a null method — so the default is
+                  // applied here rather than at submit, where it would have
+                  // to be threaded through the dues check, the details form
+                  // and the validation separately.
+                  if (!_paymentChooserVisible) {
+                    _selectedPaymentMethod = _growth.defaultPaymentMethod;
+                    _paymentDetails = {};
+                  }
                 });
               } else if (state is PaymentTotalChanged) {
                 _onServerTotalChanged(context, state);
@@ -1616,8 +1657,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 if (_loadingMethods) {
                   setState(() {
                     _loadingMethods = false;
-                    _paymentMethods =
-                        List.from(kDefaultAllowedPaymentMethods);
+                    _paymentMethods = List.from(kDefaultAllowedPaymentMethods);
                   });
                 } else {
                   // Network / server failures in the app language; messages
@@ -1684,8 +1724,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             final productId = _productId(item);
                             return CheckoutProductCard(
                               productId: productId,
-                              productName:
-                                  item['name'] ?? 'Unknown Product',
+                              productName: item['name'] ?? 'Unknown Product',
                               productImage: item['image'] ?? '',
                               quantity: _quantityOf(item),
                               price: (item['price'] ?? 0.0).toDouble(),
@@ -1745,14 +1784,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ],
                           ),
                         ),
-                      CheckoutSectionCard(
-                        icon: Icons.edit_note_outlined,
-                        title: 'Order notes',
-                        subtitle: 'Optional — help us find you faster',
-                        child: NotesSection(
-                          notesController: _notesController,
-                        ),
-                      ),
+                      NotesSection(notesController: _notesController),
                       CheckoutSectionCard(
                         icon: Icons.volunteer_activism_outlined,
                         title: 'Tip your rider',
@@ -1769,93 +1801,100 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       // Phase 2: promo code, points and free-delivery hint
                       // (each hidden unless enabled by GET /growth/config).
                       ..._growthSections(context, growth),
-                      CheckoutSectionCard(
-                        icon: Icons.account_balance_wallet_outlined,
-                        title: 'Payment method',
-                        subtitle: 'Choose how you want to pay',
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            PaymentMethodGridSection(
-                              selectedId: _selectedPaymentMethod,
-                              methods: _visiblePaymentMethods,
-                              isLoading: _loadingMethods,
-                              onSelected: (id) => setState(() {
-                                _selectedPaymentMethod = id;
-                                _paymentDetails = {};
-                                _useHpp = false;
-                                _ebirrProvider = 'kaafi';
-                              }),
-                            ),
-                            if (_selectedPaymentMethod != null)
-                              PaymentDetailsForm(
-                                key: ValueKey(_selectedPaymentMethod),
-                                paymentMethodCode: _selectedPaymentMethod!,
-                                ebirrProvider: _ebirrProvider,
-                                useHpp: _useHpp,
-                                onEbirrProviderChanged: (v) =>
-                                    setState(() => _ebirrProvider = v),
-                                onUseHppChanged: (v) =>
-                                    setState(() => _useHpp = v),
-                                onChanged: (details) {
-                                  _paymentDetails = details;
-                                },
+                      // No chooser unless the server says there is one.
+                      //
+                      // With `checkout.payment_choice_enabled` off the order
+                      // is placed cash on delivery and this whole card is
+                      // gone, which is three taps and most of a screen saved
+                      // at the point people abandon carts. It is a server
+                      // flag rather than deleted code so putting the chooser
+                      // back does not need a new build in every customer's
+                      // hands, and it defaults to ON against an older API so
+                      // nobody silently loses the ability to pay by wallet.
+                      if (_paymentChooserVisible)
+                        CheckoutSectionCard(
+                          icon: Icons.account_balance_wallet_outlined,
+                          title: 'Payment method',
+                          subtitle: 'Choose how you want to pay',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              PaymentMethodGridSection(
+                                selectedId: _selectedPaymentMethod,
+                                methods: _visiblePaymentMethods,
+                                isLoading: _loadingMethods,
+                                onSelected: (id) => setState(() {
+                                  _selectedPaymentMethod = id;
+                                  _paymentDetails = {};
+                                  _useHpp = false;
+                                  _ebirrProvider = 'kaafi';
+                                }),
                               ),
-                            // The API converts a wallet in another currency
-                            // but does not return the converted amount.
-                            if (_giftMode &&
-                                _selectedPaymentMethod == 'wallet')
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  context.l10n.p9GiftWalletNote,
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                              if (_selectedPaymentMethod != null)
+                                PaymentDetailsForm(
+                                  key: ValueKey(_selectedPaymentMethod),
+                                  paymentMethodCode: _selectedPaymentMethod!,
+                                  ebirrProvider: _ebirrProvider,
+                                  useHpp: _useHpp,
+                                  onEbirrProviderChanged: (v) =>
+                                      setState(() => _ebirrProvider = v),
+                                  onUseHppChanged: (v) =>
+                                      setState(() => _useHpp = v),
+                                  onChanged: (details) {
+                                    _paymentDetails = details;
+                                  },
+                                ),
+                              // The API converts a wallet in another currency
+                              // but does not return the converted amount.
+                              if (_giftMode &&
+                                  _selectedPaymentMethod == 'wallet')
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    context.l10n.p9GiftWalletNote,
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      CheckoutSectionCard(
-                        icon: Icons.receipt_outlined,
-                        title: 'Order summary',
-                        child: OrderSummarySection(
-                          subtotal: growthQuote?.subtotal ?? _subtotal,
-                          tipAmount: _tipAmount,
-                          total: _total,
-                          deliveryFee: growthQuote?.deliveryFee ??
-                              _deliveryFeeQuote?.deliveryFee,
-                          formattedDeliveryFee: growthQuote != null
-                              ? null
-                              : _deliveryFeeQuote?.formattedDeliveryFee,
-                          deliveryFeeBeforeDiscounts:
-                              growthQuote?.deliveryFeeBeforeDiscounts,
-                          couponDiscount: growthQuote?.couponDiscount ?? 0,
-                          couponCode: growthQuote?.coupon?.code,
-                          pointsDiscount: growthQuote?.pointsDiscount ?? 0,
-                          plusFreeDelivery: growthQuote?.plusApplied ?? false,
-                          setDeliveryIncluded:
-                              growthQuote?.setDeliveryIncluded ?? false,
-                          deliveryNote: _setDeliveryNote(growthQuote),
-                          currencyCode:
-                              _deliveryFeeQuote?.currency.trim().isNotEmpty ==
-                                      true
-                                  ? _deliveryFeeQuote!.currency
-                                  : growthQuote?.currency,
-                          currencySymbol: _deliveryFeeQuote?.currencySymbol,
-                          deliveryFeeLoading: _quoteLoading,
-                          deliveryFeeError: _quoteError,
-                          onRetryDeliveryFee: _quoteRetryable
-                              ? () => _refreshDeliveryFeeQuote(force: true)
-                              : null,
-                          distanceKm: _deliveryFeeQuote?.distanceKm,
-                          estimatedDurationMinutes:
-                              _deliveryFeeQuote?.estimatedDurationMinutes,
-                        ),
+                      OrderSummarySection(
+                        subtotal: growthQuote?.subtotal ?? _subtotal,
+                        tipAmount: _tipAmount,
+                        total: _total,
+                        deliveryFee: growthQuote?.deliveryFee ??
+                            _deliveryFeeQuote?.deliveryFee,
+                        formattedDeliveryFee: growthQuote != null
+                            ? null
+                            : _deliveryFeeQuote?.formattedDeliveryFee,
+                        deliveryFeeBeforeDiscounts:
+                            growthQuote?.deliveryFeeBeforeDiscounts,
+                        couponDiscount: growthQuote?.couponDiscount ?? 0,
+                        couponCode: growthQuote?.coupon?.code,
+                        pointsDiscount: growthQuote?.pointsDiscount ?? 0,
+                        plusFreeDelivery: growthQuote?.plusApplied ?? false,
+                        setDeliveryIncluded:
+                            growthQuote?.setDeliveryIncluded ?? false,
+                        deliveryNote: _setDeliveryNote(growthQuote),
+                        currencyCode:
+                            _deliveryFeeQuote?.currency.trim().isNotEmpty ==
+                                    true
+                                ? _deliveryFeeQuote!.currency
+                                : growthQuote?.currency,
+                        currencySymbol: _deliveryFeeQuote?.currencySymbol,
+                        deliveryFeeLoading: _quoteLoading,
+                        deliveryFeeError: _quoteError,
+                        onRetryDeliveryFee: _quoteRetryable
+                            ? () => _refreshDeliveryFeeQuote(force: true)
+                            : null,
+                        distanceKm: _deliveryFeeQuote?.distanceKm,
+                        estimatedDurationMinutes:
+                            _deliveryFeeQuote?.estimatedDurationMinutes,
                       ),
                     ]),
                   ),

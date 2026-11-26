@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -18,6 +17,7 @@ import 'package:hudhud_delivery/features/taxi/data/models/ride_request_result.da
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:hudhud_delivery/features/taxi/utils/ride_payment_helper.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/core/utils/phone_dialer.dart';
 
 class DriverOnTheWayScreen extends StatefulWidget {
   final LatLng pickupLocation;
@@ -236,8 +236,7 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   Future<void> _callDriver() async {
     final phone = _driverPhone;
     if (phone == null || phone.isEmpty) return;
-    final uri = Uri(scheme: 'tel', path: phone);
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    await PhoneDialer.call(phone);
   }
 
   Future<void> _messageDriver() async {

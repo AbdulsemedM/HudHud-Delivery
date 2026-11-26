@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
+import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
@@ -18,20 +20,22 @@ import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
+import 'package:hudhud_delivery/core/widgets/in_app_camera.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/core/widgets/speak_button.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_service_area.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
+import 'package:hudhud_delivery/features/courier/utils/cross_border.dart';
 import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/confirm_details_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart' as p;
 import 'package:record/record.dart';
@@ -50,6 +54,15 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
 
   int _step = 0;
 
+  /// What the review step remembers when the customer taps a row to change it.
+  ///
+  /// Non-null means "we came from review": finishing the edited step returns
+  /// straight to review instead of walking through every step after it, and
+  /// the back arrow drops the edit and restores what this holds. Without the
+  /// restore, backing out of a half-finished edit (a cleared name, a pin moved
+  /// somewhere unchecked) would carry unvalidated values onto the review page.
+  _EditSnapshot? _editSnapshot;
+
   LatLng _pickupPosition = const LatLng(9.0222, 38.7468);
   LatLng _dropoffPosition = const LatLng(9.0222, 38.7468);
   String _pickupAddress = '';
@@ -57,34 +70,153 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   PlaceResult? _pickupPlace;
   PlaceResult? _dropoffPlace;
 
+  /*
+   * WHERE WE ACTUALLY DELIVER, ASKED AT THE PICKUP STEP.
+   *
+   * The search offers every place on earth, so a customer picked an address
+   * in Jeddah, photographed their parcel, named a recipient, and was told at
+   * step five of five that we do not deliver from there. Every one of those
+   * steps was wasted, and the refusal arrived where it could teach them
+   * nothing - the one screen with no way back to the decision that caused it.
+   *
+   * The check already existed; it ran on the confirm screen. Moving it to the
+   * moment the pickup is chosen costs one request and saves four steps.
+   *
+   * [_servedAreaNames] is loaded once so the refusal can say where we DO
+   * deliver. "Not here" leaves a customer guessing; "not here, we deliver in
+   * Addis Ababa and Hargeisa" is something they can act on.
+   */
+  List<String> _servedAreaNames = const [];
+  bool _checkingPickupArea = false;
+  String? _pickupAreaNotice;
+  String? _dropoffAreaNotice;
+
   final _recipientNameController = TextEditingController();
   final _recipientPhoneController = TextEditingController();
   String? _senderPhone;
 
-  String? _itemType;
-  String _sizeId = 'small';
+  /// What the customer wrote, said, or photographed.
+  ///
+  /// Replaces the six-tile type picker and the three-size row. Neither earned
+  /// its tap: "Other" was the honest answer for most parcels, and the size fed
+  /// only `packageWeight`, which no pricing path in the platform reads.
+  final TextEditingController _descriptionController = TextEditingController();
+
+  /// Still sent, because the API validates `package_type` against a fixed set
+  /// and will 422 without one. 'Other' is now the only value Easy mode sends,
+  /// and the real description travels in packageDescription where a driver
+  /// can actually read it.
+  static const String _packageType = PackageItemCatalog.other;
+
+  /// Informational only — see the note on _descriptionController. Kept so the
+  /// field the API expects is still populated with something sane.
+  static const double _assumedWeightKg = 1;
   String? _packageImagePath;
   String? _voiceNotePath;
 
-  final _imagePicker = ImagePicker();
   final _audioRecorder = AudioRecorder();
   bool _isRecording = false;
 
   late final NearbyDriversPoller _nearbyPoller;
   Map<String, gmaps.BitmapDescriptor> _nearbyIconsByAsset = {};
 
+  /// One repository for the screen. The poller built its own inline, which
+  /// was fine while nothing else here called the API; the service-area check
+  /// is the second caller, and two of them would be two configurations to
+  /// keep in step.
+  final CourierRepository _courierRepository = CourierRepository(
+    courierDataProvider: CourierDataProvider(apiService: ApiService.instance),
+  );
+
   @override
   void initState() {
     super.initState();
     _nearbyPoller = NearbyDriversPoller(
-      repository: CourierRepository(
-        courierDataProvider:
-            CourierDataProvider(apiService: ApiService.instance),
-      ),
+      repository: _courierRepository,
       onUpdate: () => unawaited(_onNearbyDriversUpdated()),
     );
     unawaited(preloadCommonCourierVehicleMapIcons());
     _bootstrap();
+    unawaited(_loadServedAreaNames());
+  }
+
+  /// The configured cities, so a refusal can name them. Best effort: without
+  /// it the refusal still happens, it just cannot say where to go instead.
+  Future<void> _loadServedAreaNames() async {
+    final result = await _courierRepository.getDeliveryServiceAreas();
+    if (!mounted) return;
+    setState(() {
+      _servedAreaNames = servedAreaNames(
+        result['lookup'] as DeliveryServiceAreaLookup?,
+      );
+    });
+  }
+
+  /*
+   * A COURIER CANNOT CROSS A BORDER.
+   *
+   * Only the pickup is checked against the configured service areas, so a
+   * delivery from Addis Ababa to Jeddah was accepted all the way to courier
+   * search. The obvious fix - require the drop-off to resolve to a service
+   * area too - is wrong: `DeliveryServiceAreaService::resolve()` matches city
+   * aliases as substrings of the address text, so a real drop-off in a
+   * village outside any configured city resolves to nothing. Refusing those
+   * would block deliveries we can and do make.
+   *
+   * The signal that actually separates Jeddah from Sululta is the COUNTRY.
+   * See cross_border.dart for the rule and why an unknown country never
+   * refuses.
+   */
+  String? _crossBorderNotice(AppLocalizations l10n) {
+    final from = _pickupPlace?.country?.trim();
+    final to = _dropoffPlace?.country?.trim();
+
+    if (!isCrossBorder(from, to)) return null;
+
+    return l10n.easyCrossBorderNotServed(from!, to!);
+  }
+
+  /// Does a courier actually serve this pickup?
+  ///
+  /// Asks the same endpoint the confirm screen asks, and reads the same
+  /// signal: no supported vehicle type means nobody can collect from there.
+  ///
+  /// A FAILED REQUEST IS NOT A REFUSAL. If the lookup itself errors - no
+  /// network, server down - we do not tell the customer their city is
+  /// unserved, because we do not know that. They continue, and the confirm
+  /// screen still checks before any courier is sought.
+  Future<bool> _pickupIsServed(AppLocalizations l10n) async {
+    final pickup = _pickupAddress.trim();
+    if (pickup.isEmpty) return true;
+
+    setState(() {
+      _checkingPickupArea = true;
+      _pickupAreaNotice = null;
+    });
+
+    final result = await _courierRepository.getDeliveryServiceAreas(
+      pickupLocation: pickup,
+    );
+    if (!mounted) return false;
+
+    setState(() => _checkingPickupArea = false);
+
+    if (result['success'] != true) return true;
+
+    final types = List<String>.from(
+      result['supportedVehicleTypes'] as List? ?? const [],
+    );
+    if (types.isNotEmpty) {
+      setState(() => _pickupAreaNotice = null);
+      return true;
+    }
+
+    setState(() {
+      _pickupAreaNotice = _servedAreaNames.isEmpty
+          ? l10n.pickupOutsideDeliveryServiceArea
+          : l10n.easyPickupNotServedIn(_servedAreaNames.join(', '));
+    });
+    return false;
   }
 
   Future<void> _onNearbyDriversUpdated() async {
@@ -120,18 +252,28 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     _nearbyPoller.dispose();
     _recipientNameController.dispose();
     _recipientPhoneController.dispose();
+    _descriptionController.dispose();
     _audioRecorder.dispose();
     VoiceHintService.instance.stop();
     super.dispose();
   }
 
+  /// Speaks the current step ONLY if the customer asked for that.
+  ///
+  /// Called on entry and on every step change. It used to speak
+  /// unconditionally, so opening the wizard made the phone start talking in
+  /// whatever room the customer was standing in. The Listen button on each
+  /// step is unaffected and still speaks on demand — that is the feature;
+  /// this is only about speaking uninvited.
   void _speakCurrentStep() {
+    if (!context.read<EasyModeController>().voiceAutoSpeak) return;
+
     final l10n = context.l10n;
     final text = switch (_step) {
       0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
       1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
       2 => l10n.easyWhoReceives,
-      3 => '${l10n.easyWhatIsIt}. ${l10n.easyPackageSize}',
+      3 => '${l10n.easyWhatIsIt}. ${l10n.easyDescribeHint}',
       4 => l10n.easyConfirmTitle,
       _ => '',
     };
@@ -225,8 +367,16 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         _snack(l10n.pleaseSelectLocation);
         return;
       }
-      setState(() => _step = 1);
-      _speakCurrentStep();
+      // Here, not at step five. The notice stays on screen rather than
+      // flashing past in a snackbar: in Easy Mode it is also what the speak
+      // button reads out, and a customer who cannot read it needs it to
+      // still be there when the audio starts.
+      if (!await _pickupIsServed(l10n)) {
+        final notice = _pickupAreaNotice;
+        if (notice != null) unawaited(VoiceHintService.instance.speak(notice));
+        return;
+      }
+      _advanceTo(1);
       return;
     }
     if (_step == 1) {
@@ -238,10 +388,14 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         _snack(l10n.pleaseSelectLocation);
         return;
       }
-      setState(() {
-        _step = 2;
-      });
-      _speakCurrentStep();
+      final crossBorder = _crossBorderNotice(l10n);
+      if (crossBorder != null) {
+        setState(() => _dropoffAreaNotice = crossBorder);
+        unawaited(VoiceHintService.instance.speak(crossBorder));
+        return;
+      }
+      setState(() => _dropoffAreaNotice = null);
+      _advanceTo(2);
       return;
     }
     if (_step == 2) {
@@ -254,17 +408,24 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         _snack(l10n.pleaseEnterValidRecipientPhone);
         return;
       }
-      setState(() => _step = 3);
-      _speakCurrentStep();
+      _advanceTo(3);
       return;
     }
     if (_step == 3) {
-      if (_itemType == null) {
-        _snack(l10n.pleaseSelectItemType);
+      // Any ONE of the three will do, deliberately. This is the low-literacy
+      // path: insisting on typed text would lock out the exact customer the
+      // mode exists for, and a photo or a spoken note tells the driver what
+      // is in the bag just as well. Requiring none at all would send parcels
+      // with nothing but an address.
+      final described = _descriptionController.text.trim().isNotEmpty ||
+          _packageImagePath != null ||
+          _voiceNotePath != null;
+
+      if (!described) {
+        _snack(l10n.easyDescribeRequired);
         return;
       }
-      setState(() => _step = 4);
-      _speakCurrentStep();
+      _advanceTo(4);
       return;
     }
     if (_step == 4) {
@@ -272,7 +433,63 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     }
   }
 
+  /// Moves on from a step that has just passed its checks.
+  ///
+  /// Normally that is [next]. During an edit from the review page it is the
+  /// review page itself - unless the edit was to the pickup and the delivery
+  /// address it was already checked against is now in another country. That
+  /// check only ever ran when the delivery step was left, so returning to
+  /// review would let the order through; the customer is sent to the delivery
+  /// step with the notice showing instead, still in edit mode, so fixing it
+  /// brings them back to review.
+  void _advanceTo(int next) {
+    // The pickup and delivery checks await the network. If the customer used
+    // the back arrow meanwhile, they are on another step and this is stale.
+    if (!mounted || _step != next - 1) return;
+    if (_editSnapshot != null) {
+      final crossBorder = _step == 0 ? _crossBorderNotice(context.l10n) : null;
+      if (crossBorder != null) {
+        setState(() {
+          _step = 1;
+          _dropoffAreaNotice = crossBorder;
+        });
+        unawaited(VoiceHintService.instance.speak(crossBorder));
+        return;
+      }
+      setState(() {
+        _step = 4;
+        _editSnapshot = null;
+      });
+    } else {
+      setState(() => _step = next);
+    }
+    _speakCurrentStep();
+  }
+
+  /// Opens [step] from a tapped row on the review page.
+  void _editFromReview(int step) {
+    setState(() {
+      _editSnapshot = _EditSnapshot.capture(this);
+      _step = step;
+    });
+    _speakCurrentStep();
+  }
+
   void _goBack() {
+    final snapshot = _editSnapshot;
+    if (snapshot != null) {
+      // Any reverse geocode still running belongs to the abandoned edit.
+      _pickupGeocodeSeq++;
+      _dropoffGeocodeSeq++;
+      setState(() {
+        snapshot.restore(this);
+        _editSnapshot = null;
+        _step = 4;
+      });
+      _syncNearbyDrivers();
+      _speakCurrentStep();
+      return;
+    }
     if (_step == 0) {
       Navigator.pop(context);
       return;
@@ -296,10 +513,22 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
 
     final recipientPhone =
         normalizePhoneToBackend(_recipientPhoneController.text);
-    final weight = PackageItemCatalog.weightForSize(_sizeId);
+    const weight = _assumedWeightKg;
+
+    // The typed description now leads. Previously this field carried ONLY
+    // "Voice note: /data/user/0/.../rec.m4a" — a path on the customer's own
+    // handset, which told the driver nothing and was the only thing in the
+    // description at all.
     final descParts = <String>[];
+    final typed = _descriptionController.text.trim();
+    if (typed.isNotEmpty) {
+      descParts.add(typed);
+    }
     if (_voiceNotePath != null) {
-      descParts.add('Voice note: $_voiceNotePath');
+      descParts.add('[voice note attached]');
+    }
+    if (_packageImagePath != null) {
+      descParts.add('[photo attached]');
     }
     final description = descParts.join('\n');
 
@@ -313,7 +542,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           pickupPosition: _pickupPosition,
           deliveryPosition: _dropoffPosition,
           selectedVehicle: 'motorcycle',
-          itemType: _itemType!,
+          itemType: _packageType,
           quantity: '1',
           packageWeight: weight,
           packageDescription: description,
@@ -366,14 +595,11 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   Future<void> _takePhoto() async {
     final l10n = context.l10n;
     try {
-      final picked = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-      );
-      if (picked == null || !mounted) return;
-      setState(() => _packageImagePath = picked.path);
+      // In the app, so low-memory phones do not kill HudHud while the
+      // phone's camera app is open (see takePackagePhoto).
+      final path = await takePackagePhoto(context);
+      if (path == null || !mounted) return;
+      setState(() => _packageImagePath = path);
     } on PlatformException catch (e) {
       if (!mounted) return;
       _snack(l10n.couldNotOpenPhotoPicker(e.message ?? e.code));
@@ -412,11 +638,24 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     }
   }
 
+  /// What to call the parcel on the review screen and in the spoken summary.
+  ///
+  /// The customer may have typed nothing — a photo or a voice note is a valid
+  /// answer in this mode — so fall back to naming what they DID attach rather
+  /// than reading out an empty string.
+  String _packageLabel(AppLocalizations l10n) {
+    final typed = _descriptionController.text.trim();
+    if (typed.isNotEmpty) return typed;
+    if (_voiceNotePath != null) return l10n.voiceNoteAttached;
+    if (_packageImagePath != null) return l10n.takePackagePhoto;
+    return l10n.itemTypeOther;
+  }
+
   String _summary(AppLocalizations l10n) {
     return l10n.easyConfirmSummary(
       _pickupAddress,
       _dropoffAddress,
-      _itemType == null ? '' : PackageItemCatalog.labelFor(_itemType!, l10n),
+      _packageLabel(l10n),
       _recipientNameController.text.trim(),
     );
   }
@@ -431,38 +670,52 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       3 => (l10n.easyWhatIsIt, null),
       _ => (l10n.easyConfirmTitle, null),
     };
-    return CourierTheme.wrap(
-      context,
-      child: Scaffold(
-        backgroundColor: HomeColors.backgroundOf(context),
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _WizardHeader(
-                step: _step,
-                totalSteps: _totalSteps,
-                stepLabel: l10n.easyStepOf(_step + 1, _totalSteps),
-                title: title,
-                hint: hint,
-                onBack: _goBack,
-                speakText: switch (_step) {
-                  0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
-                  1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
-                  2 => l10n.easyWhoReceives,
-                  3 => '${l10n.easyWhatIsIt}. ${l10n.easyPackageSize}',
-                  4 => _summary(l10n),
-                  _ => '',
-                },
-              ),
-              Expanded(child: _buildStep(l10n)),
-              _WizardBottomBar(
-                label: _step == 4 ? l10n.actionContinue : l10n.actionNext,
-                isLast: _step == 4,
-                onPressed: _goNext,
-              ),
-            ],
+    // The system back button and gesture do what the on-screen arrow does:
+    // step back, or cancel a review-page edit. Only the first step, with no
+    // edit open, actually leaves the wizard. Before this, one press of the
+    // Android back button threw away every answer from all five steps.
+    return PopScope(
+      canPop: _step == 0 && _editSnapshot == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _goBack();
+      },
+      child: CourierTheme.wrap(
+        context,
+        child: Scaffold(
+          backgroundColor: HomeColors.backgroundOf(context),
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _WizardHeader(
+                  step: _step,
+                  totalSteps: _totalSteps,
+                  stepLabel: l10n.easyStepOf(_step + 1, _totalSteps),
+                  title: title,
+                  hint: hint,
+                  onBack: _goBack,
+                  speakText: switch (_step) {
+                    0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
+                    1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
+                    2 => l10n.easyWhoReceives,
+                    3 => '${l10n.easyWhatIsIt}. ${l10n.easyDescribeHint}',
+                    4 => _summary(l10n),
+                    _ => '',
+                  },
+                ),
+                Expanded(child: _buildStep(l10n)),
+                _WizardBottomBar(
+                  label: _step == 4
+                      ? l10n.actionContinue
+                      : _editSnapshot != null
+                          ? l10n.actionDone
+                          : l10n.actionNext,
+                  isLast: _step == 4,
+                  onPressed: _goNext,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -479,15 +732,23 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           iAmHereLabel: l10n.easyIAmHere,
           address: _pickupAddress,
           position: _pickupPosition,
-          snapToGpsOnStart: true,
+          // Only the first time. Coming back to this step - to change the
+          // pickup from review, or with the back arrow - must start from the
+          // pin already chosen, not yank it to wherever the phone is now.
+          snapToGpsOnStart: _pickupAddress.trim().isEmpty,
           markers: nearbyDriverMapMarkers(
             _nearbyPoller.result.drivers,
             iconsByAsset: _nearbyIconsByAsset,
           ),
           privacyMessage: _nearbyPoller.result.privacyMessage,
+          notice: _pickupAreaNotice,
+          isChecking: _checkingPickupArea,
           onPositionChanged: (pos) {
             setState(() {
               _pickupPosition = LatLng(pos.latitude, pos.longitude);
+              // The notice was about the old pin. Keeping it would refuse an
+              // address nobody has checked yet.
+              _pickupAreaNotice = null;
             });
             _syncNearbyDrivers();
             unawaited(_reverseGeocodePickup());
@@ -499,6 +760,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
               _pickupPosition = place.coordinates;
               _pickupAddress = place.formattedAddress;
               _pickupPlace = place;
+              _pickupAreaNotice = null;
             });
             _syncNearbyDrivers();
             unawaited(_goNext());
@@ -516,9 +778,12 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           requireTapToPin: false,
           showIAmHereButton: false,
           isDropoff: true,
+          notice: _dropoffAreaNotice,
           onPositionChanged: (pos) {
             setState(() {
               _dropoffPosition = LatLng(pos.latitude, pos.longitude);
+              // About the old pin, like the pickup notice.
+              _dropoffAreaNotice = null;
             });
             unawaited(_reverseGeocodeDropoff());
           },
@@ -529,6 +794,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
               _dropoffPosition = place.coordinates;
               _dropoffAddress = place.formattedAddress;
               _dropoffPlace = place;
+              _dropoffAreaNotice = null;
             });
           },
         );
@@ -540,13 +806,11 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         );
       case 3:
         return _PackageStep(
-          itemType: _itemType,
-          sizeId: _sizeId,
+          descriptionController: _descriptionController,
           imagePath: _packageImagePath,
           voiceNotePath: _voiceNotePath,
           isRecording: _isRecording,
-          onSelectItem: (id) => setState(() => _itemType = id),
-          onSelectSize: (id) => setState(() => _sizeId = id),
+          onDescriptionChanged: (_) => setState(() {}),
           onTakePhoto: _takePhoto,
           onRecordStart: _startRecording,
           onRecordEnd: _stopRecording,
@@ -557,12 +821,15 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           summary: _summary(l10n),
           pickup: _pickupAddress,
           dropoff: _dropoffAddress,
-          itemLabel: _itemType == null
-              ? ''
-              : PackageItemCatalog.labelFor(_itemType!, l10n),
+          itemLabel: _packageLabel(l10n),
           recipient: _recipientNameController.text.trim(),
+          recipientPhone: _recipientPhoneController.text.trim(),
           imagePath: _packageImagePath,
-          onPlay: () => VoiceHintService.instance.speak(_summary(l10n)),
+          onPlay: () => VoiceHintService.instance.toggle(_summary(l10n)),
+          onEditPickup: () => _editFromReview(0),
+          onEditDropoff: () => _editFromReview(1),
+          onEditRecipient: () => _editFromReview(2),
+          onEditPackage: () => _editFromReview(3),
         );
     }
   }
@@ -583,6 +850,8 @@ class _MapStep extends StatefulWidget {
     this.isDropoff = false,
     this.markers = const {},
     this.privacyMessage,
+    this.notice,
+    this.isChecking = false,
     required this.onPositionChanged,
     required this.onPlaceSelected,
   });
@@ -605,6 +874,13 @@ class _MapStep extends StatefulWidget {
   final bool isDropoff;
   final Set<gmaps.Marker> markers;
   final String? privacyMessage;
+
+  /// A refusal about the CURRENT address — shown above the address card so it
+  /// sits beside the thing it is about, and stays until the address changes.
+  final String? notice;
+
+  /// The service-area lookup is in flight.
+  final bool isChecking;
   final ValueChanged<gmaps.LatLng> onPositionChanged;
   final ValueChanged<PlaceResult> onPlaceSelected;
 
@@ -628,7 +904,9 @@ class _MapStepState extends State<_MapStep> {
   bool _searchActive = false;
   List<PlaceResult> _searchSuggestions = [];
   bool _searchLoading = false;
+  bool _searchFailed = false;
   String _searchQuery = '';
+  final _searchFieldKey = GlobalKey<LocationSearchFieldState>();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -829,6 +1107,7 @@ class _MapStepState extends State<_MapStep> {
       _pinPlaced = true;
       _searchSuggestions = [];
       _searchLoading = false;
+      _searchFailed = false;
       _searchQuery = '';
       _mapGeneration++;
       _mapController = null;
@@ -926,6 +1205,7 @@ class _MapStepState extends State<_MapStep> {
               boxShadow: AppColors.softShadow(context),
             ),
             child: LocationSearchField(
+              key: _searchFieldKey,
               controller: _searchController,
               focusNode: _searchFocusNode,
               autofocus: widget.searchFirst,
@@ -947,11 +1227,13 @@ class _MapStepState extends State<_MapStep> {
                 required isLoading,
                 required show,
                 required query,
+                required failed,
               }) {
                 if (!mounted) return;
                 setState(() {
                   _searchSuggestions = suggestions;
                   _searchLoading = isLoading;
+                  _searchFailed = failed;
                   _searchQuery = query;
                 });
               },
@@ -984,6 +1266,9 @@ class _MapStepState extends State<_MapStep> {
                         onLocationSelected: _onSearchPlaceSelected,
                         l10n: context.l10n,
                         colorScheme: Theme.of(context).colorScheme,
+                        failed: _searchFailed,
+                        onRetry: () =>
+                            _searchFieldKey.currentState?.retrySearch(),
                       ),
                     ),
                   ),
@@ -1037,6 +1322,17 @@ class _MapStepState extends State<_MapStep> {
                               text:
                                   'Nearby motorbikes are shown approximately. Driver details appear after acceptance.',
                             ),
+                            const SizedBox(height: 8),
+                          ],
+                          // Tapping Next now waits on a service-area lookup.
+                          // A map that simply does nothing for a moment reads
+                          // as a dead button, so the wait is visible.
+                          if (widget.isChecking) ...[
+                            const _CheckingAreaBanner(),
+                            const SizedBox(height: 8),
+                          ] else if (widget.notice != null &&
+                              widget.notice!.isNotEmpty) ...[
+                            _OutsideAreaBanner(text: widget.notice!),
                             const SizedBox(height: 8),
                           ],
                           if (widget.address.isNotEmpty)
@@ -1137,10 +1433,15 @@ class _WizardHeader extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 26,
-                      height: 1.15,
+                      // 26 -> 22. Easy mode earns a large title, but 26 was
+                      // shouting: it wrapped the longer step titles onto three
+                      // lines on a small phone and pushed the map down. The
+                      // weight and negative tracking already carry the
+                      // hierarchy, so the size was doing work twice.
+                      fontSize: 22,
+                      height: 1.2,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -0.6,
+                      letterSpacing: -0.4,
                       color: HomeColors.textPrimaryOf(context),
                     ),
                   ),
@@ -1436,6 +1737,76 @@ class _IAmHerePill extends StatelessWidget {
   }
 }
 
+/// The service-area lookup is in flight. No words: Easy Mode is for people
+/// who may not read, and a spinner beside the address says "wait" to
+/// everyone without needing a fifth translation.
+class _CheckingAreaBanner extends StatelessWidget {
+  const _CheckingAreaBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context).withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Row(
+        children: [
+          SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A refusal the customer can act on: why, and where we do deliver.
+///
+/// Red rather than grey, and it does not disappear on its own. The fault it
+/// reports cost four steps of work the last time it was reported at the end.
+class _OutsideAreaBanner extends StatelessWidget {
+  const _OutsideAreaBanner({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.error.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline_rounded, size: 20, color: scheme.error),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.35,
+                fontWeight: FontWeight.w600,
+                color: scheme.onErrorContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _NearbyInfoBanner extends StatelessWidget {
   const _NearbyInfoBanner({required this.text});
 
@@ -1633,9 +2004,12 @@ class _SectionTitle extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 18,
+        // 18 -> 16. A section label inside a step should sit clearly below
+        // the step title, not compete with it. At 18 against a 22 title the
+        // two read as the same level.
+        fontSize: 16,
         fontWeight: FontWeight.w800,
-        letterSpacing: -0.3,
+        letterSpacing: -0.2,
         color: HomeColors.textPrimaryOf(context),
       ),
     );
@@ -1827,26 +2201,22 @@ class _RecipientStep extends StatelessWidget {
 
 class _PackageStep extends StatelessWidget {
   const _PackageStep({
-    required this.itemType,
-    required this.sizeId,
+    required this.descriptionController,
     required this.imagePath,
     required this.voiceNotePath,
     required this.isRecording,
-    required this.onSelectItem,
-    required this.onSelectSize,
+    required this.onDescriptionChanged,
     required this.onTakePhoto,
     required this.onRecordStart,
     required this.onRecordEnd,
     required this.onClearVoice,
   });
 
-  final String? itemType;
-  final String sizeId;
+  final TextEditingController descriptionController;
   final String? imagePath;
   final String? voiceNotePath;
   final bool isRecording;
-  final ValueChanged<String> onSelectItem;
-  final ValueChanged<String> onSelectSize;
+  final ValueChanged<String> onDescriptionChanged;
   final VoidCallback onTakePhoto;
   final Future<void> Function() onRecordStart;
   final Future<void> Function() onRecordEnd;
@@ -1862,50 +2232,44 @@ class _PackageStep extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
-        GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 0.88,
-          children: [
-            for (final id in PackageItemCatalog.easyModeIds)
-              _BigChoice(
-                selected: itemType == id,
-                icon: PackageItemCatalog.iconFor(id),
-                label: PackageItemCatalog.labelFor(id, l10n),
-                onTap: () => onSelectItem(id),
-              ),
-          ],
+        // Six fixed types and three sizes used to live here. Both are gone:
+        // the type never described anything a driver needed ("Other" was the
+        // honest answer for most parcels) and the size only ever fed
+        // packageWeight, which no pricing path reads — OrderPricingService
+        // charges by weight but nothing in the codebase calls it. So two
+        // required taps bought nothing. The customer says what it is instead.
+        TextField(
+          controller: descriptionController,
+          minLines: 2,
+          maxLines: 4,
+          maxLength: 140,
+          textCapitalization: TextCapitalization.sentences,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: HomeColors.textPrimaryOf(context),
+          ),
+          decoration: InputDecoration(
+            hintText: l10n.easyDescribeHint,
+            counterText: '',
+            filled: true,
+            fillColor: HomeColors.surfaceElevatedOf(context),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onChanged: onDescriptionChanged,
         ),
-        const SizedBox(height: 28),
-        _SectionTitle(l10n.easyPackageSize),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            for (final entry in [
-              ('small', l10n.easySizeSmall, 20.0),
-              ('medium', l10n.easySizeMedium, 28.0),
-              ('large', l10n.easySizeLarge, 36.0),
-            ]) ...[
-              Expanded(
-                child: SizedBox(
-                  height: 128,
-                  child: _BigChoice(
-                    selected: sizeId == entry.$1,
-                    icon: Icons.inventory_2_rounded,
-                    iconSize: entry.$3,
-                    label: entry.$2,
-                    onTap: () => onSelectSize(entry.$1),
-                  ),
-                ),
-              ),
-              if (entry.$1 != 'large') const SizedBox(width: 12),
-            ],
-          ],
+        const SizedBox(height: 6),
+        // What riders may not carry (tester report: clear rules at booking).
+        Text(
+          l10n.prohibitedItemsNote,
+          style: TextStyle(fontSize: 13, color: Colors.red.shade700),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 20),
         _SurfaceCard(
           onTap: onTakePhoto,
           padding: EdgeInsets.zero,
@@ -2092,8 +2456,13 @@ class _ConfirmStep extends StatelessWidget {
     required this.dropoff,
     required this.itemLabel,
     required this.recipient,
+    required this.recipientPhone,
     required this.imagePath,
     required this.onPlay,
+    required this.onEditPickup,
+    required this.onEditDropoff,
+    required this.onEditRecipient,
+    required this.onEditPackage,
   });
 
   final String summary;
@@ -2101,8 +2470,13 @@ class _ConfirmStep extends StatelessWidget {
   final String dropoff;
   final String itemLabel;
   final String recipient;
+  final String recipientPhone;
   final String? imagePath;
   final VoidCallback onPlay;
+  final VoidCallback onEditPickup;
+  final VoidCallback onEditDropoff;
+  final VoidCallback onEditRecipient;
+  final VoidCallback onEditPackage;
 
   @override
   Widget build(BuildContext context) {
@@ -2141,6 +2515,7 @@ class _ConfirmStep extends StatelessWidget {
                 background: orangeTint,
                 caption: l10n.pickupLocationLabel,
                 label: pickup,
+                onEdit: onEditPickup,
               ),
               divider,
               _InfoRow(
@@ -2149,6 +2524,7 @@ class _ConfirmStep extends StatelessWidget {
                 background: indigoTint,
                 caption: l10n.deliveryLocationLabel,
                 label: dropoff,
+                onEdit: onEditDropoff,
               ),
               divider,
               _InfoRow(
@@ -2157,6 +2533,7 @@ class _ConfirmStep extends StatelessWidget {
                 background: indigoTint,
                 caption: l10n.whatAreYouSending,
                 label: itemLabel,
+                onEdit: onEditPackage,
               ),
               divider,
               _InfoRow(
@@ -2164,7 +2541,12 @@ class _ConfirmStep extends StatelessWidget {
                 color: accent,
                 background: indigoTint,
                 caption: l10n.recipient,
-                label: recipient,
+                // The phone is what the driver dials and the field most easily
+                // mistyped, so it is shown here to be checked, not just the name.
+                label: recipientPhone.isEmpty
+                    ? recipient
+                    : '$recipient\n$recipientPhone',
+                onEdit: onEditRecipient,
               ),
               const SizedBox(height: 6),
             ],
@@ -2224,6 +2606,7 @@ class _InfoRow extends StatelessWidget {
     required this.background,
     required this.caption,
     required this.label,
+    required this.onEdit,
   });
 
   final IconData icon;
@@ -2231,158 +2614,138 @@ class _InfoRow extends StatelessWidget {
   final Color background;
   final String caption;
   final String label;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Row(
-        children: [
-          _IconTile(
-            icon: icon,
-            color: color,
-            background: background,
-            size: 48,
-            iconSize: 24,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  caption,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: HomeColors.textMutedOf(context),
-                  ),
+    // The whole row is the tap target, and the pencil chip says so. This is
+    // the low-literacy flow: a row that is tappable but looks exactly as it
+    // did before would never be discovered.
+    final l10n = context.l10n;
+    final accent = HomeColors.violetOf(context);
+    return Material(
+      // Transparent so the ripple paints on the card, not behind it.
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onEdit,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+          child: Row(
+            children: [
+              _IconTile(
+                icon: icon,
+                color: color,
+                background: background,
+                size: 48,
+                iconSize: 24,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      caption,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: HomeColors.textMutedOf(context),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      label,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.3,
+                        fontWeight: FontWeight.w700,
+                        color: HomeColors.textPrimaryOf(context),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 16,
-                    height: 1.3,
-                    fontWeight: FontWeight.w700,
-                    color: HomeColors.textPrimaryOf(context),
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: HomeColors.violetTintOf(context),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_rounded, size: 18, color: accent),
+                    const SizedBox(width: 4),
+                    Text(
+                      l10n.actionChange,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: accent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// Big picture-first choice tile. Selected = indigo border + tint + check.
-class _BigChoice extends StatelessWidget {
-  const _BigChoice({
-    required this.selected,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.iconSize = 30,
-  });
+/// The answers a review-page edit can change, held so backing out of the
+/// edit puts them all back. See [_EasyBookingWizardScreenState._editSnapshot].
+class _EditSnapshot {
+  _EditSnapshot.capture(_EasyBookingWizardScreenState s)
+      : pickupPosition = s._pickupPosition,
+        pickupAddress = s._pickupAddress,
+        pickupPlace = s._pickupPlace,
+        pickupAreaNotice = s._pickupAreaNotice,
+        dropoffPosition = s._dropoffPosition,
+        dropoffAddress = s._dropoffAddress,
+        dropoffPlace = s._dropoffPlace,
+        dropoffAreaNotice = s._dropoffAreaNotice,
+        recipientName = s._recipientNameController.text,
+        recipientPhone = s._recipientPhoneController.text,
+        description = s._descriptionController.text,
+        packageImagePath = s._packageImagePath,
+        voiceNotePath = s._voiceNotePath;
 
-  final bool selected;
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final double iconSize;
+  final LatLng pickupPosition;
+  final String pickupAddress;
+  final PlaceResult? pickupPlace;
+  final String? pickupAreaNotice;
+  final LatLng dropoffPosition;
+  final String dropoffAddress;
+  final PlaceResult? dropoffPlace;
+  final String? dropoffAreaNotice;
+  final String recipientName;
+  final String recipientPhone;
+  final String description;
+  final String? packageImagePath;
+  final String? voiceNotePath;
 
-  @override
-  Widget build(BuildContext context) {
-    final dark = HomeColors.isDark(context);
-    final accent = HomeColors.violetOf(context);
-    final tint = HomeColors.violetTintOf(context);
-    final radius = BorderRadius.circular(20);
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          boxShadow: selected ? null : AppColors.softShadow(context),
-        ),
-        child: Material(
-          color: selected ? tint : HomeColors.surfaceOf(context),
-          shape: RoundedRectangleBorder(
-            borderRadius: radius,
-            side: selected
-                ? BorderSide(color: accent, width: 2)
-                : (dark
-                    ? BorderSide(color: HomeColors.borderOf(context))
-                    : BorderSide.none),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: Stack(
-              children: [
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 12, 8, 10),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color:
-                                selected ? HomeColors.surfaceOf(context) : tint,
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Icon(icon, size: iconSize, color: accent),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          label,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14,
-                            height: 1.2,
-                            fontWeight:
-                                selected ? FontWeight.w800 : FontWeight.w700,
-                            color: HomeColors.textPrimaryOf(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (selected)
-                  PositionedDirectional(
-                    top: 8,
-                    end: 8,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: accent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  /// Call inside setState.
+  void restore(_EasyBookingWizardScreenState s) {
+    s._pickupPosition = pickupPosition;
+    s._pickupAddress = pickupAddress;
+    s._pickupPlace = pickupPlace;
+    s._pickupAreaNotice = pickupAreaNotice;
+    s._checkingPickupArea = false;
+    s._dropoffPosition = dropoffPosition;
+    s._dropoffAddress = dropoffAddress;
+    s._dropoffPlace = dropoffPlace;
+    s._dropoffAreaNotice = dropoffAreaNotice;
+    s._recipientNameController.text = recipientName;
+    s._recipientPhoneController.text = recipientPhone;
+    s._descriptionController.text = description;
+    s._packageImagePath = packageImagePath;
+    s._voiceNotePath = voiceNotePath;
   }
 }

@@ -2,7 +2,7 @@ name: hudhud_delivery
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 1.1.7+47
+version: 1.1.15+65
 
 environment:
   sdk: ">=3.1.0 <4.0.0"
@@ -64,11 +64,19 @@ dependencies:
   lottie: ^3.1.3
   country_picker: ^2.0.27
   image_picker: ^1.1.2
+  # In-app camera for the package photo: the system camera app sends HudHud
+  # to the background, and low-memory phones (Samsung A16) kill it there.
+  camera: ^0.12.0+1
   device_info_plus: ^10.1.0
   package_info_plus: ^8.1.2
 
   # Location Services
   permission_handler: ^12.0.1
+
+  # Voice calls between a customer and the courier on their order. The call
+  # DECISIONS live in lib/features/calls/call_session.dart and are tested
+  # without a device; this is only the audio.
+  flutter_webrtc: ^0.12.5
   geocoding: ^3.0.0
 
   # Map and HTTP

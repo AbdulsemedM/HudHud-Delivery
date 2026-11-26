@@ -2,11 +2,11 @@ import 'package:hudhud_delivery/core/utils/localized_date.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/calls/call_presenter.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/easy_mode/voice_hint_service.dart';
@@ -22,6 +22,7 @@ import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_s
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/driver_contact_card.dart';
+import 'package:hudhud_delivery/core/utils/vehicle_motion.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
@@ -29,6 +30,7 @@ import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
 import 'package:hudhud_delivery/features/courier/parcel_v2/parcel_v2_widgets.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
+import 'package:hudhud_delivery/core/utils/phone_dialer.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
   final int? deliveryId;
@@ -66,9 +68,14 @@ class DeliveryTrackingScreen extends StatefulWidget {
   State<DeliveryTrackingScreen> createState() => _DeliveryTrackingScreenState();
 }
 
-class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
+class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
+    with SingleTickerProviderStateMixin {
   gmaps.GoogleMapController? _mapController;
   LatLng? _vehiclePosition;
+
+  /// Walks the marker between polled positions instead of teleporting it.
+  /// See VehicleMotion for why it is linear and when it snaps.
+  late final VehicleMotion _vehicleMotion;
   Timer? _pollTimer;
   gmaps.BitmapDescriptor? _deliveryGuyIcon;
 
@@ -88,6 +95,13 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   @override
   void initState() {
+    _vehicleMotion = VehicleMotion(
+      vsync: this,
+      // Only the marker moves, so only the marker's frame is rebuilt.
+      onChanged: () {
+        if (mounted) setState(() {});
+      },
+    );
     super.initState();
     _courierRepository = CourierRepository(
       courierDataProvider: CourierDataProvider(
@@ -158,7 +172,26 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _vehicleMotion.dispose();
     super.dispose();
+  }
+
+  /// Hand a new fix to the marker.
+  ///
+  /// Reduced motion is honoured here rather than inside VehicleMotion,
+  /// because MediaQuery belongs to the widget. Somebody who has asked their
+  /// phone to stop animating still gets a correct position - on a map the
+  /// position is the content, and the motion only ever existed to make the
+  /// gaps between readings legible.
+  void _driveMarkerTo(LatLng point, {Duration? interval}) {
+    final reduced = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    // latlong2 in, map-agnostic point out. VehicleMotion belongs to neither
+    // package precisely so this conversion is explicit and in one place.
+    _vehicleMotion.moveTo(
+      MotionPoint(point.latitude, point.longitude),
+      expectedInterval: interval,
+      animate: !reduced,
+    );
   }
 
   LatLng? _parseDriverLocation(Map<String, dynamic>? data) {
@@ -223,7 +256,60 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     return null;
   }
 
+  /// The courier's USER id, which is what `/calls/initiate` wants.
+  ///
+  /// PackageDelivery.driver_id is a foreign key to users, and the `driver`
+  /// relation is a User, so the id on the tracking payload is the right one.
+  /// Anything else here produces NO_ACTIVE_JOB and no explanation.
+  int? _driverUserId() {
+    final liveId = _liveTracking?.driver?.id;
+    if (liveId != null && liveId > 0) return liveId;
+
+    final driver = _trackData?['driver'];
+    if (driver is Map) {
+      final raw = driver['id'];
+      final id = raw is int ? raw : int.tryParse('${raw ?? ''}');
+      if (id != null && id > 0) return id;
+    }
+    return null;
+  }
+
+  /*
+   * TAPPING CALL PLACES THE CALL. It does not ask which kind.
+   *
+   * A chooser was the wrong shape: WhatsApp does not ask, and a customer who
+   * wants to speak to their courier should not have to understand the
+   * difference between two transports to do it. Call means call.
+   *
+   * The phone network is kept as a SECOND action, not an equal first one -
+   * the way WhatsApp keeps the dialler behind the contact. It is there when
+   * the data call will not go through, which is honest while the relay is
+   * being stood up, and it stops being the thing anybody reaches for once it
+   * is.
+   *
+   * Only when there is no in-app route at all (an old payload with no driver
+   * id) does Call fall straight through to the dialler, because a button
+   * that explains why it cannot work is worse than one that works.
+   */
   Future<void> _callDriver() async {
+    final driverId = _driverUserId();
+    if (driverId == null) {
+      await _dialDriver();
+      return;
+    }
+    await startOutgoingCall(
+      context,
+      calleeId: driverId,
+      displayName: _driverName(),
+    );
+  }
+
+  /// The phone network, as a deliberate second choice.
+  Future<void> _callDriverOnPhone() async {
+    await _dialDriver();
+  }
+
+  Future<void> _dialDriver() async {
     final phone = _driverPhone();
     if (phone == null || phone.isEmpty) {
       if (!mounted) return;
@@ -232,8 +318,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       );
       return;
     }
-    final uri = Uri(scheme: 'tel', path: phone);
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    // 2519… from the API dials as a local number without its "+".
+    final launched = await PhoneDialer.call(phone);
     if (!launched && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not open the phone dialer')),
@@ -377,6 +463,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
           final parsed = _parseDriverLocation(_trackData);
           if (parsed != null) {
             _vehiclePosition = parsed;
+            _driveMarkerTo(parsed);
             _retainedDriverPoint = GeoPoint(
               latitude: parsed.latitude,
               longitude: parsed.longitude,
@@ -484,6 +571,18 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       _retainedDriverPoint = retained;
       if (retained != null) {
         _vehiclePosition = LatLng(retained.latitude, retained.longitude);
+        // Timed against the interval the server just told us to poll on, so
+        // the marker arrives as the next fix lands rather than stopping
+        // dead and waiting - which reads as the driver pulling over.
+        _driveMarkerTo(
+          _vehiclePosition!,
+          interval: Duration(seconds: nextPoll),
+        );
+      }
+      if (terminal) {
+        // The delivery is over. Hold the last position rather than easing
+        // towards a point that will never be updated again.
+        _vehicleMotion.halt();
       }
       _trackError = null;
       _trackData = {
@@ -570,11 +669,20 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         ),
       );
     }
-    if (_vehiclePosition != null) {
+    // The ANIMATED position, not the last one polled: between fixes those
+    // differ, and the whole point is that the customer sees the difference.
+    final animated = _vehicleMotion.position;
+    final vehicleAt = animated != null
+        ? gmaps.LatLng(animated.latitude, animated.longitude)
+        : (_vehiclePosition != null ? _toG(_vehiclePosition!) : null);
+    if (vehicleAt != null) {
       markers.add(
         gmaps.Marker(
           markerId: const gmaps.MarkerId('vehicle'),
-          position: _toG(_vehiclePosition!),
+          position: vehicleAt,
+          rotation: _vehicleMotion.bearing,
+          anchor: const Offset(0.5, 0.5),
+          flat: true,
           icon: _deliveryGuyIcon ??
               gmaps.BitmapDescriptor.defaultMarkerWithHue(
                 gmaps.BitmapDescriptor.hueViolet,
@@ -927,7 +1035,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                         color: HomeColors.violetOf(context),
                                       ),
                                       onPressed: () {
-                                        VoiceHintService.instance.speak(
+                                        VoiceHintService.instance.toggle(
                                           friendlyStatus,
                                         );
                                       },
@@ -1013,8 +1121,20 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                       )
                                                       .join(' · '),
                                                   borderColor: borderColor,
-                                                  onCall: _driverPhone() != null
+                                                  onCall:
+                                                      (_driverPhone() != null ||
+                                                          _driverUserId() != null)
                                                       ? _callDriver
+                                                      : null,
+                                                  // Only when the in-app
+                                                  // route exists: otherwise
+                                                  // Call IS the dialler and a
+                                                  // second button beside it
+                                                  // would do the same thing.
+                                                  onCallOnPhone:
+                                                      (_driverUserId() != null &&
+                                                          _driverPhone() != null)
+                                                      ? _callDriverOnPhone
                                                       : null,
                                                   onMessage: _messageDriver,
                                                 ),

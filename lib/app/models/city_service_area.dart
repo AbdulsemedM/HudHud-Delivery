@@ -49,6 +49,15 @@ class CityServiceArea {
   final String? countryCode;
   final bool enforced;
 
+  /// Where map SEARCH looks, which is a narrower question than where the
+  /// market serves - see [searchRestriction]. Null before the Phase-10.1
+  /// backend, in which case search falls back to [bounds].
+  final CityBounds? searchBounds;
+
+  /// Radius for Text Search, in km. Defaults to [radiusKm] when the backend
+  /// does not send one.
+  final double? searchRadiusKm;
+
   const CityServiceArea({
     required this.marketCode,
     required this.marketName,
@@ -60,6 +69,8 @@ class CityServiceArea {
     this.shape = 'radius',
     this.countryCode,
     this.enforced = false,
+    this.searchBounds,
+    this.searchRadiusKm,
   });
 
   bool get hasCenter => centerLat != null && centerLng != null;
@@ -76,11 +87,46 @@ class CityServiceArea {
     return distanceKm(lat, lng, centerLat!, centerLng!) <= radiusKm;
   }
 
-  /// Google Places Autocomplete `locationrestriction` value.
+  /// Google Places Autocomplete rectangle for the SERVICE area.
   String? get autocompleteRestriction {
     final b = bounds;
     if (b == null) return null;
     return 'rectangle:${b.south},${b.west}|${b.north},${b.east}';
+  }
+
+  /// Google Places rectangle for map SEARCH - always a hard restriction.
+  ///
+  /// This is deliberately NOT tied to [enforced]. That flag says whether an
+  /// ORDER may cross a city line, which is a business decision; it has no
+  /// bearing on where a customer's search should look. While it was doing
+  /// both jobs the app sent `locationbias` - a preference Google is free to
+  /// ignore - and a customer in Addis searching "bole" was offered Hargeisa.
+  String? get searchRestriction {
+    final b = searchBounds ?? bounds;
+    if (b == null) return null;
+    return 'rectangle:${b.south},${b.west}|${b.north},${b.east}';
+  }
+
+  /// Radius to search within, in km (never wider than the service radius).
+  double get effectiveSearchRadiusKm {
+    final r = searchRadiusKm;
+    if (r == null || r <= 0) return radiusKm;
+    return r < radiusKm ? r : radiusKm;
+  }
+
+  /// True when a place is close enough to offer as a search result.
+  ///
+  /// A hand-drawn polygon is the most precise statement of the city there is,
+  /// so it wins; otherwise the search rectangle decides.
+  bool containsForSearch(double lat, double lng) {
+    if (shape == 'polygon' && polygon.length >= 3) {
+      return _pointInPolygon(lat, lng);
+    }
+    final b = searchBounds ?? bounds;
+    if (b != null) return b.contains(lat, lng);
+    if (!hasCenter) return true;
+    return distanceKm(lat, lng, centerLat!, centerLng!) <=
+        effectiveSearchRadiusKm;
   }
 
   /// Google `components` filter (`country:so`), or null when unknown.
@@ -119,6 +165,8 @@ class CityServiceArea {
       shape: raw['shape']?.toString() ?? 'radius',
       countryCode: raw['country_code']?.toString(),
       enforced: raw['enforced'] == true,
+      searchBounds: CityBounds.fromJson(raw['search_bounds']),
+      searchRadiusKm: _toDouble(raw['search_radius_km']),
     );
   }
 

@@ -5,8 +5,11 @@ import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
+import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
+import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 // import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/courier_screen.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_send_request.dart';
 // import 'package:hudhud_delivery/features/taxi/presentation/screens/taxi_screen.dart';
 import '../widgets/home_service_tab_bar.dart';
 import '../widgets/service_coming_soon_screen.dart';
@@ -79,6 +82,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   HomeServiceMode _serviceMode = HomeServiceMode.courier;
 
+  /// Sectors the server says have a live shop. Decides whether the Pharmacy
+  /// and Spare parts tiles exist at all — see HomeServiceTabBar for why they
+  /// are not simply hardcoded. Empty until the call returns, so Home renders
+  /// its two familiar tiles first and gains the others only if there is
+  /// something behind them.
+  Set<String> _availableSectors = const <String>{};
+
   bool _verificationPromptOpen = false;
   bool _verifyBannerDismissed = false;
   bool _launchPromptSequenceStarted = false;
@@ -93,6 +103,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     widget.homeTabActivation.addListener(_onHomeTabActivation);
     OnboardingTourController.replaySignal.addListener(_onReplayTourRequested);
     _loadUserData();
+    _loadAvailableSectors();
     _requestLocationAndUpdate(resumeRefresh: false);
     WidgetsBinding.instance.addPostFrameCallback((_) => _runLaunchPromptSequence());
   }
@@ -161,6 +172,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _requestLocationAndUpdate(resumeRefresh: true);
+    }
+  }
+
+  /// Which sectors have a shop behind them, so Home can decide whether the
+  /// Pharmacy and Spare parts tiles are worth drawing.
+  ///
+  /// Failure is silent and leaves the set empty: a home screen must not break
+  /// over a decoration, and "no tile" is the right answer when we cannot
+  /// confirm there is anything to show.
+  Future<void> _loadAvailableSectors() async {
+    try {
+      final repository = VendorsRepository(
+        vendorsDataProvider:
+            VendorsDataProvider(apiService: ApiService.instance),
+      );
+      final sectors = await repository.getAvailableSectors();
+      if (!mounted) return;
+      setState(() => _availableSectors = sectors.toSet());
+    } catch (_) {
+      // Leave _availableSectors empty.
     }
   }
 
@@ -484,12 +515,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 const SizedBox(height: 16),
                 HomeServiceTabBar(
                   selected: _serviceMode,
+                  availableSectors: _availableSectors,
                   tourKeys: _tourKeys,
                   onSelected: (mode) {
                     setState(() => _serviceMode = mode);
                     context
                         .read<ServiceAccentController>()
                         .updateHomeServiceMode(mode);
+                    // "Send a package" starts sending straight away (tester
+                    // report); the courier screen skips it while a delivery
+                    // is in progress, so that delivery is what they see.
+                    if (mode == HomeServiceMode.courier) {
+                      CourierSendRequest.instance.request();
+                    }
                   },
                 ),
                 Expanded(
@@ -498,10 +536,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     children: const [
                       CourierScreen(),
                       AllCategoriesScreen(embedded: true),
+                      // Index order must match HomeServiceMode exactly; the
+                      // two sector panes are appended for that reason.
                       // TaxiScreen(), // TODO: restore when Taxi launches
                       ServiceComingSoonScreen(mode: HomeServiceMode.taxi),
                       // HandymanScreen(embedded: true), // TODO: restore when Handyman launches
                       ServiceComingSoonScreen(mode: HomeServiceMode.handyman),
+                      AllCategoriesScreen(
+                        embedded: true,
+                        initialSector: 'pharmacy',
+                      ),
+                      AllCategoriesScreen(
+                        embedded: true,
+                        initialSector: 'spare_parts',
+                      ),
                     ],
                   ),
                 ),

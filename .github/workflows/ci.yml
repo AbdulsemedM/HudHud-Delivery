@@ -77,7 +77,7 @@ jobs:
       # better design — a gitignored required asset means no fresh clone and no
       # CI can build — and once it merges, this step should be deleted.
       - name: Seed .env (gitignored, required asset)
-        run: printf 'BASE_URL=https://deliveryapi.hudhudexpress.com\n' > .env
+        run: printf 'BASE_URL=https://api.hudhuddelivery.com\n' > .env
 
       # Errors only. Infos and warnings stay non-fatal on purpose: this is an
       # existing codebase of some size, and failing every pull request over a

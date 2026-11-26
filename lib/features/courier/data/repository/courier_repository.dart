@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../../../core/utils/api_error_result.dart';
 import '../../../payment/model/payment_initiate_result.dart';
 import '../../utils/delivery_estimate.dart';
@@ -11,6 +13,46 @@ class CourierRepository {
   final CourierDataProvider courierDataProvider;
 
   CourierRepository({required this.courierDataProvider});
+
+  /// Uploads the customer's photo of the item so the driver sees it before
+  /// accepting. Until now the photo never left the phone: only the text
+  /// "[photo attached]" was sent.
+  ///
+  /// Never throws and never blocks the booking: the caller fires this and
+  /// moves on. Network and server errors are retried with a short backoff;
+  /// a 4xx (not this customer's delivery, already picked up, photo limit,
+  /// bad file) is final, so it is not retried. Returns whether it landed.
+  Future<bool> uploadPackagePhoto({
+    required int deliveryId,
+    required String filePath,
+    int attempts = 3,
+    Duration initialDelay = const Duration(seconds: 2),
+  }) async {
+    // The picker writes to the cache, which the OS may clear. A missing file
+    // would otherwise surface as a 500 from the provider and be retried.
+    if (!File(filePath).existsSync()) return false;
+
+    var delay = initialDelay;
+    for (var attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        final response = await courierDataProvider.uploadPackagePhoto(
+          deliveryId: deliveryId,
+          filePath: filePath,
+        );
+        final status = response['statusCode'] as int? ?? 0;
+        if (status == 200 || status == 201) return true;
+        final retryable = status == 0 || status == 408 || status == 429 || status >= 500;
+        if (!retryable) return false;
+      } catch (_) {
+        return false;
+      }
+      if (attempt < attempts) {
+        await Future<void>.delayed(delay);
+        delay *= 2;
+      }
+    }
+    return false;
+  }
 
   /// Estimate delivery cost. Returns estimated_distance, estimated_duration, estimated_cost.
   /// Pass [scheduledPickup] (ISO-8601 with offset) for scheduled bookings so the

@@ -164,6 +164,8 @@
   },
   "locationConfirmButton": "ቦታ ያረጋግጡ",
   "locationSearchNoResults": "ምንም ቦታ አልተገኘም",
+  "locationSearchNoResultsHint": "ሌላ ስም ይሞክሩ፣ ወይም ካርታውን አንቀሳቅሰው ምልክቱን ያስቀምጡ።",
+  "locationSearchFailed": "አሁን መፈለግ አልተቻለም። ኢንተርኔትዎን ያረጋግጡ፣ ወይም ካርታውን አንቀሳቅሰው ምልክቱን ያስቀምጡ።",
   "locationCurrentPositionFailed": "የአሁኑን ቦታ ማግኘት አልተቻለም",
   "currentLocationMap": "የአሁኑ አካባቢ",
   "verificationStatus": "የማረጋገጫ ሁኔታ",
@@ -231,6 +233,7 @@
   "courierActiveDelivery": "ንቁ ማድረስ",
   "courierNoHistory": "የመላኪያ ታሪክ የለም።",
   "courierHistoryEmptySubtitle": "ያለፈው መላኪያዎችህ እዚህ ይታያሉ",
+  "courierAddDeliveryCta": "መላኪያ ያክሉ",
   "courierInstantTitle": "ፈጣን ማድረስ",
   "courierAddDelivery": "ማድረሻ ጨምር",
   "courierInstantSubtitle": "መልእክተኛ ጥቅልዎን ብቻ ይወስዳል እና ወዲያውኑ ያቀርባል።",
@@ -462,6 +465,8 @@
   "vehicleBajaj": "በባጃጅ ማድረሻ",
   "vehiclePickup": "በፒካፕ ማድረሻ",
   "pickupOutsideDeliveryServiceArea": "የመውሰጃው አድራሻ ከሁድሁድ የተዋቀረ የማድረሻ አገልግሎት ክልል ውጭ ነው።",
+  "easyPickupNotServedIn": "ሁድሁድ ከዚህ ቦታ ገና አይወስድም። የመውሰጃ ቦታ ከእነዚህ ይምረጡ፦ {cities}።",
+  "easyCrossBorderNotServed": "ሁድሁድ በአንድ አገር ውስጥ ያደርሳል። የመውሰጃው ቦታ በ{from} ሲሆን የማድረሻው ቦታ በ{to} ነው።",
   "selectAvailableVehicleType": "ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ",
   "sendAPackageTitle": "ጥቅል ላክ",
   "courierDeliveryAddressPlaceholder": "የማድረሻ አድራሻ",
@@ -1413,12 +1418,16 @@
   "orderByCallSubtitle": "በስልክ ጥሪ ማድረሻውን እንዲፈጥሩ እንረዳዎታለን",
   "easyMode": "ቀላል ሁነታ",
   "easyModeSubtitle": "ትልልቅ ቁልፎች፣ ስዕሎች እና የድምፅ እገዛ",
+  "easyVoiceHints": "ደረጃዎችን በድምፅ አንብብ",
+  "easyVoiceHintsSubtitle": "በነባሪ ጠፍቷል። የ«አዳምጥ» ቁልፍ ሁልጊዜ ይሠራል።",
+  "easyDescribeHint": "በጥቅሉ ውስጥ ምን አለ? ፎቶ ወይም የድምፅ ማስታወሻ ማከል ይችላሉ።",
+  "easyDescribeRequired": "ጥቅሉን ይግለጹ፣ ፎቶ ያንሱ ወይም የድምፅ ማስታወሻ ይቅረጹ።",
   "navMyDeliveries": "የእኔ ማድረሻዎች",
   "navMe": "እኔ",
-  "courierNowTitle": "አሁን",
-  "courierNowSubtitle": "ወዲያውኑ ይላኩ",
-  "courierLaterTitle": "በኋላ",
-  "courierLaterSubtitle": "ቀን እና ሰዓት ይምረጡ",
+  "courierNowTitle": "አሁን ይላኩ",
+  "courierNowSubtitle": "መልእክተኛ ወዲያውኑ መጥቶ ይወስዳል",
+  "courierLaterTitle": "ሰዓት ይምረጡ",
+  "courierLaterSubtitle": "ለመውሰጃ ቀን እና ሰዓት ይምረጡ",
   "homeMoreServices": "ተጨማሪ",
   "homeHideMoreServices": "ደብቅ",
   "homeSendPackage": "ጥቅል ይላኩ",
@@ -1908,7 +1917,26 @@
   "@cartReplaceAction": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
+  "searchShopsTitle": "ሱቆች",
+  "@searchShopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartProductAdded": "{name} ወደ ጋሪ ተጨምሯል",
+  "@cartProductAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cartItemAdded": "ወደ ጋሪ ተጨምሯል",
+  "@cartItemAdded": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
   "homeTabDelivery": "ማድረስ",
+  "homeTabPharmacy": "ፋርማሲ",
+  "homeTabSpareParts": "መለዋወጫ እቃዎች",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   },
@@ -2612,5 +2640,25 @@
   "cpRuleNoCancelAfterPickup": "እቃው ወይም ምግቡ ከተወሰደ በኋላ መሰረዝ አይቻልም።",
   "deliveryCodeTitle": "የማስረከቢያ ኮድዎ",
   "deliveryCodePrompt": "ትዕዛዝዎን እንደተቀበሉ ለማረጋገጥ እነዚህን 4 ቁጥሮች ለአሽከርካሪው ያንብቡ።",
-  "deliveryCodeWarning": "ይህን ኮድ አሽከርካሪው ፊትዎ ሲሆን ብቻ ያጋሩ።"
+  "deliveryCodeWarning": "ይህን ኮድ አሽከርካሪው ፊትዎ ሲሆን ብቻ ያጋሩ።",
+  "sectorAll": "ሁሉም",
+  "sectorRestaurants": "ምግብ ቤቶች",
+  "sectorBakery": "ዳቦ ቤት",
+  "sectorSupermarket": "ሱፐርማርኬት",
+  "sectorMarket": "ገበያ",
+  "sectorPharmacy": "መድኃኒት ቤት",
+  "sectorSpareParts": "የመኪና መለዋወጫ",
+  "sectorGeneral": "አጠቃላይ",
+  "packageDescriptionRequired": "በጥቅሉ ውስጥ ምን አለ?",
+  "pleaseDescribePackage": "አሽከርካሪው ምን እንደሚይዝ እንዲያውቅ በጥቅሉ ውስጥ ያለውን ይግለጹ",
+  "prohibitedItemsNote": "አይፈቀድም፦ የጦር መሳሪያ፣ አደንዛዥ ዕፅ፣ ጥሬ ገንዘብ፣ ተቀጣጣይ ነገሮች፣ ሕያው እንስሳት።",
+  "fareRouteDistance": "{km} ኪ.ሜ",
+  "fareEstimateNote": "ግምት ነው - የመጨረሻው ዋጋ በትክክለኛው መንገድ ይሰላል።",
+  "productFiltersTitle": "ማጣሪያ",
+  "productFiltersClear": "ሁሉንም ማጣሪያዎች አጽዳ",
+  "productFilterQuick": "በ{minutes} ደቂቃ ወይም ባነሰ ጊዜ ዝግጁ",
+  "productFilterOnSale": "ቅናሽ ላይ",
+  "productFilterCustomizable": "ማስተካከል የሚቻል",
+  "productFilterContainsAllergens": "አለርጂ አምጪ ይዟል",
+  "productFilterNutritionInfo": "የአመጋገብ መረጃ"
 }

@@ -884,6 +884,18 @@ abstract class AppLocalizations {
   /// **'No locations found'**
   String get locationSearchNoResults;
 
+  /// No description provided for @locationSearchNoResultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another name, or move the map to place the pin.'**
+  String get locationSearchNoResultsHint;
+
+  /// No description provided for @locationSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t search right now. Check your internet, or move the map to place the pin.'**
+  String get locationSearchFailed;
+
   /// No description provided for @locationCurrentPositionFailed.
   ///
   /// In en, this message translates to:
@@ -1160,6 +1172,12 @@ abstract class AppLocalizations {
   /// **'Your past deliveries will appear here'**
   String get courierHistoryEmptySubtitle;
 
+  /// No description provided for @courierAddDeliveryCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add delivery'**
+  String get courierAddDeliveryCta;
+
   /// No description provided for @courierInstantTitle.
   ///
   /// In en, this message translates to:
@@ -1256,6 +1274,18 @@ abstract class AppLocalizations {
   /// **'Delivery'**
   String get homeTabDelivery;
 
+  /// No description provided for @homeTabPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get homeTabPharmacy;
+
+  /// No description provided for @homeTabSpareParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Spare parts'**
+  String get homeTabSpareParts;
+
   /// No description provided for @cartDifferentVendorTitle.
   ///
   /// In en, this message translates to:
@@ -1279,6 +1309,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep cart'**
   String get cartKeepCurrentAction;
+
+  /// Heading over the row of shops matching a search.
+  ///
+  /// In en, this message translates to:
+  /// **'Shops'**
+  String get searchShopsTitle;
+
+  /// Snackbar after a product is added to the cart.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added to cart'**
+  String cartProductAdded(String name);
+
+  /// Snackbar after a product with no name is added to the cart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to cart'**
+  String get cartItemAdded;
 
   /// No description provided for @homeTabCourier.
   ///
@@ -2155,6 +2203,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pickup is outside HudHud’s configured delivery service areas.'**
   String get pickupOutsideDeliveryServiceArea;
+
+  /// Shown when the chosen pickup address is outside every configured service area. {cities} is the list of cities HudHud delivers from.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud does not pick up from this place yet. Choose a pickup in: {cities}.'**
+  String easyPickupNotServedIn(String cities);
+
+  /// Shown when the pickup and drop-off are in different countries, which no courier can cover.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud delivers inside one country. The pickup is in {from} and the drop-off is in {to}.'**
+  String easyCrossBorderNotServed(String from, String to);
 
   /// No description provided for @selectAvailableVehicleType.
   ///
@@ -6038,6 +6098,30 @@ abstract class AppLocalizations {
   /// **'Bigger buttons, pictures, and spoken help'**
   String get easyModeSubtitle;
 
+  /// No description provided for @easyVoiceHints.
+  ///
+  /// In en, this message translates to:
+  /// **'Read steps aloud'**
+  String get easyVoiceHints;
+
+  /// No description provided for @easyVoiceHintsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Off by default. The Listen button always works.'**
+  String get easyVoiceHintsSubtitle;
+
+  /// No description provided for @easyDescribeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What is in the package? You can also add a photo or a voice note.'**
+  String get easyDescribeHint;
+
+  /// No description provided for @easyDescribeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the package, take a photo, or record a voice note.'**
+  String get easyDescribeRequired;
+
   /// No description provided for @navMyDeliveries.
   ///
   /// In en, this message translates to:
@@ -6053,25 +6137,25 @@ abstract class AppLocalizations {
   /// No description provided for @courierNowTitle.
   ///
   /// In en, this message translates to:
-  /// **'Now'**
+  /// **'Add Delivery'**
   String get courierNowTitle;
 
   /// No description provided for @courierNowSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Send right away'**
+  /// **'A courier comes to pick it up right away'**
   String get courierNowSubtitle;
 
   /// No description provided for @courierLaterTitle.
   ///
   /// In en, this message translates to:
-  /// **'Later'**
+  /// **'Choose a time'**
   String get courierLaterTitle;
 
   /// No description provided for @courierLaterSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Pick a day and time'**
+  /// **'Pick a day and hour for pickup'**
   String get courierLaterSubtitle;
 
   /// No description provided for @homeMoreServices.
@@ -8456,6 +8540,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Once the package or food is picked up, it can\'t be cancelled.'**
   String get cpRuleNoCancelAfterPickup;
+
+  /// Heading on the delivery-code card shown at the door
+  ///
+  /// In en, this message translates to:
+  /// **'Your delivery code'**
+  String get deliveryCodeTitle;
+
+  /// Tells the customer to read the 4-digit code aloud to the driver
+  ///
+  /// In en, this message translates to:
+  /// **'Read these 4 digits to your driver to confirm you received your order.'**
+  String get deliveryCodePrompt;
+
+  /// Warns the customer not to share the code before the driver arrives
+  ///
+  /// In en, this message translates to:
+  /// **'Only share this code once the driver is in front of you.'**
+  String get deliveryCodeWarning;
+
+  /// No description provided for @sectorAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get sectorAll;
+
+  /// No description provided for @sectorRestaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants'**
+  String get sectorRestaurants;
+
+  /// No description provided for @sectorBakery.
+  ///
+  /// In en, this message translates to:
+  /// **'Bakery'**
+  String get sectorBakery;
+
+  /// No description provided for @sectorSupermarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Supermarket'**
+  String get sectorSupermarket;
+
+  /// No description provided for @sectorMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get sectorMarket;
+
+  /// No description provided for @sectorPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get sectorPharmacy;
+
+  /// No description provided for @sectorSpareParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto parts'**
+  String get sectorSpareParts;
+
+  /// No description provided for @sectorGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get sectorGeneral;
+
+  /// No description provided for @packageDescriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s in the package?'**
+  String get packageDescriptionRequired;
+
+  /// No description provided for @pleaseDescribePackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what\'s in the package so the rider knows what they carry'**
+  String get pleaseDescribePackage;
+
+  /// No description provided for @prohibitedItemsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Not allowed: weapons, drugs, cash, flammables, live animals.'**
+  String get prohibitedItemsNote;
+
+  /// No description provided for @fareRouteDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String fareRouteDistance(String km);
+
+  /// No description provided for @fareEstimateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate - the final price uses the actual route.'**
+  String get fareEstimateNote;
+
+  /// No description provided for @productFiltersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get productFiltersTitle;
+
+  /// No description provided for @productFiltersClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all filters'**
+  String get productFiltersClear;
+
+  /// No description provided for @productFilterQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready in {minutes} min or less'**
+  String productFilterQuick(int minutes);
+
+  /// No description provided for @productFilterOnSale.
+  ///
+  /// In en, this message translates to:
+  /// **'On sale'**
+  String get productFilterOnSale;
+
+  /// No description provided for @productFilterCustomizable.
+  ///
+  /// In en, this message translates to:
+  /// **'Customizable'**
+  String get productFilterCustomizable;
+
+  /// No description provided for @productFilterContainsAllergens.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains allergens'**
+  String get productFilterContainsAllergens;
+
+  /// No description provided for @productFilterNutritionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition info'**
+  String get productFilterNutritionInfo;
 }
 
 class _AppLocalizationsDelegate
@@ -8495,22 +8717,4 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       'an issue with the localizations generation tool. Please file an issue '
       'on GitHub with a reproducible sample app and the gen-l10n configuration '
       'that was used.');
-
-  /// Heading on the delivery-code card shown at the door
-  ///
-  /// In en, this message translates to:
-  /// **'Your delivery code'**
-  String get deliveryCodeTitle;
-
-  /// Tells the customer to read the 4-digit code aloud to the driver
-  ///
-  /// In en, this message translates to:
-  /// **'Read these 4 digits to your driver to confirm you received your order.'**
-  String get deliveryCodePrompt;
-
-  /// Warns the customer not to share the code before the driver arrives
-  ///
-  /// In en, this message translates to:
-  /// **'Only share this code once the driver is in front of you.'**
-  String get deliveryCodeWarning;
 }

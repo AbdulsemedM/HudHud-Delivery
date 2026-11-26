@@ -119,6 +119,13 @@
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<!--
+		  A CALL MUST SURVIVE THE APP GOING TO THE BACKGROUND. Without this
+		  iOS suspends the app the moment the customer switches away or the
+		  screen locks, and the call dies mid-sentence with no error on
+		  either end.
+		-->
+		<string>audio</string>
 	</array>
 </dict>
 </plist>

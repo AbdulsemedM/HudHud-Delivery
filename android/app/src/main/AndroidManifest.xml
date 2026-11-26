@@ -14,16 +14,32 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <!-- Voice notes / TTS playback -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!--
+      The speakerphone toggle on the call screen. Without this the button is
+      there and silently does nothing. RECORD_AUDIO above already existed.
+    -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <!-- Use system photo picker instead of broad media access (Play policy) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- tools:replace: the camera plugin (camera_android_camerax) declares
+         this with maxSdkVersion 28, and the manifest merger refuses two
+         values. Ours (32) is kept, so storage access is unchanged. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"
-        tools:ignore="ScopedStorage" />
+        tools:ignore="ScopedStorage"
+        tools:replace="android:maxSdkVersion" />
+    <!-- The camera plugin also declares a camera as REQUIRED, which would hide
+         the app on Play from any device without one. The package photo is
+         optional (gallery, Easy Mode voice note), so the camera is too. -->
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false"
+        tools:replace="android:required" />
     
     <application
         android:localeConfig="@xml/locales_config"

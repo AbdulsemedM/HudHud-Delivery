@@ -17,6 +17,7 @@ class VendorsRepository {
     int? categoryId,
     double? latitude,
     double? longitude,
+    String? sector,
   }) async {
     final response = await vendorsDataProvider.getVendors(
       page: page,
@@ -25,6 +26,7 @@ class VendorsRepository {
       categoryId: categoryId,
       latitude: latitude,
       longitude: longitude,
+      sector: sector,
     );
     if (response['statusCode'] != 200) {
       throw Exception(
@@ -52,6 +54,32 @@ class VendorsRepository {
         .map((e) =>
             VendorModel.fromVendorListJson(Map<String, dynamic>.from(e as Map)))
         .toList();
+  }
+
+  /// The sector keys that currently have at least one browsable shop.
+  ///
+  /// Never throws. The chip row is a convenience on the home screen, and a
+  /// home screen that fails to build because a decoration could not load is
+  /// a worse outcome than a home screen with no chips. An empty list is a
+  /// valid, correct answer the UI already knows how to draw.
+  Future<List<String>> getAvailableSectors() async {
+    try {
+      final response = await vendorsDataProvider.getVendorSectors();
+      if (response['statusCode'] != 200) return const [];
+
+      final rows = response['data'] is Map<String, dynamic>
+          ? (response['data'] as Map<String, dynamic>)['data']
+          : null;
+      if (rows is! List) return const [];
+
+      return rows
+          .map((e) => e is Map ? e['key']?.toString() : null)
+          .whereType<String>()
+          .where((k) => k.isNotEmpty)
+          .toList(growable: false);
+    } catch (_) {
+      return const [];
+    }
   }
 
   String _clean(String message) {

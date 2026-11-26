@@ -65,8 +65,7 @@ jobs:
           KPW: ${{ secrets.ANDROID_KEY_PASSWORD }}
           SPW: ${{ secrets.ANDROID_STORE_PASSWORD }}
           GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
-          MAPS: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
-          MAPS_DEDICATED: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          MAPS: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
           set -uo pipefail
           missing=0
@@ -100,20 +99,29 @@ jobs:
           # and ships an app whose map is blank - build.gradle's own warning
           # says exactly that. A delivery app with no map is worth failing a
           # build over.
-          check GOOGLE_MAPS_API_KEY "${MAPS:-}" "the Android Maps SDK key, as GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY; without it the build passes and the map ships blank"
+          check GOOGLE_MAPS_API_KEY "${MAPS:-}" "the Android Maps SDK key. It must be this repo's own GOOGLE_MAPS_API_KEY secret, restricted to Android apps - NOT the organisation's VITE_GOOGLE_MAPS_API_KEY, which belongs to the portal's web bundle and is rejected by the Android SDK"
 
-          # Reached the fallback, which is a web key by its name. A Maps key
-          # restricted to HTTP referrers is rejected by the Maps SDK for
-          # Android, and the symptom is the same blank map. Android needs a key
-          # either unrestricted or restricted to Android apps (package name plus
-          # signing SHA-1), with "Maps SDK for Android" enabled on the project.
-          if [ -n "${MAPS:-}" ] && [ -z "${MAPS_DEDICATED:-}" ]; then
-            echo "::warning::Using VITE_GOOGLE_MAPS_API_KEY. That name belongs to a web bundle; if the key is restricted to HTTP referrers, Android will reject it and the map ships blank anyway. Check its Application restrictions in Google Cloud Console, or add a separate Android key as GOOGLE_MAPS_API_KEY."
-          fi
+          # The VITE_GOOGLE_MAPS_API_KEY fallback that used to live here is gone,
+          # deliberately, and it must not come back.
+          #
+          # That name is an ORGANISATION secret shared with the vendor portal's
+          # web bundle. Both app repos had no GOOGLE_MAPS_API_KEY of their own,
+          # so every release quietly fell through to it - which is how one
+          # unrestricted key ended up serving the portal and both apps at once.
+          #
+          # It worked only while that key was unrestricted. The portal's key is
+          # now restricted to HTTP referrers, and the Maps SDK for Android
+          # rejects a referrer-restricted key outright: the build would succeed
+          # and the app would ship a blank map. A fallback that silently
+          # substitutes a key belonging to a different platform is worse than no
+          # key at all, because no key at least fails here.
+          #
+          # Android needs its own key, restricted to Android apps (package name
+          # plus signing SHA-1) with Maps SDK for Android enabled.
           if [ "$missing" = "1" ]; then
             echo
             echo "Add them at Settings -> Secrets and variables -> Actions."
-            echo "Only the ANDROID_*, GOOGLE_SERVICES_JSON and GOOGLE_MAPS_API_KEY"
+            echo "Only the ANDROID_*, GOOGLE_SERVICES_JSON, GOOGLE_MAPS_API_KEY and GOOGLE_MAPS_WEB_KEY"
             echo "ones are needed for an Android build;"
             echo "iOS needs SHOREBIRD_TOKEN alone."
             exit 1
@@ -165,6 +173,32 @@ jobs:
       run:
         shell: bash
     steps:
+      # Free the runner's disk BEFORE anything builds.
+      #
+      # The 21 Nov patch run failed its post-job cache save with "No space left
+      # on device". The patch itself had already succeeded, so it cost nothing
+      # that day - but the next build with slightly more output fails earlier,
+      # and a build that dies after `shorebird patch` has published is a much
+      # worse failure than one that dies before.
+      #
+      # Clearing the Actions cache would have bought one run; the cache refills.
+      # This removes preinstalled toolchains this build never touches: .NET,
+      # Haskell, Boost, CodeQL and the Docker image store, roughly 8-10 GB.
+      #
+      # DELIBERATELY NOT the Android SDK or NDK. This build installs CMake and
+      # compiles native code through Gradle, so removing them - the usual
+      # headline advice for freeing runner disk - would break it.
+      - name: Free disk space
+        run: |
+          set -uo pipefail
+          echo "before:"; df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          docker image prune -af >/dev/null 2>&1 || true
+          echo "after:"; df -h / | tail -1
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -210,7 +244,8 @@ jobs:
       - name: Create Firebase and Maps config from secrets
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_WEB_KEY: ${{ secrets.GOOGLE_MAPS_WEB_KEY }}
         run: |
           set -euo pipefail
 
@@ -268,11 +303,28 @@ jobs:
           # runner already put there.
           touch android/local.properties
           if [ -z "${GOOGLE_MAPS_API_KEY:-}" ]; then
-            echo "::error::No Maps key in GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY. build.gradle would default it to an empty string and ship a blank map."
+            echo "::error::GOOGLE_MAPS_API_KEY is not set on this repository. build.gradle would default it to an empty string and ship a blank map. Set the Android-restricted key as a repository secret; do not reuse the organisation VITE_GOOGLE_MAPS_API_KEY, which is referrer-restricted and the Android SDK rejects it."
             exit 1
           fi
           echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> android/local.properties
-          echo "Maps key appended to android/local.properties."
+          echo "Maps SDK key appended to android/local.properties."
+
+          # The web-services key is a SEPARATE Google key, on purpose. Google
+          # honours an "Android apps" application restriction on the Maps SDKs
+          # only; Places, Geocoding and Directions run over maps.googleapis.com
+          # and reject such a key with REQUEST_DENIED. Sharing one key works
+          # only while it is unrestricted.
+          #
+          # Missing is a warning, not an error: build.gradle falls back to the
+          # SDK key, which is exactly what shipped before the split. But if that
+          # key is restricted - and ours now is - the map still draws while
+          # address search silently fails, so say so loudly here.
+          if [ -n "${GOOGLE_MAPS_WEB_KEY:-}" ]; then
+            echo "GOOGLE_MAPS_WEB_KEY=${GOOGLE_MAPS_WEB_KEY}" >> android/local.properties
+            echo "Maps web-services key appended to android/local.properties."
+          else
+            echo "::warning::GOOGLE_MAPS_WEB_KEY is not set. Places, Geocoding and Directions will fall back to GOOGLE_MAPS_API_KEY. If that key is restricted to Android apps, address autocomplete and the route line will fail with REQUEST_DENIED while the map still renders."
+          fi
 
       # pubspec declares `.env` as an asset in both apps and `.env` is
       # gitignored, so a fresh checkout cannot bundle assets at all:
@@ -295,7 +347,8 @@ jobs:
       # secret, else .env.example, else the repo's own ci.yml.
       - name: Create .env (declared as a Flutter asset)
         env:
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_WEB_KEY: ${{ secrets.GOOGLE_MAPS_WEB_KEY }}
           APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
         run: |
           set -euo pipefail
@@ -350,6 +403,7 @@ jobs:
           path = pathlib.Path(".env")
           wanted = {
               "GOOGLE_MAPS_API_KEY": os.environ.get("GOOGLE_MAPS_API_KEY", ""),
+              "GOOGLE_MAPS_WEB_KEY": os.environ.get("GOOGLE_MAPS_WEB_KEY", ""),
               "BASE_URL": os.environ["BASE_URL_VALUE"],
           }
 

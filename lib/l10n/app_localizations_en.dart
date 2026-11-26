@@ -418,6 +418,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationSearchNoResults => 'No locations found';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'Try another name, or move the map to place the pin.';
+
+  @override
+  String get locationSearchFailed =>
+      'Couldn\'t search right now. Check your internet, or move the map to place the pin.';
+
+  @override
   String get locationCurrentPositionFailed => 'Could not get current location';
 
   @override
@@ -568,6 +576,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your past deliveries will appear here';
 
   @override
+  String get courierAddDeliveryCta => 'Add delivery';
+
+  @override
   String get courierInstantTitle => 'Instant Delivery';
 
   @override
@@ -621,6 +632,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTabDelivery => 'Delivery';
 
   @override
+  String get homeTabPharmacy => 'Pharmacy';
+
+  @override
+  String get homeTabSpareParts => 'Spare parts';
+
+  @override
   String get cartDifferentVendorTitle => 'Start a new cart?';
 
   @override
@@ -632,6 +649,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cartKeepCurrentAction => 'Keep cart';
+
+  @override
+  String get searchShopsTitle => 'Shops';
+
+  @override
+  String cartProductAdded(String name) {
+    return '$name added to cart';
+  }
+
+  @override
+  String get cartItemAdded => 'Added to cart';
 
   @override
   String get homeTabCourier => 'Courier';
@@ -1093,6 +1121,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pickupOutsideDeliveryServiceArea =>
       'Pickup is outside HudHud’s configured delivery service areas.';
+
+  @override
+  String easyPickupNotServedIn(String cities) {
+    return 'HudHud does not pick up from this place yet. Choose a pickup in: $cities.';
+  }
+
+  @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'HudHud delivers inside one country. The pickup is in $from and the drop-off is in $to.';
+  }
 
   @override
   String get selectAvailableVehicleType => 'Select an available vehicle type';
@@ -3204,22 +3242,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get easyModeSubtitle => 'Bigger buttons, pictures, and spoken help';
 
   @override
+  String get easyVoiceHints => 'Read steps aloud';
+
+  @override
+  String get easyVoiceHintsSubtitle =>
+      'Off by default. The Listen button always works.';
+
+  @override
+  String get easyDescribeHint =>
+      'What is in the package? You can also add a photo or a voice note.';
+
+  @override
+  String get easyDescribeRequired =>
+      'Describe the package, take a photo, or record a voice note.';
+
+  @override
   String get navMyDeliveries => 'My deliveries';
 
   @override
   String get navMe => 'Me';
 
   @override
-  String get courierNowTitle => 'Now';
+  String get courierNowTitle => 'Add Delivery';
 
   @override
-  String get courierNowSubtitle => 'Send right away';
+  String get courierNowSubtitle => 'A courier comes to pick it up right away';
 
   @override
-  String get courierLaterTitle => 'Later';
+  String get courierLaterTitle => 'Choose a time';
 
   @override
-  String get courierLaterSubtitle => 'Pick a day and time';
+  String get courierLaterSubtitle => 'Pick a day and hour for pickup';
 
   @override
   String get homeMoreServices => 'More';
@@ -4627,8 +4680,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryCodeTitle => 'Your delivery code';
 
   @override
-  String get deliveryCodePrompt => 'Read these 4 digits to your driver to confirm you received your order.';
+  String get deliveryCodePrompt =>
+      'Read these 4 digits to your driver to confirm you received your order.';
 
   @override
-  String get deliveryCodeWarning => 'Only share this code once the driver is in front of you.';
+  String get deliveryCodeWarning =>
+      'Only share this code once the driver is in front of you.';
+
+  @override
+  String get sectorAll => 'All';
+
+  @override
+  String get sectorRestaurants => 'Restaurants';
+
+  @override
+  String get sectorBakery => 'Bakery';
+
+  @override
+  String get sectorSupermarket => 'Supermarket';
+
+  @override
+  String get sectorMarket => 'Market';
+
+  @override
+  String get sectorPharmacy => 'Pharmacy';
+
+  @override
+  String get sectorSpareParts => 'Auto parts';
+
+  @override
+  String get sectorGeneral => 'General';
+
+  @override
+  String get packageDescriptionRequired => 'What\'s in the package?';
+
+  @override
+  String get pleaseDescribePackage =>
+      'Say what\'s in the package so the rider knows what they carry';
+
+  @override
+  String get prohibitedItemsNote =>
+      'Not allowed: weapons, drugs, cash, flammables, live animals.';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km km';
+  }
+
+  @override
+  String get fareEstimateNote =>
+      'Estimate - the final price uses the actual route.';
+
+  @override
+  String get productFiltersTitle => 'Filter';
+
+  @override
+  String get productFiltersClear => 'Clear all filters';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'Ready in $minutes min or less';
+  }
+
+  @override
+  String get productFilterOnSale => 'On sale';
+
+  @override
+  String get productFilterCustomizable => 'Customizable';
+
+  @override
+  String get productFilterContainsAllergens => 'Contains allergens';
+
+  @override
+  String get productFilterNutritionInfo => 'Nutrition info';
 }

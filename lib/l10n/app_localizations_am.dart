@@ -415,6 +415,14 @@ class AppLocalizationsAm extends AppLocalizations {
   String get locationSearchNoResults => 'ምንም ቦታ አልተገኘም';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'ሌላ ስም ይሞክሩ፣ ወይም ካርታውን አንቀሳቅሰው ምልክቱን ያስቀምጡ።';
+
+  @override
+  String get locationSearchFailed =>
+      'አሁን መፈለግ አልተቻለም። ኢንተርኔትዎን ያረጋግጡ፣ ወይም ካርታውን አንቀሳቅሰው ምልክቱን ያስቀምጡ።';
+
+  @override
   String get locationCurrentPositionFailed => 'የአሁኑን ቦታ ማግኘት አልተቻለም';
 
   @override
@@ -559,6 +567,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get courierHistoryEmptySubtitle => 'ያለፈው መላኪያዎችህ እዚህ ይታያሉ';
 
   @override
+  String get courierAddDeliveryCta => 'መላኪያ ያክሉ';
+
+  @override
   String get courierInstantTitle => 'ፈጣን ማድረስ';
 
   @override
@@ -610,6 +621,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get homeTabDelivery => 'ማድረስ';
 
   @override
+  String get homeTabPharmacy => 'ፋርማሲ';
+
+  @override
+  String get homeTabSpareParts => 'መለዋወጫ እቃዎች';
+
+  @override
   String get cartDifferentVendorTitle => 'አዲስ ጋሪ ይጀምሩ?';
 
   @override
@@ -621,6 +638,17 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get cartKeepCurrentAction => 'ጋሪውን አቆይ';
+
+  @override
+  String get searchShopsTitle => 'ሱቆች';
+
+  @override
+  String cartProductAdded(String name) {
+    return '$name ወደ ጋሪ ተጨምሯል';
+  }
+
+  @override
+  String get cartItemAdded => 'ወደ ጋሪ ተጨምሯል';
 
   @override
   String get homeTabCourier => 'መልእክተኛ';
@@ -1080,6 +1108,16 @@ class AppLocalizationsAm extends AppLocalizations {
   @override
   String get pickupOutsideDeliveryServiceArea =>
       'የመውሰጃው አድራሻ ከሁድሁድ የተዋቀረ የማድረሻ አገልግሎት ክልል ውጭ ነው።';
+
+  @override
+  String easyPickupNotServedIn(String cities) {
+    return 'ሁድሁድ ከዚህ ቦታ ገና አይወስድም። የመውሰጃ ቦታ ከእነዚህ ይምረጡ፦ $cities።';
+  }
+
+  @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'ሁድሁድ በአንድ አገር ውስጥ ያደርሳል። የመውሰጃው ቦታ በ$from ሲሆን የማድረሻው ቦታ በ$to ነው።';
+  }
 
   @override
   String get selectAvailableVehicleType => 'ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ';
@@ -3142,22 +3180,34 @@ class AppLocalizationsAm extends AppLocalizations {
   String get easyModeSubtitle => 'ትልልቅ ቁልፎች፣ ስዕሎች እና የድምፅ እገዛ';
 
   @override
+  String get easyVoiceHints => 'ደረጃዎችን በድምፅ አንብብ';
+
+  @override
+  String get easyVoiceHintsSubtitle => 'በነባሪ ጠፍቷል። የ«አዳምጥ» ቁልፍ ሁልጊዜ ይሠራል።';
+
+  @override
+  String get easyDescribeHint => 'በጥቅሉ ውስጥ ምን አለ? ፎቶ ወይም የድምፅ ማስታወሻ ማከል ይችላሉ።';
+
+  @override
+  String get easyDescribeRequired => 'ጥቅሉን ይግለጹ፣ ፎቶ ያንሱ ወይም የድምፅ ማስታወሻ ይቅረጹ።';
+
+  @override
   String get navMyDeliveries => 'የእኔ ማድረሻዎች';
 
   @override
   String get navMe => 'እኔ';
 
   @override
-  String get courierNowTitle => 'አሁን';
+  String get courierNowTitle => 'አሁን ይላኩ';
 
   @override
-  String get courierNowSubtitle => 'ወዲያውኑ ይላኩ';
+  String get courierNowSubtitle => 'መልእክተኛ ወዲያውኑ መጥቶ ይወስዳል';
 
   @override
-  String get courierLaterTitle => 'በኋላ';
+  String get courierLaterTitle => 'ሰዓት ይምረጡ';
 
   @override
-  String get courierLaterSubtitle => 'ቀን እና ሰዓት ይምረጡ';
+  String get courierLaterSubtitle => 'ለመውሰጃ ቀን እና ሰዓት ይምረጡ';
 
   @override
   String get homeMoreServices => 'ተጨማሪ';
@@ -4529,8 +4579,75 @@ class AppLocalizationsAm extends AppLocalizations {
   String get deliveryCodeTitle => 'የማስረከቢያ ኮድዎ';
 
   @override
-  String get deliveryCodePrompt => 'ትዕዛዝዎን እንደተቀበሉ ለማረጋገጥ እነዚህን 4 ቁጥሮች ለአሽከርካሪው ያንብቡ።';
+  String get deliveryCodePrompt =>
+      'ትዕዛዝዎን እንደተቀበሉ ለማረጋገጥ እነዚህን 4 ቁጥሮች ለአሽከርካሪው ያንብቡ።';
 
   @override
   String get deliveryCodeWarning => 'ይህን ኮድ አሽከርካሪው ፊትዎ ሲሆን ብቻ ያጋሩ።';
+
+  @override
+  String get sectorAll => 'ሁሉም';
+
+  @override
+  String get sectorRestaurants => 'ምግብ ቤቶች';
+
+  @override
+  String get sectorBakery => 'ዳቦ ቤት';
+
+  @override
+  String get sectorSupermarket => 'ሱፐርማርኬት';
+
+  @override
+  String get sectorMarket => 'ገበያ';
+
+  @override
+  String get sectorPharmacy => 'መድኃኒት ቤት';
+
+  @override
+  String get sectorSpareParts => 'የመኪና መለዋወጫ';
+
+  @override
+  String get sectorGeneral => 'አጠቃላይ';
+
+  @override
+  String get packageDescriptionRequired => 'በጥቅሉ ውስጥ ምን አለ?';
+
+  @override
+  String get pleaseDescribePackage =>
+      'አሽከርካሪው ምን እንደሚይዝ እንዲያውቅ በጥቅሉ ውስጥ ያለውን ይግለጹ';
+
+  @override
+  String get prohibitedItemsNote =>
+      'አይፈቀድም፦ የጦር መሳሪያ፣ አደንዛዥ ዕፅ፣ ጥሬ ገንዘብ፣ ተቀጣጣይ ነገሮች፣ ሕያው እንስሳት።';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km ኪ.ሜ';
+  }
+
+  @override
+  String get fareEstimateNote => 'ግምት ነው - የመጨረሻው ዋጋ በትክክለኛው መንገድ ይሰላል።';
+
+  @override
+  String get productFiltersTitle => 'ማጣሪያ';
+
+  @override
+  String get productFiltersClear => 'ሁሉንም ማጣሪያዎች አጽዳ';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'በ$minutes ደቂቃ ወይም ባነሰ ጊዜ ዝግጁ';
+  }
+
+  @override
+  String get productFilterOnSale => 'ቅናሽ ላይ';
+
+  @override
+  String get productFilterCustomizable => 'ማስተካከል የሚቻል';
+
+  @override
+  String get productFilterContainsAllergens => 'አለርጂ አምጪ ይዟል';
+
+  @override
+  String get productFilterNutritionInfo => 'የአመጋገብ መረጃ';
 }

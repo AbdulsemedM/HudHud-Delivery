@@ -425,6 +425,14 @@ class AppLocalizationsOm extends AppLocalizations {
   String get locationSearchNoResults => 'Bakka hin argamne';
 
   @override
+  String get locationSearchNoResultsHint =>
+      'Maqaa biraa yaali, yookaan kaartaa sochoosii mallattoo kaa\'i.';
+
+  @override
+  String get locationSearchFailed =>
+      'Amma barbaaduun hin danda\'amne. Interneetii keessan mirkaneessaa, yookaan kaartaa sochoosii mallattoo kaa\'i.';
+
+  @override
   String get locationCurrentPositionFailed =>
       'Bakka ammaa argachuu hin dandeenye';
 
@@ -579,6 +587,9 @@ class AppLocalizationsOm extends AppLocalizations {
       'Geejjibni keessan kan darbe asitti ni mul\'ata';
 
   @override
+  String get courierAddDeliveryCta => 'Geejjiba dabali';
+
+  @override
   String get courierInstantTitle => 'Geejjibaa Battalaa';
 
   @override
@@ -632,6 +643,12 @@ class AppLocalizationsOm extends AppLocalizations {
   String get homeTabDelivery => 'Geejjiba';
 
   @override
+  String get homeTabPharmacy => 'Faarmaasii';
+
+  @override
+  String get homeTabSpareParts => 'Meeshaalee bakka buusaa';
+
+  @override
   String get cartDifferentVendorTitle => 'Gaarii haaraa jalqabduu?';
 
   @override
@@ -643,6 +660,17 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get cartKeepCurrentAction => 'Gaarii tursi';
+
+  @override
+  String get searchShopsTitle => 'Suuqota';
+
+  @override
+  String cartProductAdded(String name) {
+    return '$name gaariitti dabalameera';
+  }
+
+  @override
+  String get cartItemAdded => 'Gaariitti dabalameera';
 
   @override
   String get homeTabCourier => 'Ergamaa';
@@ -1109,6 +1137,16 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get pickupOutsideDeliveryServiceArea =>
       'Bakki fuudhaa naannoo tajaajila geessisaa HudHud qindaa\'e ala.';
+
+  @override
+  String easyPickupNotServedIn(String cities) {
+    return 'HudHud iddoo kanaa ammatti hin fuudhu. Iddoo fuudhaa kanneen keessaa filadhu: $cities.';
+  }
+
+  @override
+  String easyCrossBorderNotServed(String from, String to) {
+    return 'HudHud biyya tokko keessatti geessa. Iddoon fuudhaa $from keessa, iddoon geessuu immoo $to keessa jira.';
+  }
 
   @override
   String get selectAvailableVehicleType => 'Gosa konkolaataa jiru filadhu';
@@ -3232,22 +3270,37 @@ class AppLocalizationsOm extends AppLocalizations {
       'Qabduu gurguddaa, suuraalee fi gargaarsa sagaleen';
 
   @override
+  String get easyVoiceHints => 'Tarkaanfiiwwan sagaleen dubbisi';
+
+  @override
+  String get easyVoiceHintsSubtitle =>
+      'Durduubaan ni cufama. Qabduun \'Dhaggeeffadhu\' yeroo hunda ni hojjeta.';
+
+  @override
+  String get easyDescribeHint =>
+      'Paakeejii keessa maaltu jira? Suuraa yookaan sagalee dabaluu dandeessa.';
+
+  @override
+  String get easyDescribeRequired =>
+      'Paakeejii ibsi, suuraa kaasi, yookaan sagalee waraabi.';
+
+  @override
   String get navMyDeliveries => 'Geejjiba koo';
 
   @override
   String get navMe => 'Ana';
 
   @override
-  String get courierNowTitle => 'Amma';
+  String get courierNowTitle => 'Amma ergi';
 
   @override
-  String get courierNowSubtitle => 'Battaluma ergi';
+  String get courierNowSubtitle => 'Geejjibaan battaluma dhufee fudhata';
 
   @override
-  String get courierLaterTitle => 'Booda';
+  String get courierLaterTitle => 'Yeroo filadhu';
 
   @override
-  String get courierLaterSubtitle => 'Guyyaa fi sa\'aatii filadhu';
+  String get courierLaterSubtitle => 'Guyyaa fi sa\'aatii fudhannaa filadhu';
 
   @override
   String get homeMoreServices => 'Dabalata';
@@ -4669,8 +4722,77 @@ class AppLocalizationsOm extends AppLocalizations {
   String get deliveryCodeTitle => 'Koodii geejjibaa keessan';
 
   @override
-  String get deliveryCodePrompt => 'Ajaja keessan akka fudhattan mirkaneessuuf lakkoofsota 4 kanneen konkolaachisaaf dubbisaa.';
+  String get deliveryCodePrompt =>
+      'Ajaja keessan akka fudhattan mirkaneessuuf lakkoofsota 4 kanneen konkolaachisaaf dubbisaa.';
 
   @override
-  String get deliveryCodeWarning => 'Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa.';
+  String get deliveryCodeWarning =>
+      'Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa.';
+
+  @override
+  String get sectorAll => 'Hunda';
+
+  @override
+  String get sectorRestaurants => 'Mana nyaataa';
+
+  @override
+  String get sectorBakery => 'Mana daabboo';
+
+  @override
+  String get sectorSupermarket => 'Suupermaarkeetii';
+
+  @override
+  String get sectorMarket => 'Gabaa';
+
+  @override
+  String get sectorPharmacy => 'Mana qorichaa';
+
+  @override
+  String get sectorSpareParts => 'Meeshaalee konkolaataa';
+
+  @override
+  String get sectorGeneral => 'Waliigala';
+
+  @override
+  String get packageDescriptionRequired => 'Paakeejii keessa maaltu jira?';
+
+  @override
+  String get pleaseDescribePackage =>
+      'Konkolaachisaan maal akka baatu akka beekuuf, paakeejii keessa maal akka jiru ibsi';
+
+  @override
+  String get prohibitedItemsNote =>
+      'Hin hayyamamu: meeshaa waraanaa, araada, maallaqa callaa, wantoota gubatan, bineensota lubbuun jiran.';
+
+  @override
+  String fareRouteDistance(String km) {
+    return '$km km';
+  }
+
+  @override
+  String get fareEstimateNote =>
+      'Tilmaama - gatiin dhumaa karaa dhugaa irratti hundaa\'a.';
+
+  @override
+  String get productFiltersTitle => 'Calalii';
+
+  @override
+  String get productFiltersClear => 'Calalii hunda haqi';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'Daqiiqaa $minutes ykn isaa gadi keessatti qophaa\'a';
+  }
+
+  @override
+  String get productFilterOnSale => 'Gatii hir\'ate';
+
+  @override
+  String get productFilterCustomizable => 'Jijjiiramuu kan danda\'u';
+
+  @override
+  String get productFilterContainsAllergens => 'Waan alarjii fidu qaba';
+
+  @override
+  String get productFilterNutritionInfo => 'Odeeffannoo nyaataa';
 }

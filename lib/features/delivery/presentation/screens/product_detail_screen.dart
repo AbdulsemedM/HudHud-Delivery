@@ -155,9 +155,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (result != CartAddResult.added || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${product.name ?? 'Product'} added to cart'),
+        content: Text(product.name?.trim().isNotEmpty == true
+            ? context.l10n.cartProductAdded(product.name!.trim())
+            : context.l10n.cartItemAdded),
         action: SnackBarAction(
-          label: 'Checkout',
+          label: context.l10n.p12GoToCheckout,
           onPressed: () => openCheckoutFromCart(
             context,
             fallbackVendorId: product.vendor_id,
