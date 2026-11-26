@@ -54,6 +54,15 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
 
   int _step = 0;
 
+  /// What the review step remembers when the customer taps a row to change it.
+  ///
+  /// Non-null means "we came from review": finishing the edited step returns
+  /// straight to review instead of walking through every step after it, and
+  /// the back arrow drops the edit and restores what this holds. Without the
+  /// restore, backing out of a half-finished edit (a cleared name, a pin moved
+  /// somewhere unchecked) would carry unvalidated values onto the review page.
+  _EditSnapshot? _editSnapshot;
+
   LatLng _pickupPosition = const LatLng(9.0222, 38.7468);
   LatLng _dropoffPosition = const LatLng(9.0222, 38.7468);
   String _pickupAddress = '';
@@ -367,8 +376,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         if (notice != null) unawaited(VoiceHintService.instance.speak(notice));
         return;
       }
-      setState(() => _step = 1);
-      _speakCurrentStep();
+      _advanceTo(1);
       return;
     }
     if (_step == 1) {
@@ -386,11 +394,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         unawaited(VoiceHintService.instance.speak(crossBorder));
         return;
       }
-      setState(() {
-        _step = 2;
-        _dropoffAreaNotice = null;
-      });
-      _speakCurrentStep();
+      setState(() => _dropoffAreaNotice = null);
+      _advanceTo(2);
       return;
     }
     if (_step == 2) {
@@ -403,8 +408,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         _snack(l10n.pleaseEnterValidRecipientPhone);
         return;
       }
-      setState(() => _step = 3);
-      _speakCurrentStep();
+      _advanceTo(3);
       return;
     }
     if (_step == 3) {
@@ -413,16 +417,15 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       // mode exists for, and a photo or a spoken note tells the driver what
       // is in the bag just as well. Requiring none at all would send parcels
       // with nothing but an address.
-      final described = _descriptionController.text.trim().isNotEmpty
-          || _packageImagePath != null
-          || _voiceNotePath != null;
+      final described = _descriptionController.text.trim().isNotEmpty ||
+          _packageImagePath != null ||
+          _voiceNotePath != null;
 
       if (!described) {
         _snack(l10n.easyDescribeRequired);
         return;
       }
-      setState(() => _step = 4);
-      _speakCurrentStep();
+      _advanceTo(4);
       return;
     }
     if (_step == 4) {
@@ -430,7 +433,63 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     }
   }
 
+  /// Moves on from a step that has just passed its checks.
+  ///
+  /// Normally that is [next]. During an edit from the review page it is the
+  /// review page itself - unless the edit was to the pickup and the delivery
+  /// address it was already checked against is now in another country. That
+  /// check only ever ran when the delivery step was left, so returning to
+  /// review would let the order through; the customer is sent to the delivery
+  /// step with the notice showing instead, still in edit mode, so fixing it
+  /// brings them back to review.
+  void _advanceTo(int next) {
+    // The pickup and delivery checks await the network. If the customer used
+    // the back arrow meanwhile, they are on another step and this is stale.
+    if (!mounted || _step != next - 1) return;
+    if (_editSnapshot != null) {
+      final crossBorder = _step == 0 ? _crossBorderNotice(context.l10n) : null;
+      if (crossBorder != null) {
+        setState(() {
+          _step = 1;
+          _dropoffAreaNotice = crossBorder;
+        });
+        unawaited(VoiceHintService.instance.speak(crossBorder));
+        return;
+      }
+      setState(() {
+        _step = 4;
+        _editSnapshot = null;
+      });
+    } else {
+      setState(() => _step = next);
+    }
+    _speakCurrentStep();
+  }
+
+  /// Opens [step] from a tapped row on the review page.
+  void _editFromReview(int step) {
+    setState(() {
+      _editSnapshot = _EditSnapshot.capture(this);
+      _step = step;
+    });
+    _speakCurrentStep();
+  }
+
   void _goBack() {
+    final snapshot = _editSnapshot;
+    if (snapshot != null) {
+      // Any reverse geocode still running belongs to the abandoned edit.
+      _pickupGeocodeSeq++;
+      _dropoffGeocodeSeq++;
+      setState(() {
+        snapshot.restore(this);
+        _editSnapshot = null;
+        _step = 4;
+      });
+      _syncNearbyDrivers();
+      _speakCurrentStep();
+      return;
+    }
     if (_step == 0) {
       Navigator.pop(context);
       return;
@@ -611,38 +670,52 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       3 => (l10n.easyWhatIsIt, null),
       _ => (l10n.easyConfirmTitle, null),
     };
-    return CourierTheme.wrap(
-      context,
-      child: Scaffold(
-        backgroundColor: HomeColors.backgroundOf(context),
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _WizardHeader(
-                step: _step,
-                totalSteps: _totalSteps,
-                stepLabel: l10n.easyStepOf(_step + 1, _totalSteps),
-                title: title,
-                hint: hint,
-                onBack: _goBack,
-                speakText: switch (_step) {
-                  0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
-                  1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
-                  2 => l10n.easyWhoReceives,
-                  3 => '${l10n.easyWhatIsIt}. ${l10n.easyDescribeHint}',
-                  4 => _summary(l10n),
-                  _ => '',
-                },
-              ),
-              Expanded(child: _buildStep(l10n)),
-              _WizardBottomBar(
-                label: _step == 4 ? l10n.actionContinue : l10n.actionNext,
-                isLast: _step == 4,
-                onPressed: _goNext,
-              ),
-            ],
+    // The system back button and gesture do what the on-screen arrow does:
+    // step back, or cancel a review-page edit. Only the first step, with no
+    // edit open, actually leaves the wizard. Before this, one press of the
+    // Android back button threw away every answer from all five steps.
+    return PopScope(
+      canPop: _step == 0 && _editSnapshot == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _goBack();
+      },
+      child: CourierTheme.wrap(
+        context,
+        child: Scaffold(
+          backgroundColor: HomeColors.backgroundOf(context),
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _WizardHeader(
+                  step: _step,
+                  totalSteps: _totalSteps,
+                  stepLabel: l10n.easyStepOf(_step + 1, _totalSteps),
+                  title: title,
+                  hint: hint,
+                  onBack: _goBack,
+                  speakText: switch (_step) {
+                    0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
+                    1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
+                    2 => l10n.easyWhoReceives,
+                    3 => '${l10n.easyWhatIsIt}. ${l10n.easyDescribeHint}',
+                    4 => _summary(l10n),
+                    _ => '',
+                  },
+                ),
+                Expanded(child: _buildStep(l10n)),
+                _WizardBottomBar(
+                  label: _step == 4
+                      ? l10n.actionContinue
+                      : _editSnapshot != null
+                          ? l10n.actionDone
+                          : l10n.actionNext,
+                  isLast: _step == 4,
+                  onPressed: _goNext,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -659,7 +732,10 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           iAmHereLabel: l10n.easyIAmHere,
           address: _pickupAddress,
           position: _pickupPosition,
-          snapToGpsOnStart: true,
+          // Only the first time. Coming back to this step - to change the
+          // pickup from review, or with the back arrow - must start from the
+          // pin already chosen, not yank it to wherever the phone is now.
+          snapToGpsOnStart: _pickupAddress.trim().isEmpty,
           markers: nearbyDriverMapMarkers(
             _nearbyPoller.result.drivers,
             iconsByAsset: _nearbyIconsByAsset,
@@ -747,8 +823,13 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           dropoff: _dropoffAddress,
           itemLabel: _packageLabel(l10n),
           recipient: _recipientNameController.text.trim(),
+          recipientPhone: _recipientPhoneController.text.trim(),
           imagePath: _packageImagePath,
           onPlay: () => VoiceHintService.instance.toggle(_summary(l10n)),
+          onEditPickup: () => _editFromReview(0),
+          onEditDropoff: () => _editFromReview(1),
+          onEditRecipient: () => _editFromReview(2),
+          onEditPackage: () => _editFromReview(3),
         );
     }
   }
@@ -2173,7 +2254,8 @@ class _PackageStep extends StatelessWidget {
             counterText: '',
             filled: true,
             fillColor: HomeColors.surfaceElevatedOf(context),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide.none,
@@ -2374,8 +2456,13 @@ class _ConfirmStep extends StatelessWidget {
     required this.dropoff,
     required this.itemLabel,
     required this.recipient,
+    required this.recipientPhone,
     required this.imagePath,
     required this.onPlay,
+    required this.onEditPickup,
+    required this.onEditDropoff,
+    required this.onEditRecipient,
+    required this.onEditPackage,
   });
 
   final String summary;
@@ -2383,8 +2470,13 @@ class _ConfirmStep extends StatelessWidget {
   final String dropoff;
   final String itemLabel;
   final String recipient;
+  final String recipientPhone;
   final String? imagePath;
   final VoidCallback onPlay;
+  final VoidCallback onEditPickup;
+  final VoidCallback onEditDropoff;
+  final VoidCallback onEditRecipient;
+  final VoidCallback onEditPackage;
 
   @override
   Widget build(BuildContext context) {
@@ -2423,6 +2515,7 @@ class _ConfirmStep extends StatelessWidget {
                 background: orangeTint,
                 caption: l10n.pickupLocationLabel,
                 label: pickup,
+                onEdit: onEditPickup,
               ),
               divider,
               _InfoRow(
@@ -2431,6 +2524,7 @@ class _ConfirmStep extends StatelessWidget {
                 background: indigoTint,
                 caption: l10n.deliveryLocationLabel,
                 label: dropoff,
+                onEdit: onEditDropoff,
               ),
               divider,
               _InfoRow(
@@ -2439,6 +2533,7 @@ class _ConfirmStep extends StatelessWidget {
                 background: indigoTint,
                 caption: l10n.whatAreYouSending,
                 label: itemLabel,
+                onEdit: onEditPackage,
               ),
               divider,
               _InfoRow(
@@ -2446,7 +2541,12 @@ class _ConfirmStep extends StatelessWidget {
                 color: accent,
                 background: indigoTint,
                 caption: l10n.recipient,
-                label: recipient,
+                // The phone is what the driver dials and the field most easily
+                // mistyped, so it is shown here to be checked, not just the name.
+                label: recipientPhone.isEmpty
+                    ? recipient
+                    : '$recipient\n$recipientPhone',
+                onEdit: onEditRecipient,
               ),
               const SizedBox(height: 6),
             ],
@@ -2506,6 +2606,7 @@ class _InfoRow extends StatelessWidget {
     required this.background,
     required this.caption,
     required this.label,
+    required this.onEdit,
   });
 
   final IconData icon;
@@ -2513,50 +2614,138 @@ class _InfoRow extends StatelessWidget {
   final Color background;
   final String caption;
   final String label;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Row(
-        children: [
-          _IconTile(
-            icon: icon,
-            color: color,
-            background: background,
-            size: 48,
-            iconSize: 24,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  caption,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: HomeColors.textMutedOf(context),
-                  ),
+    // The whole row is the tap target, and the pencil chip says so. This is
+    // the low-literacy flow: a row that is tappable but looks exactly as it
+    // did before would never be discovered.
+    final l10n = context.l10n;
+    final accent = HomeColors.violetOf(context);
+    return Material(
+      // Transparent so the ripple paints on the card, not behind it.
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onEdit,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+          child: Row(
+            children: [
+              _IconTile(
+                icon: icon,
+                color: color,
+                background: background,
+                size: 48,
+                iconSize: 24,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      caption,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: HomeColors.textMutedOf(context),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      label,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.3,
+                        fontWeight: FontWeight.w700,
+                        color: HomeColors.textPrimaryOf(context),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 16,
-                    height: 1.3,
-                    fontWeight: FontWeight.w700,
-                    color: HomeColors.textPrimaryOf(context),
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: HomeColors.violetTintOf(context),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_rounded, size: 18, color: accent),
+                    const SizedBox(width: 4),
+                    Text(
+                      l10n.actionChange,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: accent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+}
+
+/// The answers a review-page edit can change, held so backing out of the
+/// edit puts them all back. See [_EasyBookingWizardScreenState._editSnapshot].
+class _EditSnapshot {
+  _EditSnapshot.capture(_EasyBookingWizardScreenState s)
+      : pickupPosition = s._pickupPosition,
+        pickupAddress = s._pickupAddress,
+        pickupPlace = s._pickupPlace,
+        pickupAreaNotice = s._pickupAreaNotice,
+        dropoffPosition = s._dropoffPosition,
+        dropoffAddress = s._dropoffAddress,
+        dropoffPlace = s._dropoffPlace,
+        dropoffAreaNotice = s._dropoffAreaNotice,
+        recipientName = s._recipientNameController.text,
+        recipientPhone = s._recipientPhoneController.text,
+        description = s._descriptionController.text,
+        packageImagePath = s._packageImagePath,
+        voiceNotePath = s._voiceNotePath;
+
+  final LatLng pickupPosition;
+  final String pickupAddress;
+  final PlaceResult? pickupPlace;
+  final String? pickupAreaNotice;
+  final LatLng dropoffPosition;
+  final String dropoffAddress;
+  final PlaceResult? dropoffPlace;
+  final String? dropoffAreaNotice;
+  final String recipientName;
+  final String recipientPhone;
+  final String description;
+  final String? packageImagePath;
+  final String? voiceNotePath;
+
+  /// Call inside setState.
+  void restore(_EasyBookingWizardScreenState s) {
+    s._pickupPosition = pickupPosition;
+    s._pickupAddress = pickupAddress;
+    s._pickupPlace = pickupPlace;
+    s._pickupAreaNotice = pickupAreaNotice;
+    s._checkingPickupArea = false;
+    s._dropoffPosition = dropoffPosition;
+    s._dropoffAddress = dropoffAddress;
+    s._dropoffPlace = dropoffPlace;
+    s._dropoffAreaNotice = dropoffAreaNotice;
+    s._recipientNameController.text = recipientName;
+    s._recipientPhoneController.text = recipientPhone;
+    s._descriptionController.text = description;
+    s._packageImagePath = packageImagePath;
+    s._voiceNotePath = voiceNotePath;
   }
 }

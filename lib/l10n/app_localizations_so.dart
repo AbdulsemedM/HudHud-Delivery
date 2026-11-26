@@ -4784,4 +4784,28 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get fareEstimateNote =>
       'Qiyaas - qiimaha kama dambaysta ah wuxuu ku xisaabsamaa waddada dhabta ah.';
+
+  @override
+  String get productFiltersTitle => 'Shaandhee';
+
+  @override
+  String get productFiltersClear => 'Tirtir dhammaan shaandheyaasha';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'Diyaar $minutes daqiiqo ama ka yar';
+  }
+
+  @override
+  String get productFilterOnSale => 'Qiimo dhimis';
+
+  @override
+  String get productFilterCustomizable => 'La beddeli karo';
+
+  @override
+  String get productFilterContainsAllergens =>
+      'Waxaa ku jira walxo xasaasiyad keena';
+
+  @override
+  String get productFilterNutritionInfo => 'Macluumaad nafaqo';
 }

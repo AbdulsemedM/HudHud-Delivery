@@ -4696,4 +4696,27 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get fareEstimateNote =>
       'تقديري - السعر النهائي يُحسب على المسار الفعلي.';
+
+  @override
+  String get productFiltersTitle => 'تصفية';
+
+  @override
+  String get productFiltersClear => 'مسح كل عوامل التصفية';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'جاهز خلال $minutes دقيقة أو أقل';
+  }
+
+  @override
+  String get productFilterOnSale => 'عليه خصم';
+
+  @override
+  String get productFilterCustomizable => 'قابل للتخصيص';
+
+  @override
+  String get productFilterContainsAllergens => 'يحتوي على مسببات حساسية';
+
+  @override
+  String get productFilterNutritionInfo => 'معلومات غذائية';
 }

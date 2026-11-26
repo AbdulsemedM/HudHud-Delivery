@@ -4730,4 +4730,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get fareEstimateNote =>
       'Estimate - the final price uses the actual route.';
+
+  @override
+  String get productFiltersTitle => 'Filter';
+
+  @override
+  String get productFiltersClear => 'Clear all filters';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'Ready in $minutes min or less';
+  }
+
+  @override
+  String get productFilterOnSale => 'On sale';
+
+  @override
+  String get productFilterCustomizable => 'Customizable';
+
+  @override
+  String get productFilterContainsAllergens => 'Contains allergens';
+
+  @override
+  String get productFilterNutritionInfo => 'Nutrition info';
 }

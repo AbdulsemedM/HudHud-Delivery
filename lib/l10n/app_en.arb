@@ -2441,5 +2441,19 @@
       }
     }
   },
-  "fareEstimateNote": "Estimate - the final price uses the actual route."
+  "fareEstimateNote": "Estimate - the final price uses the actual route.",
+  "productFiltersTitle": "Filter",
+  "productFiltersClear": "Clear all filters",
+  "productFilterQuick": "Ready in {minutes} min or less",
+  "@productFilterQuick": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "productFilterOnSale": "On sale",
+  "productFilterCustomizable": "Customizable",
+  "productFilterContainsAllergens": "Contains allergens",
+  "productFilterNutritionInfo": "Nutrition info"
 }

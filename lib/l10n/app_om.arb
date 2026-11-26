@@ -2646,5 +2646,12 @@
   "pleaseDescribePackage": "Konkolaachisaan maal akka baatu akka beekuuf, paakeejii keessa maal akka jiru ibsi",
   "prohibitedItemsNote": "Hin hayyamamu: meeshaa waraanaa, araada, maallaqa callaa, wantoota gubatan, bineensota lubbuun jiran.",
   "fareRouteDistance": "{km} km",
-  "fareEstimateNote": "Tilmaama - gatiin dhumaa karaa dhugaa irratti hundaa'a."
+  "fareEstimateNote": "Tilmaama - gatiin dhumaa karaa dhugaa irratti hundaa'a.",
+  "productFiltersTitle": "Calalii",
+  "productFiltersClear": "Calalii hunda haqi",
+  "productFilterQuick": "Daqiiqaa {minutes} ykn isaa gadi keessatti qophaa'a",
+  "productFilterOnSale": "Gatii hir'ate",
+  "productFilterCustomizable": "Jijjiiramuu kan danda'u",
+  "productFilterContainsAllergens": "Waan alarjii fidu qaba",
+  "productFilterNutritionInfo": "Odeeffannoo nyaataa"
 }

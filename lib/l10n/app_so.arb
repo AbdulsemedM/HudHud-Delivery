@@ -2646,5 +2646,12 @@
   "pleaseDescribePackage": "Sheeg waxa ku jira xidhmada si darawalku u ogaado waxa uu sido",
   "prohibitedItemsNote": "Lama oggola: hub, daroogo, lacag caddaan ah, walxo gubta, xayawaan nool.",
   "fareRouteDistance": "{km} km",
-  "fareEstimateNote": "Qiyaas - qiimaha kama dambaysta ah wuxuu ku xisaabsamaa waddada dhabta ah."
+  "fareEstimateNote": "Qiyaas - qiimaha kama dambaysta ah wuxuu ku xisaabsamaa waddada dhabta ah.",
+  "productFiltersTitle": "Shaandhee",
+  "productFiltersClear": "Tirtir dhammaan shaandheyaasha",
+  "productFilterQuick": "Diyaar {minutes} daqiiqo ama ka yar",
+  "productFilterOnSale": "Qiimo dhimis",
+  "productFilterCustomizable": "La beddeli karo",
+  "productFilterContainsAllergens": "Waxaa ku jira walxo xasaasiyad keena",
+  "productFilterNutritionInfo": "Macluumaad nafaqo"
 }

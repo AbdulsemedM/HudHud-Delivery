@@ -4772,4 +4772,27 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get fareEstimateNote =>
       'Tilmaama - gatiin dhumaa karaa dhugaa irratti hundaa\'a.';
+
+  @override
+  String get productFiltersTitle => 'Calalii';
+
+  @override
+  String get productFiltersClear => 'Calalii hunda haqi';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'Daqiiqaa $minutes ykn isaa gadi keessatti qophaa\'a';
+  }
+
+  @override
+  String get productFilterOnSale => 'Gatii hir\'ate';
+
+  @override
+  String get productFilterCustomizable => 'Jijjiiramuu kan danda\'u';
+
+  @override
+  String get productFilterContainsAllergens => 'Waan alarjii fidu qaba';
+
+  @override
+  String get productFilterNutritionInfo => 'Odeeffannoo nyaataa';
 }

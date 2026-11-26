@@ -8636,6 +8636,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Estimate - the final price uses the actual route.'**
   String get fareEstimateNote;
+
+  /// No description provided for @productFiltersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get productFiltersTitle;
+
+  /// No description provided for @productFiltersClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all filters'**
+  String get productFiltersClear;
+
+  /// No description provided for @productFilterQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready in {minutes} min or less'**
+  String productFilterQuick(int minutes);
+
+  /// No description provided for @productFilterOnSale.
+  ///
+  /// In en, this message translates to:
+  /// **'On sale'**
+  String get productFilterOnSale;
+
+  /// No description provided for @productFilterCustomizable.
+  ///
+  /// In en, this message translates to:
+  /// **'Customizable'**
+  String get productFilterCustomizable;
+
+  /// No description provided for @productFilterContainsAllergens.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains allergens'**
+  String get productFilterContainsAllergens;
+
+  /// No description provided for @productFilterNutritionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition info'**
+  String get productFilterNutritionInfo;
 }
 
 class _AppLocalizationsDelegate

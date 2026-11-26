@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../bloc/categories_bloc.dart';
 import '../../model/category_tree_model.dart';
 import '../../model/categories_products_model.dart';
+import '../../model/product_filter.dart';
 import '../../../home/presentation/theme/home_colors.dart';
 import '../widgets/categories_widget.dart';
 import '../../../checkout/presentation/screen/checkout_screen.dart';
@@ -38,8 +39,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   List<CategoriesProductsModel> _products = [];
   List<CategoriesProductsModel> _filteredProducts = [];
 
-  List<String> _availableFilters = [];
-  List<String> _selectedFilters = [];
+  List<ProductFilter> _availableFilters = [];
+  List<ProductFilter> _selectedFilters = [];
 
   String _search = '';
   String? _minPrice;
@@ -85,7 +86,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     _fetchProducts();
   }
 
-  void _onFiltersChanged(List<String> selectedFilters) {
+  void _onFiltersChanged(List<ProductFilter> selectedFilters) {
     setState(() {
       _selectedFilters = selectedFilters;
       _filterProducts();
@@ -93,79 +94,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   void _generateAvailableFilters() {
-    Set<String> filters = {};
-
-    for (var product in _products) {
-      if (product.discount_price != null &&
-          product.discount_price!.isNotEmpty) {
-        filters.add('On Sale');
-      }
-      if (product.ingredients != null && product.ingredients!.isNotEmpty) {
-        filters.add('With Ingredients');
-      }
-      if (product.allergens != null && product.allergens!.isNotEmpty) {
-        filters.add('Contains Allergens');
-      }
-      if (product.addons != null && product.addons!.isNotEmpty) {
-        filters.add('Customizable');
-      }
-      if (product.preparation_time != null) {
-        int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
-        if (prepTime <= 15) {
-          filters.add('Quick (≤15 min)');
-        } else if (prepTime <= 30) {
-          filters.add('Medium (16-30 min)');
-        } else {
-          filters.add('Slow (>30 min)');
-        }
-      }
-      if (product.calories != null || product.protein != null) {
-        filters.add('Nutrition Info');
-      }
-    }
-
-    _availableFilters = filters.toList();
+    _availableFilters = ProductFilter.worthShowing(_products);
+    // A chip that is no longer offered (new search, new page of results)
+    // must not keep filtering invisibly.
+    _selectedFilters =
+        _selectedFilters.where(_availableFilters.contains).toList();
   }
 
   void _filterProducts() {
     setState(() {
-      _filteredProducts = _products.toList();
-
-      if (_selectedFilters.isNotEmpty) {
-        _filteredProducts = _filteredProducts.where((product) {
-          return _selectedFilters.every((filter) {
-            switch (filter) {
-              case 'On Sale':
-                return product.discount_price != null &&
-                    product.discount_price!.isNotEmpty;
-              case 'With Ingredients':
-                return product.ingredients != null &&
-                    product.ingredients!.isNotEmpty;
-              case 'Contains Allergens':
-                return product.allergens != null &&
-                    product.allergens!.isNotEmpty;
-              case 'Customizable':
-                return product.addons != null && product.addons!.isNotEmpty;
-              case 'Quick (≤15 min)':
-                int prepTime =
-                    int.tryParse(product.preparation_time.toString()) ?? 0;
-                return prepTime > 0 && prepTime <= 15;
-              case 'Medium (16-30 min)':
-                int prepTime =
-                    int.tryParse(product.preparation_time.toString()) ?? 0;
-                return prepTime > 15 && prepTime <= 30;
-              case 'Slow (>30 min)':
-                int prepTime =
-                    int.tryParse(product.preparation_time.toString()) ?? 0;
-                return prepTime > 30;
-              case 'Nutrition Info':
-                return product.calories != null || product.protein != null;
-              default:
-                return true;
-            }
-          });
-        }).toList();
-      }
+      _filteredProducts = ProductFilter.apply(_products, _selectedFilters);
     });
   }
 

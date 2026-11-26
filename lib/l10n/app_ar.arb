@@ -2646,5 +2646,12 @@
   "pleaseDescribePackage": "اكتب محتويات الطرد ليعرف السائق ما يحمله",
   "prohibitedItemsNote": "غير مسموح: الأسلحة، المخدرات، النقود، المواد القابلة للاشتعال، الحيوانات الحية.",
   "fareRouteDistance": "{km} كم",
-  "fareEstimateNote": "تقديري - السعر النهائي يُحسب على المسار الفعلي."
+  "fareEstimateNote": "تقديري - السعر النهائي يُحسب على المسار الفعلي.",
+  "productFiltersTitle": "تصفية",
+  "productFiltersClear": "مسح كل عوامل التصفية",
+  "productFilterQuick": "جاهز خلال {minutes} دقيقة أو أقل",
+  "productFilterOnSale": "عليه خصم",
+  "productFilterCustomizable": "قابل للتخصيص",
+  "productFilterContainsAllergens": "يحتوي على مسببات حساسية",
+  "productFilterNutritionInfo": "معلومات غذائية"
 }

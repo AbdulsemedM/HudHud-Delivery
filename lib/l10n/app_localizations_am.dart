@@ -4627,4 +4627,27 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get fareEstimateNote => 'ግምት ነው - የመጨረሻው ዋጋ በትክክለኛው መንገድ ይሰላል።';
+
+  @override
+  String get productFiltersTitle => 'ማጣሪያ';
+
+  @override
+  String get productFiltersClear => 'ሁሉንም ማጣሪያዎች አጽዳ';
+
+  @override
+  String productFilterQuick(int minutes) {
+    return 'በ$minutes ደቂቃ ወይም ባነሰ ጊዜ ዝግጁ';
+  }
+
+  @override
+  String get productFilterOnSale => 'ቅናሽ ላይ';
+
+  @override
+  String get productFilterCustomizable => 'ማስተካከል የሚቻል';
+
+  @override
+  String get productFilterContainsAllergens => 'አለርጂ አምጪ ይዟል';
+
+  @override
+  String get productFilterNutritionInfo => 'የአመጋገብ መረጃ';
 }
