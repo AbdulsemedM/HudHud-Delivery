@@ -17,15 +17,3 @@ class LoginFormSubmitted extends LoginEvent {
 }
 
 class GoogleLoginRequested extends LoginEvent {}
-
-class BiometricLoginRequested extends LoginEvent {
-  final String authReason;
-  final String noCredentialsMessage;
-  final String authFailedMessage;
-
-  BiometricLoginRequested({
-    required this.authReason,
-    required this.noCredentialsMessage,
-    required this.authFailedMessage,
-  });
-}

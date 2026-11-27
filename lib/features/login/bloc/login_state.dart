@@ -1,6 +1,6 @@
 part of 'login_bloc.dart';
 
-enum LoginAction { credentials, google, biometric }
+enum LoginAction { credentials, google }
 
 @immutable
 sealed class LoginState {}

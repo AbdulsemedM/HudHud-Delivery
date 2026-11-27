@@ -132,67 +132,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsChangePassword => 'تغيير كلمة المرور';
 
   @override
-  String get settingsBiometricLogin => 'تسجيل الدخول البيومتري';
-
-  @override
-  String get settingsBiometricLoginSubtitle =>
-      'سجّل الدخول بسرعة ببصمة الإصبع أو Face ID على هذا الجهاز';
-
-  @override
-  String get settingsBiometricSubtitleEnabled =>
-      'مفعّل — استخدم بصمة الإصبع أو Face ID لتسجيل الدخول';
-
-  @override
-  String get settingsBiometricSubtitleOffReady =>
-      'متوقف — يمكنك تفعيله في أي وقت';
-
-  @override
-  String get settingsBiometricSubtitleSignInOnce =>
-      'سجّل الدخول مرة واحدة للتفعيل';
-
-  @override
-  String get biometricAuthReason => 'تحقق من هويتك للمتابعة';
-
-  @override
-  String get biometricEnableEnterPassword =>
-      'أدخل كلمة المرور لتفعيل تسجيل الدخول البيومتري';
-
-  @override
   String get biometricNotAvailable =>
-      'تسجيل الدخول البيومتري غير متاح على هذا الجهاز';
-
-  @override
-  String get biometricNoCredentials =>
-      'لا يوجد تسجيل دخول محفوظ. سجّل الدخول بكلمة المرور أولاً.';
-
-  @override
-  String get biometricLoginFailed =>
-      'فشل تسجيل الدخول البيومتري. حاول مرة أخرى أو استخدم كلمة المرور.';
-
-  @override
-  String get biometricEnabledSuccess => 'تم تفعيل تسجيل الدخول البيومتري';
-
-  @override
-  String get biometricDisabledSuccess => 'تم إيقاف تسجيل الدخول البيومتري';
-
-  @override
-  String get biometricOptInTitle => 'تفعيل تسجيل الدخول البيومتري؟';
-
-  @override
-  String get biometricOptInMessage =>
-      'استخدم بصمة الإصبع أو Face ID لتسجيل الدخول بشكل أسرع في المرة القادمة.';
-
-  @override
-  String get biometricOptInEnable => 'تفعيل';
-
-  @override
-  String get biometricOptInNotNow => 'ليس الآن';
-
-  @override
-  String get loginBiometricButtonSemantics => 'تسجيل الدخول بالبيومترية';
-
-  @override
-  String get loginBiometricOrDivider => 'أو سجّل الدخول بالبيومترية';
+      'فتح القفل بالبصمة أو الوجه غير متاح على هذا الجهاز';
 
   @override
   String get settingsNotifications => 'إشعارات';
@@ -4719,4 +4660,35 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get productFilterNutritionInfo => 'معلومات غذائية';
+
+  @override
+  String get appLockTitle => 'قفل التطبيق';
+
+  @override
+  String get appLockSubtitle =>
+      'طلب البصمة أو الوجه عند فتح التطبيق وقبل الدفع';
+
+  @override
+  String get appLockReason => 'أكّد هويتك لفتح HudHud';
+
+  @override
+  String get appLockUnlockTitle => 'HudHud مقفل';
+
+  @override
+  String get appLockUnlockButton => 'فتح القفل';
+
+  @override
+  String get appLockSignOut => 'تسجيل الخروج';
+
+  @override
+  String get appLockEnabledSuccess => 'تم تشغيل قفل التطبيق';
+
+  @override
+  String get appLockDisabledSuccess => 'تم إيقاف قفل التطبيق';
+
+  @override
+  String get paymentConfirmReason => 'أكّد هذه الدفعة';
+
+  @override
+  String get paymentConfirmCancelled => 'تم إلغاء الدفع';
 }

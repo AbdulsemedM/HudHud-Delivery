@@ -350,113 +350,11 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get settingsChangePassword;
 
-  /// No description provided for @settingsBiometricLogin.
-  ///
-  /// In en, this message translates to:
-  /// **'Biometric login'**
-  String get settingsBiometricLogin;
-
-  /// No description provided for @settingsBiometricLoginSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in quickly with fingerprint or Face ID on this device'**
-  String get settingsBiometricLoginSubtitle;
-
-  /// No description provided for @settingsBiometricSubtitleEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'On — use fingerprint or Face ID to sign in'**
-  String get settingsBiometricSubtitleEnabled;
-
-  /// No description provided for @settingsBiometricSubtitleOffReady.
-  ///
-  /// In en, this message translates to:
-  /// **'Off — turn on anytime'**
-  String get settingsBiometricSubtitleOffReady;
-
-  /// No description provided for @settingsBiometricSubtitleSignInOnce.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in once to enable'**
-  String get settingsBiometricSubtitleSignInOnce;
-
-  /// No description provided for @biometricAuthReason.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify your identity to continue'**
-  String get biometricAuthReason;
-
-  /// No description provided for @biometricEnableEnterPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your password to enable biometric login'**
-  String get biometricEnableEnterPassword;
-
   /// No description provided for @biometricNotAvailable.
   ///
   /// In en, this message translates to:
-  /// **'Biometric login is not available on this device'**
+  /// **'Fingerprint or face unlock is not available on this device'**
   String get biometricNotAvailable;
-
-  /// No description provided for @biometricNoCredentials.
-  ///
-  /// In en, this message translates to:
-  /// **'No saved login found. Sign in with your password first.'**
-  String get biometricNoCredentials;
-
-  /// No description provided for @biometricLoginFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Biometric sign-in failed. Try again or use your password.'**
-  String get biometricLoginFailed;
-
-  /// No description provided for @biometricEnabledSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Biometric login enabled'**
-  String get biometricEnabledSuccess;
-
-  /// No description provided for @biometricDisabledSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Biometric login disabled'**
-  String get biometricDisabledSuccess;
-
-  /// No description provided for @biometricOptInTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable biometric login?'**
-  String get biometricOptInTitle;
-
-  /// No description provided for @biometricOptInMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Use fingerprint or Face ID to sign in faster next time.'**
-  String get biometricOptInMessage;
-
-  /// No description provided for @biometricOptInEnable.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable'**
-  String get biometricOptInEnable;
-
-  /// No description provided for @biometricOptInNotNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get biometricOptInNotNow;
-
-  /// No description provided for @loginBiometricButtonSemantics.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in with biometrics'**
-  String get loginBiometricButtonSemantics;
-
-  /// No description provided for @loginBiometricOrDivider.
-  ///
-  /// In en, this message translates to:
-  /// **'or sign in with biometrics'**
-  String get loginBiometricOrDivider;
 
   /// No description provided for @settingsNotifications.
   ///
@@ -8678,6 +8576,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nutrition info'**
   String get productFilterNutritionInfo;
+
+  /// No description provided for @appLockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get appLockTitle;
+
+  /// No description provided for @appLockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for fingerprint or face when opening the app and before payments'**
+  String get appLockSubtitle;
+
+  /// No description provided for @appLockReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it is you to unlock HudHud'**
+  String get appLockReason;
+
+  /// No description provided for @appLockUnlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud is locked'**
+  String get appLockUnlockTitle;
+
+  /// No description provided for @appLockUnlockButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get appLockUnlockButton;
+
+  /// No description provided for @appLockSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get appLockSignOut;
+
+  /// No description provided for @appLockEnabledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock turned on'**
+  String get appLockEnabledSuccess;
+
+  /// No description provided for @appLockDisabledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock turned off'**
+  String get appLockDisabledSuccess;
+
+  /// No description provided for @paymentConfirmReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this payment'**
+  String get paymentConfirmReason;
+
+  /// No description provided for @paymentConfirmCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment cancelled'**
+  String get paymentConfirmCancelled;
 }
 
 class _AppLocalizationsDelegate

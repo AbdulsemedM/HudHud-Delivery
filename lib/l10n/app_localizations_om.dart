@@ -132,69 +132,8 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsChangePassword => 'Jecha Darbii Jijjiiri';
 
   @override
-  String get settingsBiometricLogin => 'Seensa baayomeetirikii';
-
-  @override
-  String get settingsBiometricLoginSubtitle =>
-      'Meeshaa kana irratti asharaa qubaa yookiin Face ID fayyadamuun saffisaan seeni';
-
-  @override
-  String get settingsBiometricSubtitleEnabled =>
-      'Banaa — asharaa qubaa yookiin Face ID fayyadamuun seeni';
-
-  @override
-  String get settingsBiometricSubtitleOffReady =>
-      'Cufame — yeroo barbaadde bani';
-
-  @override
-  String get settingsBiometricSubtitleSignInOnce =>
-      'Tokko seeni akka dandeessiftu';
-
-  @override
-  String get biometricAuthReason => 'Itti fufuuf eenyummaa kee mirkaneessi';
-
-  @override
-  String get biometricEnableEnterPassword =>
-      'Seensa baayomeetirikii dandeessisuuf jecha darbii kee galchi';
-
-  @override
   String get biometricNotAvailable =>
-      'Seensi baayomeetirikii meeshaa kana irratti hin jiru';
-
-  @override
-  String get biometricNoCredentials =>
-      'Seensi kuufame hin jiru. Dura jecha darbiitiin seeni.';
-
-  @override
-  String get biometricLoginFailed =>
-      'Seensi baayomeetirikii hin milkoofne. Irra deebi\'ii yookiin jecha darbii fayyadami.';
-
-  @override
-  String get biometricEnabledSuccess => 'Seensi baayomeetirikii dandeessifame';
-
-  @override
-  String get biometricDisabledSuccess => 'Seensi baayomeetirikii cufame';
-
-  @override
-  String get biometricOptInTitle => 'Seensa baayomeetirikii dandeessisi?';
-
-  @override
-  String get biometricOptInMessage =>
-      'Yeroo itti aanutti saffisaan seenuuf asharaa qubaa yookiin Face ID fayyadami.';
-
-  @override
-  String get biometricOptInEnable => 'Dandeessisi';
-
-  @override
-  String get biometricOptInNotNow => 'Amma miti';
-
-  @override
-  String get loginBiometricButtonSemantics =>
-      'Baayomeetirikii fayyadamuun seeni';
-
-  @override
-  String get loginBiometricOrDivider =>
-      'yookiin baayomeetirikii fayyadamuun seeni';
+      'Banuun quba-ashaaraa ykn fuulaan meeshaa kana irratti hin jiru';
 
   @override
   String get settingsNotifications => 'Beeksisa';
@@ -4795,4 +4734,35 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get productFilterNutritionInfo => 'Odeeffannoo nyaataa';
+
+  @override
+  String get appLockTitle => 'Cufaa appii';
+
+  @override
+  String get appLockSubtitle =>
+      'Appii yeroo bantuu fi kaffaltii dura quba-ashaaraa ykn fuula gaafadhu';
+
+  @override
+  String get appLockReason => 'HudHud banuuf ati ta’uu kee mirkaneessi';
+
+  @override
+  String get appLockUnlockTitle => 'HudHud cufameera';
+
+  @override
+  String get appLockUnlockButton => 'Bani';
+
+  @override
+  String get appLockSignOut => 'Ba’i';
+
+  @override
+  String get appLockEnabledSuccess => 'Cufaan appii banameera';
+
+  @override
+  String get appLockDisabledSuccess => 'Cufaan appii dhaameera';
+
+  @override
+  String get paymentConfirmReason => 'Kaffaltii kana mirkaneessi';
+
+  @override
+  String get paymentConfirmCancelled => 'Kaffaltiin haqameera';
 }

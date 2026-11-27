@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/app/services/app_lock_service.dart';
 import 'package:hudhud_delivery/features/cancellation/cancellation_policy_controller.dart';
 import 'dart:io';
 
@@ -502,6 +503,10 @@ class AuthService {
     } finally {
       // Always clear session data
       await _clearSession();
+      // The next person to sign in on this phone chooses their own app lock.
+      try {
+        await AppLockService().onSignedOut();
+      } catch (_) {}
     }
   }
 
@@ -1131,7 +1136,7 @@ class AuthService {
     );
   }
 
-  // Clear session data only (preserves biometric credential storage).
+  // Clear session data only (keeps the app-lock setting and remember-me).
   Future<void> clearAllData() async {
     await Future.wait([
       _storage.delete(key: _tokenKey),

@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/app/services/app_lock_service.dart';
 import '../models/wallet_balance_model.dart';
 import '../models/wallet_transaction_model.dart';
 import '../providers/wallet_data_provider.dart';
@@ -25,6 +26,7 @@ class WalletRepository {
     Map<String, dynamic>? paymentDetails,
     String? idempotencyKey,
   }) async {
+    await AppLockService().requirePaymentConfirmation();
     return walletDataProvider.topUp(
       amount: amount,
       paymentMethodCode: paymentMethodCode,
@@ -42,6 +44,7 @@ class WalletRepository {
     Map<String, dynamic>? paymentDetails,
     String? idempotencyKey,
   }) async {
+    await AppLockService().requirePaymentConfirmation();
     return walletDataProvider.withdraw(
       amount: amount,
       paymentMethodCode: paymentMethodCode,
