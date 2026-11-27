@@ -29,6 +29,7 @@ import 'package:hudhud_delivery/features/products/data/products_data_provider.da
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
 import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
 import 'package:hudhud_delivery/features/products/presentation/screens/product_search_results_screen.dart';
+import 'package:hudhud_delivery/features/vendors/data/models/vendor_sector_option.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
 import 'package:hudhud_delivery/features/vendors/data/models/store_status.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
@@ -132,7 +133,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   /// Sector keys the server says have a shop in them. Starts empty, which
   /// draws no chips — the honest state before the answer arrives, and the
   /// one it stays in if the request fails.
-  List<String> _availableSectors = const [];
+  List<VendorSectorOption> _availableSectors = const [];
 
   List<PopularProductModel> _popularProducts = [];
   bool _popularLoading = true;
@@ -296,7 +297,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   /// appear as soon as they load, whether or not this has answered. The
   /// chips arriving a moment later is fine; the list waiting on them is not.
   Future<void> _loadSectors() async {
-    final sectors = await _vendorsRepository.getAvailableSectors();
+    final sectors = await _vendorsRepository.getSectorOptions();
     if (!mounted) return;
     setState(() => _availableSectors = sectors);
   }
@@ -658,10 +659,11 @@ class _SectionHeader extends StatelessWidget {
 
 /// The sector chips, in the order they are shown.
 ///
-/// KEYS, NOT LABELS. The server refuses anything outside the eight in
-/// config/catalog.php with a 422 and `code: SECTOR_UNRECOGNISED`, so "Auto
-/// parts" has to travel as `spare_parts` — which is exactly why the label is
-/// resolved separately from the key instead of being sent as one.
+/// KEYS, NOT LABELS. The server refuses a sector it does not recognise with
+/// a 422 and `code: SECTOR_UNRECOGNISED`, so "Auto parts" has to travel as
+/// `spare_parts` — which is exactly why the label is resolved separately from
+/// the key instead of being sent as one. Vendor types are admin-managed now,
+/// so the set of keys is whatever the server sends, not a fixed eight.
 ///
 /// `label` reads from AppLocalizations, so it needs a BuildContext and this
 /// can no longer be a const list. That is the point: the app ships five
@@ -681,20 +683,19 @@ class _SectionHeader extends StatelessWidget {
 /// platform does support all eight sectors; the marketplace does not have
 /// them yet, and the app could not tell the difference on its own.
 ///
-/// The order below is the display order, kept here rather than taken from
-/// the response so the row does not reshuffle itself as counts change.
+/// Order is the admin-set `sort_order` from the server (stable, so the row
+/// does not reshuffle as counts change); an older API without it falls back
+/// to the built-in order in [legacySectorOrder].
 List<({String? key, String label})> _sectorChipSpecs(
   BuildContext context,
-  List<String> available,
+  List<VendorSectorOption> available,
 ) {
   final l10n = context.l10n;
 
-  const order = <String>[
-    'restaurant', 'bakery', 'supermarket', 'grocery',
-    'market', 'pharmacy', 'spare_parts', 'general',
-  ];
-
-  final labels = <String, String>{
+  // The app's own translations for the eight built-in types. A name the
+  // server sends in the customer's language wins over these (an admin may
+  // have renamed a type); these win over the server's English name.
+  final builtInLabels = <String, String>{
     'restaurant': l10n.sectorRestaurants,
     'bakery': l10n.sectorBakery,
     'supermarket': l10n.sectorSupermarket,
@@ -708,15 +709,19 @@ List<({String? key, String label})> _sectorChipSpecs(
     'general': l10n.sectorGeneral,
   };
 
-  final present = order.where(available.contains).toList(growable: false);
-
-  // One sector is the same as none: "All" and the only sector would show an
-  // identical list, so the row would be two buttons that do the same thing.
-  if (present.length < 2) return const [];
+  // Admin-added types are not in the map above, so there is no `!` lookup
+  // here any more: resolveSectorChips falls back to the server's name and,
+  // failing that, the humanised key.
+  final chips = resolveSectorChips(
+    available,
+    languageCode: Localizations.localeOf(context).languageCode,
+    builtInLabels: builtInLabels,
+  );
+  if (chips.isEmpty) return const [];
 
   return [
     (key: null, label: l10n.sectorAll),
-    for (final key in present) (key: key, label: labels[key]!),
+    for (final chip in chips) (key: chip.key, label: chip.label),
   ];
 }
 
@@ -743,10 +748,10 @@ class _SectorChips extends StatelessWidget {
   final String? selected;
   final ValueChanged<String?> onSelected;
 
-  /// Sector keys the server says have a shop in them. Empty until it
+  /// Vendor types the server says have a shop in them. Empty until it
   /// answers, and empty for good if it cannot — in both cases the row
   /// simply is not there, which is the correct thing to show.
-  final List<String> available;
+  final List<VendorSectorOption> available;
 
   @override
   Widget build(BuildContext context) {
@@ -1182,7 +1187,7 @@ class _CategoriesGrid extends StatelessWidget {
   /// which owns the request.
   final String? selectedSector;
   final ValueChanged<String?> onSectorSelected;
-  final List<String> availableSectors;
+  final List<VendorSectorOption> availableSectors;
   final List<PopularProductModel> popularProducts;
   final bool popularLoading;
   final void Function(CategoryTreeModel) onCategoryTap;
