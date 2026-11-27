@@ -36,6 +36,8 @@ class ProductsDataProvider {
     int? vendorId,
     int? categoryId,
     bool excludeOutOfStock = true,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       // API expects 1/0 — boolean "true"/"false" triggers HTTP 500 on this route.
@@ -44,6 +46,12 @@ class ProductsDataProvider {
         if (vendorId != null) 'vendor_id': vendorId,
         if (categoryId != null) 'category_id': categoryId,
         'exclude_out_of_stock': excludeOutOfStock ? 1 : 0,
+        // Where the customer is: the API returns each shop's delivery fee
+        // calculated from here (vendor_shop.delivery_fee).
+        if (latitude != null && longitude != null) ...{
+          'latitude': latitude,
+          'longitude': longitude,
+        },
       };
 
       final response = await apiService.get(

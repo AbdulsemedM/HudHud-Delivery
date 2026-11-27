@@ -42,4 +42,28 @@ void main() {
     expect(result.products.first.deliveryFee, 50);
     expect(result.meta?['period'], 'month');
   });
+
+  // The API now sends the fee calculated from the customer's location, with
+  // decimals, or null when it cannot be calculated.
+  Map<String, dynamic> withShopFee(Object? fee) => {
+        'data': [
+          {
+            'id': 9,
+            'name': 'Tibs',
+            'price': '300.00',
+            'status': 'active',
+            'vendor_shop': {'id': 3, 'shop_name': 'Shop', 'delivery_fee': fee},
+          },
+        ],
+      };
+
+  test('keeps the decimals of the calculated delivery fee', () {
+    final result = PopularProductsResult.fromResponseData(withShopFee(85.47));
+    expect(result.products.first.deliveryFee, 85.47);
+  });
+
+  test('a fee the API could not calculate stays unknown, not zero', () {
+    final result = PopularProductsResult.fromResponseData(withShopFee(null));
+    expect(result.products.first.deliveryFee, isNull);
+  });
 }

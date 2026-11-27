@@ -50,11 +50,15 @@ class ProductsRepository {
     String period = 'month',
     int? vendorId,
     int? categoryId,
+    double? latitude,
+    double? longitude,
   }) async {
     final response = await productsDataProvider.getPopularProducts(
       period: period,
       vendorId: vendorId,
       categoryId: categoryId,
+      latitude: latitude,
+      longitude: longitude,
     );
     if (response['statusCode'] != 200) {
       throw Exception(

@@ -326,6 +326,20 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     _loadVendors();
   }
 
+  /// Where the customer is browsing from: the address picked on the home
+  /// screen, else the device location. The vendor list and the popular
+  /// products' delivery fees both use it, so they always agree.
+  Future<(double?, double?)> _discoveryPoint() async {
+    final overrideLat = widget.discoveryLatitude;
+    final overrideLng = widget.discoveryLongitude;
+    if (overrideLat != null && overrideLng != null) {
+      return (overrideLat, overrideLng);
+    }
+    final location = StartupLocationService.cached ??
+        await StartupLocationService.fetchAtStartup();
+    return (location?.latitude, location?.longitude);
+  }
+
   Future<void> _loadVendors() async {
     if (!mounted) return;
     setState(() {
@@ -333,19 +347,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       _vendorsError = null;
     });
     try {
-      final overrideLat = widget.discoveryLatitude;
-      final overrideLng = widget.discoveryLongitude;
-      double? latitude;
-      double? longitude;
-      if (overrideLat != null && overrideLng != null) {
-        latitude = overrideLat;
-        longitude = overrideLng;
-      } else {
-        final location = StartupLocationService.cached ??
-            await StartupLocationService.fetchAtStartup();
-        latitude = location?.latitude;
-        longitude = location?.longitude;
-      }
+      final (latitude, longitude) = await _discoveryPoint();
       final list = await _vendorsRepository.getVendors(
         page: 1,
         latitude: latitude,
@@ -370,7 +372,11 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     if (!mounted) return;
     setState(() => _popularLoading = true);
     try {
-      final list = await _productsRepository.getPopularProducts();
+      final (latitude, longitude) = await _discoveryPoint();
+      final list = await _productsRepository.getPopularProducts(
+        latitude: latitude,
+        longitude: longitude,
+      );
       if (!mounted) return;
       if (kDebugMode) {
         debugPrint('Popular products loaded: ${list.length}');
@@ -1849,7 +1855,7 @@ class _PopularProductCard extends StatelessWidget {
                         ),
                       ),
                     ],
-                    if (rating > 0 || deliveryFee > 0) ...[
+                    if (rating > 0 || (deliveryFee ?? 0) > 0) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -1870,7 +1876,7 @@ class _PopularProductCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 14),
                           ],
-                          if (deliveryFee > 0) ...[
+                          if (deliveryFee != null && deliveryFee > 0) ...[
                             Icon(
                               Icons.delivery_dining_rounded,
                               size: 18,
@@ -1879,7 +1885,7 @@ class _PopularProductCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                '${moneyPrefix(MarketController.catalogCurrency)}$deliveryFee delivery',
+                                '${formatMoneyAmount(deliveryFee, currency: MarketController.catalogCurrency)} delivery',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,

@@ -7,7 +7,11 @@ class PopularProductModel {
   final int? shopId;
   final String? shopLogoUrl;
   final double shopRating;
-  final int deliveryFee;
+
+  /// What this customer would pay for delivery from this shop, calculated by
+  /// the API from their location. Null when unknown (no location sent, the
+  /// shop has no location, or it does not deliver there): show nothing.
+  final double? deliveryFee;
   final int? popularityScore;
   final String? totalOrders;
 
@@ -17,7 +21,7 @@ class PopularProductModel {
     this.shopId,
     this.shopLogoUrl,
     this.shopRating = 0,
-    this.deliveryFee = 0,
+    this.deliveryFee,
     this.popularityScore,
     this.totalOrders,
   });
@@ -57,7 +61,7 @@ class PopularProductModel {
     int? shopId;
     String? shopLogo;
     double shopRating = 0;
-    int deliveryFee = 0;
+    double? deliveryFee;
 
     if (vendorShop is Map) {
       final shop = Map<String, dynamic>.from(vendorShop);
@@ -76,8 +80,7 @@ class PopularProductModel {
       } else {
         shopRating = double.tryParse(ratingRaw?.toString() ?? '') ?? 0;
       }
-      deliveryFee =
-          double.tryParse(shop['delivery_fee']?.toString() ?? '')?.round() ?? 0;
+      deliveryFee = double.tryParse(shop['delivery_fee']?.toString() ?? '');
     } else if (vendor is Map) {
       final v = Map<String, dynamic>.from(vendor);
       shopName = v['name']?.toString();
