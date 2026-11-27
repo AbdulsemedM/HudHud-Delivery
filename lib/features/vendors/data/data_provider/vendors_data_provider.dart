@@ -7,8 +7,9 @@ class VendorsDataProvider {
 
   /// GET /api/public/vendors — preferred discovery route (lat/lng optional).
   ///
-  /// [sector] is one of the platform's eight vendor sectors: restaurant,
-  /// bakery, supermarket, grocery, market, pharmacy, spare_parts, general.
+  /// [sector] is a vendor type key as returned by [getVendorSectors]. Types
+  /// are admin-managed; the built-in ones are restaurant, bakery,
+  /// supermarket, grocery, market, pharmacy, spare_parts and general.
   /// The server resolves it from the vendor's organization record, falling
   /// back to business_type, and narrows BEFORE paginating — so asking for
   /// pharmacies returns pharmacies rather than the pharmacies that happened
