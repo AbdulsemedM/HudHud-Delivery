@@ -4,8 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/auth_entry_screen.dart';
-import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
-import 'package:local_auth/local_auth.dart';
+import 'package:hudhud_delivery/app/services/app_lock_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 // import 'package:hudhud_delivery/controllers/theme_controller.dart';
@@ -17,7 +16,6 @@ import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/money_format.dart';
-import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
@@ -87,16 +85,14 @@ class _SettingsScreenState extends State<SettingsScreen>
   bool _smsNotificationsEnabled = true;
   double? _walletTotal;
   PackageInfo? _packageInfo;
-  bool _biometricEnabled = false;
-  bool _biometricAvailable = false;
-  bool _biometricHasCredentials = false;
-  bool _biometricBusy = false;
+  bool _appLockEnabled = false;
+  bool _appLockAvailable = false;
+  bool _appLockBusy = false;
   bool _useFaceBiometricIcon = false;
   bool _marketingConsentBusy = false;
   int _chatUnreadCount = 0;
   Timer? _chatUnreadTimer;
-  final BiometricCredentialService _biometricService =
-      BiometricCredentialService();
+  final AppLockService _appLock = AppLockService();
 
   // Phase 2: rewards points (only fetched when rewards are enabled).
   int? _rewardPoints;
@@ -295,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       _loadUserData(),
       _loadWalletSummary(),
       _loadPackageInfo(),
-      _loadBiometricState(),
+      _loadAppLockState(),
       if (_rewardsWasEnabled) _loadRewardPoints(),
       if (_referralWasEnabled && _referralCardKey.currentState != null)
         _referralCardKey.currentState!.reload(),
@@ -303,73 +299,43 @@ class _SettingsScreenState extends State<SettingsScreen>
     ]);
   }
 
-  Future<void> _loadBiometricState() async {
+  Future<void> _loadAppLockState() async {
     if (kIsWeb) return;
-    final available = await _biometricService.isDeviceSupported();
-    final enabled = await _biometricService.isBiometricLoginEnabled();
-    final hasCredentials = await _biometricService.hasCredentialBlob();
-    final types = await _biometricService.getAvailableBiometrics();
+    final available = await _appLock.isDeviceSupported();
+    final enabled = await _appLock.isEnabled();
+    final useFace = await _appLock.prefersFaceIcon();
     if (mounted) {
       setState(() {
-        _biometricAvailable = available;
-        _biometricEnabled = enabled;
-        _biometricHasCredentials = hasCredentials;
-        _useFaceBiometricIcon = types.contains(BiometricType.face);
+        _appLockAvailable = available;
+        _appLockEnabled = enabled && available;
+        _useFaceBiometricIcon = useFace;
       });
     }
   }
 
-  Future<void> _onBiometricLoginChanged(bool value) async {
-    if (_biometricBusy) return;
+  /// Turning the lock on or off both need the owner's fingerprint / face,
+  /// so someone holding an unlocked phone cannot quietly switch it off.
+  Future<void> _onAppLockChanged(bool value) async {
+    if (_appLockBusy) return;
     final l10n = context.l10n;
-
-    if (!value) {
-      setState(() => _biometricBusy = true);
-      await _biometricService.optOut();
-      if (!mounted) return;
-      setState(() {
-        _biometricEnabled = false;
-        _biometricBusy = false;
-      });
-      AuthSnackBar.success(context, l10n.biometricDisabledSuccess);
-      return;
-    }
-
-    if (!_biometricAvailable) {
+    if (!_appLockAvailable) {
       AuthSnackBar.info(context, l10n.biometricNotAvailable);
       return;
     }
 
-    final authenticated = await _biometricService.authenticate(
-      localizedReason: l10n.biometricAuthReason,
-    );
-    if (!authenticated || !mounted) return;
-
-    if (await _biometricService.hasCredentialBlob()) {
-      setState(() => _biometricBusy = true);
-      final ok = await _biometricService.enableBiometricLogin();
-      if (!mounted) return;
-      setState(() {
-        _biometricEnabled = ok;
-        _biometricHasCredentials = true;
-        _biometricBusy = false;
-      });
-      if (ok) {
-        AuthSnackBar.success(context, l10n.biometricEnabledSuccess);
-      } else {
-        AuthSnackBar.info(context, l10n.biometricNoCredentials);
-      }
-      return;
-    }
-
-    final saved = await _showBiometricEnableDialog();
+    setState(() => _appLockBusy = true);
+    final confirmed = await _appLock.authenticate(reason: l10n.appLockReason);
+    if (confirmed) await _appLock.setEnabled(value);
     if (!mounted) return;
-    if (saved) {
-      setState(() {
-        _biometricEnabled = true;
-        _biometricHasCredentials = true;
-      });
-      AuthSnackBar.success(context, l10n.biometricEnabledSuccess);
+    setState(() {
+      if (confirmed) _appLockEnabled = value;
+      _appLockBusy = false;
+    });
+    if (confirmed) {
+      AuthSnackBar.success(
+        context,
+        value ? l10n.appLockEnabledSuccess : l10n.appLockDisabledSuccess,
+      );
     }
   }
 
@@ -404,104 +370,6 @@ class _SettingsScreenState extends State<SettingsScreen>
       });
       AuthSnackBar.error(context, e.toString());
     }
-  }
-
-  Future<bool> _showBiometricEnableDialog() async {
-    final l10n = context.l10n;
-    final user = _user;
-    final hasEmail = user?.email != null && user!.email!.trim().isNotEmpty;
-    final fieldType = hasEmail ? 'email' : 'phone';
-    final identifierController = TextEditingController(
-      text: hasEmail ? user.email!.trim() : (user?.phone?.trim() ?? ''),
-    );
-    final passwordController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    final saved = await AuthModal.dialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return AuthAlertDialog(
-          title: l10n.biometricEnableEnterPassword,
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: identifierController,
-                  keyboardType: hasEmail
-                      ? TextInputType.emailAddress
-                      : TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: hasEmail ? l10n.labelEmail : l10n.labelPhone,
-                  ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return hasEmail
-                          ? l10n.validationEmailRequired
-                          : l10n.validationPhoneRequired;
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 12),
-                TextFormField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: l10n.labelPassword,
-                  ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) {
-                      return l10n.validationPasswordRequired;
-                    }
-                    if (v.length < 4) {
-                      return l10n.validationPasswordMin;
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            AuthDialogAction(
-              label: l10n.actionCancel,
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-            ),
-            AuthDialogAction(
-              label: l10n.actionSave,
-              filled: true,
-              onPressed: () {
-                if (formKey.currentState?.validate() != true) return;
-                Navigator.of(dialogContext).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    if (saved != true) {
-      identifierController.dispose();
-      passwordController.dispose();
-      return false;
-    }
-
-    var identifier = identifierController.text.trim();
-    if (fieldType == 'phone') {
-      identifier = normalizePhoneToBackend(identifier);
-    }
-    await _biometricService.saveCredentials(
-      identifier: identifier,
-      password: passwordController.text,
-      fieldType: fieldType,
-    );
-    await _biometricService.enableBiometricLogin();
-    identifierController.dispose();
-    passwordController.dispose();
-    return true;
   }
 
   Future<void> _loadUserData() async {
@@ -819,13 +687,12 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                       if (!kIsWeb) ...[
                         const _ProfileTileDivider(),
-                        _ProfileBiometricTile(
+                        _ProfileAppLockTile(
                           useFaceIcon: _useFaceBiometricIcon,
-                          enabled: _biometricEnabled,
-                          deviceSupported: _biometricAvailable,
-                          switchEnabled: _biometricAvailable && !_biometricBusy,
-                          hasCredentials: _biometricHasCredentials,
-                          onChanged: _onBiometricLoginChanged,
+                          enabled: _appLockEnabled,
+                          deviceSupported: _appLockAvailable,
+                          switchEnabled: _appLockAvailable && !_appLockBusy,
+                          onChanged: _onAppLockChanged,
                         ),
                       ],
                       // TODO: restore when Account Settings launches
@@ -1309,29 +1176,20 @@ class _ProfileSwitchRow extends StatelessWidget {
   }
 }
 
-class _ProfileBiometricTile extends StatelessWidget {
+class _ProfileAppLockTile extends StatelessWidget {
   final bool useFaceIcon;
   final bool enabled;
   final bool deviceSupported;
   final bool switchEnabled;
-  final bool hasCredentials;
   final ValueChanged<bool> onChanged;
 
-  const _ProfileBiometricTile({
+  const _ProfileAppLockTile({
     required this.useFaceIcon,
     required this.enabled,
     required this.deviceSupported,
     required this.switchEnabled,
-    required this.hasCredentials,
     required this.onChanged,
   });
-
-  String _subtitle(AppLocalizations l10n) {
-    if (!deviceSupported) return l10n.biometricNotAvailable;
-    if (enabled) return l10n.settingsBiometricSubtitleEnabled;
-    if (hasCredentials) return l10n.settingsBiometricSubtitleOffReady;
-    return l10n.settingsBiometricSubtitleSignInOnce;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1339,8 +1197,9 @@ class _ProfileBiometricTile extends StatelessWidget {
     return _ProfileSwitchRow(
       icon: useFaceIcon ? Icons.face_rounded : Icons.fingerprint_rounded,
       color: _accentIndigo(context),
-      title: l10n.settingsBiometricLogin,
-      subtitle: _subtitle(l10n),
+      title: l10n.appLockTitle,
+      subtitle:
+          deviceSupported ? l10n.appLockSubtitle : l10n.biometricNotAvailable,
       value: enabled,
       onChanged: switchEnabled ? onChanged : null,
     );

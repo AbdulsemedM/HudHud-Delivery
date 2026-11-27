@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/app/services/app_lock_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -99,6 +100,14 @@ Future<bool> payCancellationFine(
   final repo = repository ?? CancellationRepository();
   final messenger = ScaffoldMessenger.of(context);
   final l10n = context.l10n;
+  // One confirmation for the whole flow, including the re-charge after a
+  // top-up below.
+  if (!await AppLockService()
+      .confirmPayment(reason: l10n.paymentConfirmReason)) {
+    messenger
+        .showSnackBar(SnackBar(content: Text(l10n.paymentConfirmCancelled)));
+    return false;
+  }
   var result = await repo.payFine(fine.id);
   if (!result.ok && result.error?.isInsufficientBalance == true) {
     if (!context.mounted) return false;

@@ -45,7 +45,9 @@ import 'features/orders/data/providers/orders_data_provider.dart';
 import 'features/orders/data/repositories/orders_repository.dart';
 
 // Widgets
+import 'app/services/app_lock_service.dart';
 import 'app/widgets/app_connectivity_banner.dart';
+import 'app/widgets/app_lock_gate.dart';
 import 'app/widgets/ota_lifecycle_binder.dart';
 import 'package:hudhud_delivery/features/wallet/services/wallet_topup_recovery_service.dart';
 import 'package:image_picker_android/image_picker_android.dart';
@@ -148,6 +150,11 @@ void main() async {
 
   // Initialize auth service
   final authService = AuthService();
+
+  // The removed biometric login kept the password on the device; wipe it.
+  try {
+    await AppLockService().purgeLegacyBiometricLogin();
+  } catch (_) {}
 
   // Register 401 redirect to login (skip if login is already showing).
   DioClient.instance.setOnUnauthorized(() {
@@ -272,8 +279,11 @@ class _MyAppState extends State<MyApp> {
                 // Update system UI overlay style when theme changes
                 themeController.updateSystemUIOverlayStyle();
                 return OtaLifecycleBinder(
-                  child: AppConnectivityBanner(
-                    child: child ?? const SizedBox.shrink(),
+                  child: AppLockGate(
+                    navigatorKey: widget.navigatorKey,
+                    child: AppConnectivityBanner(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
                   ),
                 );
               },

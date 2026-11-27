@@ -132,65 +132,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsChangePassword => 'Change Password';
 
   @override
-  String get settingsBiometricLogin => 'Biometric login';
-
-  @override
-  String get settingsBiometricLoginSubtitle =>
-      'Sign in quickly with fingerprint or Face ID on this device';
-
-  @override
-  String get settingsBiometricSubtitleEnabled =>
-      'On — use fingerprint or Face ID to sign in';
-
-  @override
-  String get settingsBiometricSubtitleOffReady => 'Off — turn on anytime';
-
-  @override
-  String get settingsBiometricSubtitleSignInOnce => 'Sign in once to enable';
-
-  @override
-  String get biometricAuthReason => 'Verify your identity to continue';
-
-  @override
-  String get biometricEnableEnterPassword =>
-      'Enter your password to enable biometric login';
-
-  @override
   String get biometricNotAvailable =>
-      'Biometric login is not available on this device';
-
-  @override
-  String get biometricNoCredentials =>
-      'No saved login found. Sign in with your password first.';
-
-  @override
-  String get biometricLoginFailed =>
-      'Biometric sign-in failed. Try again or use your password.';
-
-  @override
-  String get biometricEnabledSuccess => 'Biometric login enabled';
-
-  @override
-  String get biometricDisabledSuccess => 'Biometric login disabled';
-
-  @override
-  String get biometricOptInTitle => 'Enable biometric login?';
-
-  @override
-  String get biometricOptInMessage =>
-      'Use fingerprint or Face ID to sign in faster next time.';
-
-  @override
-  String get biometricOptInEnable => 'Enable';
-
-  @override
-  String get biometricOptInNotNow => 'Not now';
-
-  @override
-  String get loginBiometricButtonSemantics => 'Sign in with biometrics';
-
-  @override
-  String get loginBiometricOrDivider => 'or sign in with biometrics';
+      'Fingerprint or face unlock is not available on this device';
 
   @override
   String get settingsNotifications => 'Notifications';
@@ -4753,4 +4696,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productFilterNutritionInfo => 'Nutrition info';
+
+  @override
+  String get appLockTitle => 'App lock';
+
+  @override
+  String get appLockSubtitle =>
+      'Ask for fingerprint or face when opening the app and before payments';
+
+  @override
+  String get appLockReason => 'Confirm it is you to unlock HudHud';
+
+  @override
+  String get appLockUnlockTitle => 'HudHud is locked';
+
+  @override
+  String get appLockUnlockButton => 'Unlock';
+
+  @override
+  String get appLockSignOut => 'Sign out';
+
+  @override
+  String get appLockEnabledSuccess => 'App lock turned on';
+
+  @override
+  String get appLockDisabledSuccess => 'App lock turned off';
+
+  @override
+  String get paymentConfirmReason => 'Confirm this payment';
+
+  @override
+  String get paymentConfirmCancelled => 'Payment cancelled';
 }

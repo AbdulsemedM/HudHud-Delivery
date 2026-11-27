@@ -132,68 +132,8 @@ class AppLocalizationsSo extends AppLocalizations {
   String get settingsChangePassword => 'Beddel erayga sirta ah';
 
   @override
-  String get settingsBiometricLogin => 'Galitaanka bayoomatrika';
-
-  @override
-  String get settingsBiometricLoginSubtitle =>
-      'Si degdeg ah ugu gal farta ama Face ID aaladdan';
-
-  @override
-  String get settingsBiometricSubtitleEnabled =>
-      'Furanyahay — isticmaal farta ama Face ID si aad u gasho';
-
-  @override
-  String get settingsBiometricSubtitleOffReady => 'Xiran — fur wakhti kasta';
-
-  @override
-  String get settingsBiometricSubtitleSignInOnce =>
-      'Hal mar geli si aad u karti geliso';
-
-  @override
-  String get biometricAuthReason => 'Xaqiiji aqoonsigaaga si aad u sii wadato';
-
-  @override
-  String get biometricEnableEnterPassword =>
-      'Geli erayga sirta si aad u karti geliso galitaanka bayoomatrika';
-
-  @override
   String get biometricNotAvailable =>
-      'Galitaanka bayoomatrika kuma heli karo aaladdan';
-
-  @override
-  String get biometricNoCredentials =>
-      'Galitaan la kaydiyay ma jiro. Marka hore erayga sirta ku gal.';
-
-  @override
-  String get biometricLoginFailed =>
-      'Galitaanka bayoomatrika wuu fashilmay. Isku day mar kale ama isticmaal erayga sirta.';
-
-  @override
-  String get biometricEnabledSuccess =>
-      'Galitaanka bayoomatrika waa la karti geliyay';
-
-  @override
-  String get biometricDisabledSuccess =>
-      'Galitaanka bayoomatrika waa la joojiyay';
-
-  @override
-  String get biometricOptInTitle => 'Karti geli galitaanka bayoomatrika?';
-
-  @override
-  String get biometricOptInMessage =>
-      'Isticmaal farta ama Face ID si aad ugu dhaqso gasho marka xigta.';
-
-  @override
-  String get biometricOptInEnable => 'Karti geli';
-
-  @override
-  String get biometricOptInNotNow => 'Hadda maya';
-
-  @override
-  String get loginBiometricButtonSemantics => 'Ku gal bayoomatrika';
-
-  @override
-  String get loginBiometricOrDivider => 'ama ku gal bayoomatrika';
+      'Furitaanka faraha ama wejiga kuma jiro aaladdan';
 
   @override
   String get settingsNotifications => 'Ogeysiisyada';
@@ -4808,4 +4748,35 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get productFilterNutritionInfo => 'Macluumaad nafaqo';
+
+  @override
+  String get appLockTitle => 'Quful app';
+
+  @override
+  String get appLockSubtitle =>
+      'Weydii faraha ama wejiga marka app-ka la furayo iyo ka hor lacag bixinta';
+
+  @override
+  String get appLockReason => 'Xaqiiji inaad adigu tahay si aad u furto HudHud';
+
+  @override
+  String get appLockUnlockTitle => 'HudHud waa xiran yahay';
+
+  @override
+  String get appLockUnlockButton => 'Fur';
+
+  @override
+  String get appLockSignOut => 'Ka bax';
+
+  @override
+  String get appLockEnabledSuccess => 'Qufulka app-ka waa la shiday';
+
+  @override
+  String get appLockDisabledSuccess => 'Qufulka app-ka waa la damiyay';
+
+  @override
+  String get paymentConfirmReason => 'Xaqiiji lacag bixintan';
+
+  @override
+  String get paymentConfirmCancelled => 'Lacag bixinta waa la joojiyay';
 }

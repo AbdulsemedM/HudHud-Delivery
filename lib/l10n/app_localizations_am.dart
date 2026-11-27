@@ -132,63 +132,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get settingsChangePassword => 'የይለፍ ቃል ቀይር';
 
   @override
-  String get settingsBiometricLogin => 'ባዮሜትሪክ መግቢያ';
-
-  @override
-  String get settingsBiometricLoginSubtitle =>
-      'በዚህ መሣሪያ ላይ በጣት አሻራ ወይም Face ID በፍጥነት ይግቡ';
-
-  @override
-  String get settingsBiometricSubtitleEnabled =>
-      'በርቷል — ለመግባት ጣት አሻራ ወይም Face ID ይጠቀሙ';
-
-  @override
-  String get settingsBiometricSubtitleOffReady => 'ጠፍቷል — በማንኛውም ጊዜ ያብሩ';
-
-  @override
-  String get settingsBiometricSubtitleSignInOnce => 'ለማንቃት አንዴ ይግቡ';
-
-  @override
-  String get biometricAuthReason => 'ለመቀጠል ማንነትዎን ያረጋግጡ';
-
-  @override
-  String get biometricEnableEnterPassword =>
-      'ባዮሜትሪክ መግቢያን ለማንቃት የይለፍ ቃልዎን ያስገቡ';
-
-  @override
-  String get biometricNotAvailable => 'ባዮሜትሪክ መግቢያ በዚህ መሣሪያ ላይ አይገኝም';
-
-  @override
-  String get biometricNoCredentials => 'የተቀመጠ መግቢያ የለም። በመጀመሪያ በይለፍ ቃል ይግቡ።';
-
-  @override
-  String get biometricLoginFailed =>
-      'ባዮሜትሪክ መግቢያ አልተሳካም። እንደገና ይሞክሩ ወይም የይለፍ ቃል ይጠቀሙ።';
-
-  @override
-  String get biometricEnabledSuccess => 'ባዮሜትሪክ መግቢያ ተነቅቷል';
-
-  @override
-  String get biometricDisabledSuccess => 'ባዮሜትሪክ መግቢያ ተዘግቷል';
-
-  @override
-  String get biometricOptInTitle => 'ባዮሜትሪክ መግቢያ ይንቃ?';
-
-  @override
-  String get biometricOptInMessage =>
-      'በሚቀጥለው ጊዜ በፍጥነት ለመግባት ጣት አሻራ ወይም Face ID ይጠቀሙ።';
-
-  @override
-  String get biometricOptInEnable => 'አንቃ';
-
-  @override
-  String get biometricOptInNotNow => 'አሁን አይደለም';
-
-  @override
-  String get loginBiometricButtonSemantics => 'በባዮሜትሪክ ይግቡ';
-
-  @override
-  String get loginBiometricOrDivider => 'ወይም በባዮሜትሪክ ይግቡ';
+  String get biometricNotAvailable => 'የጣት አሻራ ወይም የፊት መክፈቻ በዚህ መሣሪያ ላይ አይገኝም';
 
   @override
   String get settingsNotifications => 'ማሳወቂያዎች';
@@ -4650,4 +4594,35 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get productFilterNutritionInfo => 'የአመጋገብ መረጃ';
+
+  @override
+  String get appLockTitle => 'የመተግበሪያ መቆለፊያ';
+
+  @override
+  String get appLockSubtitle =>
+      'መተግበሪያውን ሲከፍቱ እና ከክፍያ በፊት የጣት አሻራ ወይም ፊት ይጠየቃል';
+
+  @override
+  String get appLockReason => 'HudHudን ለመክፈት እርስዎ መሆንዎን ያረጋግጡ';
+
+  @override
+  String get appLockUnlockTitle => 'HudHud ተቆልፏል';
+
+  @override
+  String get appLockUnlockButton => 'ክፈት';
+
+  @override
+  String get appLockSignOut => 'ውጣ';
+
+  @override
+  String get appLockEnabledSuccess => 'የመተግበሪያ መቆለፊያ በርቷል';
+
+  @override
+  String get appLockDisabledSuccess => 'የመተግበሪያ መቆለፊያ ጠፍቷል';
+
+  @override
+  String get paymentConfirmReason => 'ይህን ክፍያ ያረጋግጡ';
+
+  @override
+  String get paymentConfirmCancelled => 'ክፍያው ተሰርዟል';
 }

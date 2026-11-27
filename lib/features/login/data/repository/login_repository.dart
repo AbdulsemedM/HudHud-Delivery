@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
+import 'package:hudhud_delivery/app/services/app_lock_service.dart';
 import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
 import 'package:hudhud_delivery/core/utils/login_device_metadata.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
@@ -53,7 +53,6 @@ class LoginRepository {
         final result = await _completeSessionFromLoginData(data, authService);
         await _persistCredentialsAfterLogin(
           emailOrPhone: emailOrPhone,
-          password: password,
           fieldType: fieldType,
           rememberMe: rememberMe,
         );
@@ -226,41 +225,19 @@ class LoginRepository {
     );
   }
 
-  /// Saves or clears identifier + password based on remember-me preference.
+  /// Remember-me keeps only the email / phone to pre-fill next time. The
+  /// password is never stored (the old biometric login used to keep it).
   Future<void> _persistCredentialsAfterLogin({
     required String emailOrPhone,
-    required String password,
     required String fieldType,
     required bool rememberMe,
   }) async {
-    final biometric = BiometricCredentialService();
-
+    final appLock = AppLockService();
     if (!rememberMe) {
-      await biometric.clearRememberedLogin();
+      await appLock.forgetLogin();
       return;
     }
-
-    final existing = await biometric.peekCredentials();
-    if (existing != null) {
-      final matches = await biometric.matchesStoredLoginIdentifier(
-        emailOrPhone,
-        fieldType: fieldType,
-      );
-      if (!matches) {
-        await biometric.clearSessionKeepOptOut();
-      }
-    }
-
-    await biometric.saveCredentials(
-      identifier: emailOrPhone,
-      password: password,
-      fieldType: fieldType,
-    );
-    await biometric.setRememberMeEnabled(true);
-
-    if (await biometric.isDeviceSupported()) {
-      await biometric.enableBiometricLogin();
-    }
+    await appLock.rememberLogin(identifier: emailOrPhone, fieldType: fieldType);
   }
 
   String _cleanErrorMessage(String message) {

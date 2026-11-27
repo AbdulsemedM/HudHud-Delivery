@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/app/services/app_lock_service.dart';
 import '../../../../core/api/api_service.dart';
 import '../data_provider/payment_data_provider.dart';
 import '../../model/payment_initiate_result.dart';
@@ -55,6 +56,9 @@ class PaymentRepository {
     required int serviceRequestId,
     Map<String, dynamic>? paymentDetails,
   }) async {
+    // Outside the try: a declined confirmation must not be reworded as
+    // "Service payment failed".
+    await AppLockService().requirePaymentConfirmation();
     try {
       if (!kServicePaymentMethodCodes.contains(methodCode)) {
         throw Exception('Unsupported service payment method: $methodCode');
@@ -118,6 +122,8 @@ class PaymentRepository {
               'Invalid package delivery id: $packageDeliveryId');
         }
     }
+
+    await AppLockService().requirePaymentConfirmation();
 
     try {
       return await paymentDataProvider.initiatePayment(

@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/app/services/app_lock_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -56,11 +57,17 @@ class _PlusScreenState extends State<PlusScreen> {
 
   Future<void> _subscribe() async {
     if (_busy) return;
+    final l10n = context.l10n;
+    if (!await AppLockService()
+        .confirmPayment(reason: l10n.paymentConfirmReason)) {
+      if (mounted) AuthSnackBar.info(context, l10n.paymentConfirmCancelled);
+      return;
+    }
+    if (!mounted) return;
     setState(() => _busy = true);
     final result = await _repo.subscribePlus();
     if (!mounted) return;
     setState(() => _busy = false);
-    final l10n = context.l10n;
     if (result.ok) {
       AuthSnackBar.success(context, l10n.p3PlusSubscribed);
       await _load();
